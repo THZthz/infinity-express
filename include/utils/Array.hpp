@@ -298,8 +298,10 @@ struct recommended_size_add_by
 	recommended(SizeType const& ms, SizeType const old_cap, SizeType const new_cap)
 	{
 #ifndef _MSC_VER
-		static_assert(N < std::numeric_limits<SizeType>::max(), "N is too big for current "
-		                                                        "size_type");
+		static_assert(
+		    N < std::numeric_limits<SizeType>::max(),
+		    "N is too big for current "
+		    "size_type");
 #endif
 		static constexpr SizeType N_ = N;
 
@@ -1393,6 +1395,15 @@ private:
 };
 
 } // namespace ie
+
+/*----------------------------------------------------------------------------*/
+
+// TODO ie::vector<bool> ?
+namespace ie {
+
+}
+
+/*----------------------------------------------------------------------------*/
 
 namespace std {
 

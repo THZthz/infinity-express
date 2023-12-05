@@ -2,30 +2,33 @@
 #define IE_CELLAUTOMATA_HPP
 
 #include <random>
+#include <vector>
+#include <queue>
+#include <memory>
 
 class CellAutomata
 {
 public:
+	void generate();
 
-	void generate()
-	{
-		std::random_device dev;
-		std::mt19937 rng(dev());
-		std::uniform_real_distribution<double> dist(0.f, 100.f);
+	void print() const;
 
-		m_occupancy.resize(m_rows * m_cols);
+private:
+	bool inBound(int x, int y, int offx = 0, int offy = 0) const;
 
-		// initialize, 45% chance to be walls.
-		for (uint32_t i = 0; i < m_cols * m_rows; ++i)
-		{
-			if (dist(rng) < 45.f) { m_occupancy[i] = true; }
-			else { m_occupancy[i] = false; }
-		}
-	}
+	int countWalls(int x, int y, int diff) const;
 
 private:
 	int m_cols = 50, m_rows = 50;
 	std::vector<bool> m_occupancy;
+	std::vector<bool> m_occupancyRev;
+
+	struct Coord
+	{
+		int x = -1, y = -1;
+		Coord(int x0, int y0) : x(x0), y(y0) { }
+	};
+	std::vector<std::vector<Coord>> m_borders;
 };
 
 #endif // IE_CELLAUTOMATA_HPP

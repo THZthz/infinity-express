@@ -27,7 +27,6 @@
 #include "Scenes/Main.hpp"
 #include "Generator/CellAutomata.hpp"
 #include "utils/Array.hpp"
-#include "utils/tests/tests_Array.hpp"
 
 int
 main()
@@ -41,8 +40,6 @@ main()
 
 	CellAutomata gen;
 	gen.generate();
-
-	test_Array();
 
 
 	return EXIT_SUCCESS;

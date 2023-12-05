@@ -95,6 +95,9 @@ set(INCLUDES_
 set(SOURCES_
         src/main/main.cpp
 
+        # Generator
+        src/Generator/CellAutomata.cpp
+
         # utils
         src/utils/gjk/gjk.cpp
         src/utils/gjk/manifold.cpp
@@ -127,6 +130,11 @@ set(SOURCES_
         ${libtess2_SOURCE_DIR}/Source/sweep.c
         ${libtess2_SOURCE_DIR}/Source/tess.c
 
+        # clipper2
+        modules/clipper2_1.3.0/src/clipper.engine.cpp
+        modules/clipper2_1.3.0/src/clipper.offset.cpp
+        modules/clipper2_1.3.0/src/clipper.rectclip.cpp
+
         # glad
         modules/glad/glad.h
         modules/glad/glad.c
@@ -136,6 +144,7 @@ target_include_directories(${EXE_} PRIVATE include modules)
 target_include_directories(${EXE_} PRIVATE
         modules/stb
         modules/nanovgxc/src/
+        modules/clipper2_1.3.0/include
         ${imgui_SOURCE_DIR}/
         ${libtess2_SOURCE_DIR}/Include)
 target_link_libraries(${EXE_} PUBLIC glm predicates) # math
