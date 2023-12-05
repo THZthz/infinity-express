@@ -19,8 +19,8 @@ namespace ie {
 /// A dynamic AABB tree broad-phase, inspired by Nathanael Presson's btDbvt.
 /// A dynamic tree arranges data in a binary tree to accelerate
 /// queries such as volume queries and ray casts. Leafs are proxies
-/// with an AABB. In the tree we expand the proxy AABB by b2_fatAABBFactor
-/// so that the proxy AABB is bigger than the client object. This allows the client
+/// with an AABB. In the tree we expand the proxy AABB so that the proxy AABB
+/// is bigger than the client object. This allows the client
 /// object to move by small amounts without triggering a tree update.
 ///
 /// Nodes are pooled and relocatable, so we use node indices rather than pointers.
@@ -29,14 +29,14 @@ class BVH
 public:
 	/// Used to detect bad values. Positions greater than about 16km will have precision
 	/// problems, so 100km as a limit should be fine in all cases.
-	const float LEN_UINTS_PER_METER = 1.f;
+	const float LEN_UNITS_PER_METER = 1.f;
 
-	const float HUGE_NUMBER = 100000.0f * LEN_UINTS_PER_METER;
+	const float HUGE_NUMBER = 100000.0f * LEN_UNITS_PER_METER;
 
 	/// This is used to fatten AABBs in the dynamic tree. This allows proxies
 	/// to move by a small amount without triggering a tree adjustment.
 	/// This is in meters.
-	const float AABB_EXTENSION = 0.1f * LEN_UINTS_PER_METER;
+	const float AABB_EXTENSION = 0.1f * LEN_UNITS_PER_METER;
 
 
 

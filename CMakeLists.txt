@@ -56,6 +56,17 @@ fetch(imgui https://github.com/ocornut/imgui.git v1.90)
 
 # -------------------------------------------------------------------------------
 set(INCLUDES_
+        # Generator
+        include/Generator/CellAutomata.hpp
+
+        # Physics
+        include/Physics/World.hpp
+        include/Physics/DebugDraw.hpp
+
+        # Scenes
+        include/Scenes/Main.hpp
+
+        # utils
         include/utils/AABB.hpp
         include/utils/Array.hpp
         include/utils/BVH.hpp
@@ -73,6 +84,7 @@ set(INCLUDES_
         include/utils/LockLessMultiReadPipe.hpp
         include/utils/Macros.hpp
         include/utils/Memory.hpp
+        include/utils/Optional.hpp
         include/utils/Profile.hpp
         include/utils/Robinhood.hpp
         include/utils/Scene.hpp

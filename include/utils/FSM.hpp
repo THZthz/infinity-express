@@ -33,7 +33,7 @@
 #	include <stdexcept>
 #endif
 
-namespace fsmlite {
+namespace ie {
 namespace detail {
 #if __cplusplus >= 201703L || _MSVC_LANG >= 201703L
 template <class F, class... Args>
@@ -64,7 +64,7 @@ template <class F, class... Args>
 using is_invocable = typename std::
     integral_constant<bool, sizeof(is_invocable_test::test<F, Args...>(0)) == 1>::type;
 #else
-#	error "fsmlite requires C++11 support."
+#	error "requires C++11 support."
 #endif
 // C++11 std::forward() is in <utility>, which may not be
 // present on freestanding implementations
@@ -491,16 +491,16 @@ private:
 	};
 #endif
 };
-} // namespace fsmlite
+} // namespace ie
 
 #endif
 
 
 #if 0
 
-class player : public fsmlite::fsm<player>
+class player : public ie::fsm<player>
 {
-	friend class fsmlite::fsm<player>; // base class needs access to transition_table
+	friend class ie::fsm<player>; // base class needs access to transition_table
 
 	std::string cd_title;
 	bool autoplay = false;

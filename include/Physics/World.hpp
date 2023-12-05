@@ -76,14 +76,14 @@ public:
 
 		// Track maximum profile times
 		b2Profile p = b2World_GetProfile(m_worldId);
-		m_maxProfile.step = std::max(m_maxProfile.step, p.step);
-		m_maxProfile.pairs = std::max(m_maxProfile.pairs, p.pairs);
-		m_maxProfile.collide = std::max(m_maxProfile.collide, p.collide);
-		m_maxProfile.solve = std::max(m_maxProfile.solve, p.solve);
-		m_maxProfile.buildIslands = std::max(m_maxProfile.buildIslands, p.buildIslands);
-		m_maxProfile.solveIslands = std::max(m_maxProfile.solveIslands, p.solveIslands);
-		m_maxProfile.broadphase = std::max(m_maxProfile.broadphase, p.broadphase);
-		m_maxProfile.continuous = std::max(m_maxProfile.continuous, p.continuous);
+		m_maxProfile.step = ie::Max(m_maxProfile.step, p.step);
+		m_maxProfile.pairs = ie::Max(m_maxProfile.pairs, p.pairs);
+		m_maxProfile.collide = ie::Max(m_maxProfile.collide, p.collide);
+		m_maxProfile.solve = ie::Max(m_maxProfile.solve, p.solve);
+		m_maxProfile.buildIslands = ie::Max(m_maxProfile.buildIslands, p.buildIslands);
+		m_maxProfile.solveIslands = ie::Max(m_maxProfile.solveIslands, p.solveIslands);
+		m_maxProfile.broadphase = ie::Max(m_maxProfile.broadphase, p.broadphase);
+		m_maxProfile.continuous = ie::Max(m_maxProfile.continuous, p.continuous);
 
 		m_totalProfile.step += p.step;
 		m_totalProfile.pairs += p.pairs;

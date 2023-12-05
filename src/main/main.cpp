@@ -25,25 +25,24 @@
 #include "Physics/DebugDraw.hpp"
 #include "Physics/World.hpp"
 #include "Scenes/Main.hpp"
-
-#include "box2d/box2d.h"
-#include "box2d/id.h"
-#include "box2d/joint_util.h"
-#include "box2d/debug_draw.h"
-
-
-#include "utils/Robinhood.hpp"
-
-#include "utils/FSM.hpp"
+#include "Generator/CellAutomata.hpp"
+#include "utils/Array.hpp"
+#include "utils/tests/tests_Array.hpp"
 
 int
 main()
 {
-	//	printf("Infinity Express v%s\n", INFINITY_EXPRESS_VERSION_STR);
-	//	printf("\tworking directory %s\n", INFINITY_EXPRESS_WORKING_DIR);
-	//
+	printf("Infinity Express v%s\n", INFINITY_EXPRESS_VERSION_STR);
+	printf("\tworking directory %s\n", INFINITY_EXPRESS_WORKING_DIR);
+	printf("\tc++ standard version: %ld\n", __cplusplus);
+
 	//	App app;
 	//	app.start();
+
+	CellAutomata gen;
+	gen.generate();
+
+	test_Array();
 
 
 	return EXIT_SUCCESS;

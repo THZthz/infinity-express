@@ -14,7 +14,7 @@ const int MAX_POLY_VERTS = 8;
 /// chosen to be numerically significant, but visually insignificant. In meters.
 const float LINEAR_SLOP = 0.005f;
 
-//const float HUGE = 100000.f;
+const float HUGE = 100000.f;
 
 // ██████╗      ██╗██╗  ██╗
 //██╔════╝      ██║██║ ██╔╝
@@ -56,12 +56,25 @@ struct Rot2d
 	Rot2d() = default;
 	constexpr Rot2d(float sv, float cv) : s(sv), c(cv) { }
 
-	// clang-format off
-	explicit Rot2d(float angle)	{ s = Sin(angle); c = Cos(angle); }
-	void Set(float angle) { s = Sin(angle); c = Cos(angle); }
-	void SetIdentity() { s = 0.0f; c = 1.0f; }
+	explicit Rot2d(float angle)
+	{
+		s = Sin(angle);
+		c = Cos(angle);
+	}
+
+	void Set(float angle)
+	{
+		s = Sin(angle);
+		c = Cos(angle);
+	}
+
+	void SetIdentity()
+	{
+		s = 0.0f;
+		c = 1.0f;
+	}
+
 	float GetAngle() const { return Atan2(s, c); }
-	// clang-format on
 };
 
 static constexpr Rot2d rot2d_identity = {0.f, 1.f};
@@ -129,8 +142,8 @@ struct DistanceInput
 /// Output for b2Distance.
 struct DistanceOutput
 {
-	vec2 pointA{}; ///< closest point on shapeA
-	vec2 pointB{}; ///< closest point on shapeB
+	vec2 pointA; ///< closest point on shapeA
+	vec2 pointB; ///< closest point on shapeB
 	float distance{0.f};
 	int32_t iterations{0}; ///< number of GJK iterations used
 };

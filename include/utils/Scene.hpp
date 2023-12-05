@@ -25,7 +25,7 @@ public:
 	Scene(const std::string &name, int width, int height);
 	~Scene();
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 public:
 	void start();
 	void stop();
@@ -33,7 +33,7 @@ public:
 	void pause();
 	void resume();
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 
 public:
 	virtual void preload() { }
@@ -62,7 +62,7 @@ public:
 #endif
 	}
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 
 public:
 	virtual void onKey(int key, int scancode, int action, int mods) { }
@@ -71,7 +71,7 @@ public:
 	virtual void onCursorPos(double x, double y) { }
 	virtual void onMouseButton(int button, int action, int mods) { }
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 
 public:
 	bool isRunning() const { return m_running; }
@@ -122,12 +122,12 @@ public:
 		m_rotation += rad;
 	}
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 
 	glm::vec2 getPointer() const { return m_pointer; }
 	const glm::vec2 &getPointerWorld() const { return m_pointerWorld; }
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 private:
 	template <typename T>
 	static void addListener(std::vector<T> &callbackList, T callback);
@@ -142,12 +142,12 @@ private:
 	static void keyListener(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void framebufferSizeListener(GLFWwindow *window, int width, int height);
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 private:
 	void mainLoop();
 
 
-	// -------------------------------------------------------------------------------
+	/*----------------------------------------------------------------------------*/
 protected:
 	std::string m_name;
 
