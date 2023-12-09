@@ -1,26 +1,182 @@
 #include "utils/Scene.hpp"
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
 
 using namespace ie;
+
+Scene::Camera::Camera() { resetView(); }
+
+void
+Scene::Camera::resetView()
+{
+	m_center = {0.0f, 0.0f};
+	m_zoom = 1.0f;
+}
+
+glm::vec2
+Scene::Camera::convertScreenToWorld(glm::vec2 ps) const
+{
+	auto w = float(m_width);
+	auto h = float(m_height);
+	float u = ps.x / w;
+	float v = (h - ps.y) / h;
+
+	float ratio = w / h;
+	glm::vec2 extents = {m_zoom * ratio * m_viewHeight, m_zoom * m_viewHeight};
+
+	glm::vec2 lower = m_center - extents;
+	glm::vec2 upper = m_center + extents;
+
+	glm::vec2 pw = {(1.0f - u) * lower.x + u * upper.x, (1.0f - v) * lower.y + v * upper.y};
+	return pw;
+}
+
+glm::vec2
+Scene::Camera::convertWorldToScreen(glm::vec2 pw) const
+{
+	auto w = float(m_width);
+	auto h = float(m_height);
+	float ratio = w / h;
+	glm::vec2 extents = {m_zoom * ratio * m_viewHeight, m_zoom * m_viewHeight};
+
+	glm::vec2 lower = m_center - extents;
+	glm::vec2 upper = m_center + extents;
+
+	float u = (pw.x - lower.x) / (upper.x - lower.x);
+	float v = (pw.y - lower.y) / (upper.y - lower.y);
+
+	glm::vec2 ps = {u * w, (1.0f - v) * h};
+	return ps;
+}
+
+void
+Scene::Camera::buildProjectionMatrix(float *m, float zBias) const
+{
+	float ratio = float(m_width) / float(m_height);
+	glm::vec2 extents = {m_zoom * ratio * m_viewHeight, m_zoom * m_viewHeight};
+
+	glm::vec2 lower = m_center - extents;
+	glm::vec2 upper = m_center + extents;
+	float w = upper.x - lower.x;
+	float h = upper.y - lower.y;
+
+	m[0] = 2.0f / w;
+	m[1] = 0.0f;
+	m[2] = 0.0f;
+	m[3] = 0.0f;
+
+	m[4] = 0.0f;
+	m[5] = 2.0f / h;
+	m[6] = 0.0f;
+	m[7] = 0.0f;
+
+	m[8] = 0.0f;
+	m[9] = 0.0f;
+	m[10] = -1.0f;
+	m[11] = 0.0f;
+
+	m[12] = -2.0f * m_center.x / w;
+	m[13] = -2.0f * m_center.y / h;
+	m[14] = zBias;
+	m[15] = 1.0f;
+}
+
+void
+Scene::Camera::setSize(int width, int height)
+{
+	m_width = width;
+	m_height = height;
+}
+
+void
+Scene::Camera::setCenter(float x, float y)
+{
+	m_center.x = x;
+	m_center.y = y;
+}
+
+void
+Scene::Camera::setZoom(float zoom)
+{
+	m_zoom = zoom;
+}
+
+int
+Scene::Camera::getWidth() const
+{
+	return m_width;
+}
+
+int
+Scene::Camera::getHeight() const
+{
+	return m_height;
+}
+
+float
+Scene::Camera::getZoom() const
+{
+	return m_zoom;
+}
+
+const glm::vec2 &
+Scene::Camera::getCenter() const
+{
+	return m_center;
+}
+
+void
+Scene::Camera::translate(float x, float y)
+{
+	m_center.x -= x;
+	m_center.y -= y;
+}
+
+void
+Scene::Camera::scale(float s, float x, float y)
+{
+}
+
+glm::vec4
+Scene::Camera::getBoundingBox() const
+{
+	float ratio = float(m_width) / float(m_height);
+	glm::vec2 extents{ratio * m_viewHeight * m_zoom, m_viewHeight * m_zoom};
+	return {m_center - extents, m_center + extents};
+}
 
 Scene::Scene(const std::string &name, int width, int height)
     : m_name(name), m_winWidth(width), m_winHeight(height)
 
 {
-	// set transform matrix to identity
-	nvgTransformIdentity(m_transform);
-	nvgTransformIdentity(m_inverseTransform);
-
-
 	// initialize glfw library globally, this is safe to call multiple times
 	if (!glfwInit()) throw std::runtime_error("Failed to initialize GLFW");
 
 	glfwSetErrorCallback(errorListener);
 
 	// create a window
+#if defined(IE_SCENE_IMPL_OPENGL_ES2) // Decide GL+GLSL versions  // TODO
+	// GL ES 2.0 + GLSL 100
+	const char *glsl_version = "#version 100";
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
+#elif defined(__APPLE__)
+	// GL 3.2 + GLSL 150
+	const char *glsl_version = "#version 150";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // 3.2+ only
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // Required on Mac
+#else
+	// GL 3.0 + GLSL 130
+	const char *glsl_version = "#version 130";
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+#endif
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 	glfwWindowHint(GLFW_SAMPLES, 4);
 	m_window = glfwCreateWindow(width, height, name.c_str(), nullptr, nullptr);
@@ -29,6 +185,21 @@ Scene::Scene(const std::string &name, int width, int height)
 		glfwTerminate();
 		throw std::runtime_error("Failed to create window");
 	}
+
+	if (GLFWmonitor *primaryMonitor = glfwGetPrimaryMonitor())
+	{
+#ifdef __APPLE__
+		glfwGetMonitorContentScale(primaryMonitor, &m_framebufferScale, &m_framebufferScale);
+#else
+		glfwGetMonitorContentScale(primaryMonitor, &m_windowScale, &m_windowScale);
+#endif
+	}
+
+#ifdef __APPLE__
+	glfwGetWindowContentScale(g_mainWindow, &m_framebufferScale, &m_framebufferScale);
+#else
+	glfwGetWindowContentScale(m_window, &m_windowScale, &m_windowScale);
+#endif
 
 	// make gl context active for the window
 	glfwMakeContextCurrent(m_window);
@@ -51,12 +222,51 @@ Scene::Scene(const std::string &name, int width, int height)
 	glfwSetMouseButtonCallback(m_window, mouseButtonListener);
 	glfwSetFramebufferSizeCallback(m_window, framebufferSizeListener);
 	glfwSetScrollCallback(m_window, scrollListener);
+
+	// initialize imgui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO &io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	// Setup Platform/Renderer backends
+	if (!ImGui_ImplGlfw_InitForOpenGL(m_window, false))
+		throw std::runtime_error("ImGui_ImplGlfw_InitForOpenGL failed");
+	if (!ImGui_ImplOpenGL3_Init(nullptr))
+		throw std::runtime_error("ImGui_ImplOpenGL3_Init failed");
+
+	// Load Fonts
+	// - If no fonts are loaded, dear imgui will use the default font. You can also load multiple fonts and use ImGui::PushFont()/PopFont() to select them.
+	// - AddFontFromFileTTF() will return the ImFont* so you can store it if you need to select the font among multiple.
+	// - If the file cannot be loaded, the function will return a nullptr. Please handle those errors in your application (e.g. use an assertion, or display an error and quit).
+	// - The fonts will be rasterized at a given size (w/ oversampling) and stored into a texture when calling ImFontAtlas::Build()/GetTexDataAsXXXX(), which ImGui_ImplXXXX_NewFrame below will call.
+	// - Use '#define IMGUI_ENABLE_FREETYPE' in your imconfig file to use Freetype for higher quality font rendering.
+	// - Read 'docs/FONTS.md' for more instructions and details.
+	// - Remember that in C/C++ if you want to include a backslash \ in a string literal you need to write a double backslash \\ !
+	// - Our Emscripten build process allows embedding fonts to be accessible at runtime from the "fonts/" folder. See Makefile.emscripten for details.
+	//io.Fonts->AddFontDefault();
+	//io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\segoeui.ttf", 18.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/DroidSans.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Roboto-Medium.ttf", 16.0f);
+	//io.Fonts->AddFontFromFileTTF("../../misc/fonts/Cousine-Regular.ttf", 15.0f);
+	//ImFont* font = io.Fonts->AddFontFromFileTTF("c:\\Windows\\Fonts\\ArialUni.ttf", 18.0f, nullptr, io.Fonts->GetGlyphRangesJapanese());
+	//IM_ASSERT(font != nullptr);
 }
 
 Scene::~Scene()
 {
+	// destroy imgui context
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
+
+
+	assert(!m_preloaded);
 	nvgluDeleteFramebuffer(m_framebuffer);
 	nvglDelete(m_vg);
+	glfwDestroyWindow(m_window);
 	glfwTerminate();
 }
 
@@ -69,11 +279,14 @@ start:
 		preload();
 		m_preloaded = true;
 	}
+	// NOTE: in game logic we should not use glfwGetTime, but use std::chrono instead.
 	m_running = true;
+	m_frameTime = 0.f;
 	m_prevTime = 0.f;
 	m_accumulator = 0.f;
+	m_frame = 0;
 	glfwSwapInterval(0);
-	glfwSetTime(0); // TODO
+	glfwSetTime(0);
 	while (m_running && !glfwWindowShouldClose(m_window)) { mainLoop(); }
 	if (m_preloaded && m_shouldCleanup)
 	{
@@ -187,49 +400,71 @@ Scene::framebufferSizeListener(GLFWwindow *window, int width, int height)
 void
 Scene::mainLoop()
 {
+	double time1 = glfwGetTime(); // start time of current frame
+
 	glfwGetWindowSize(m_window, &m_winWidth, &m_winHeight);
 	glfwGetFramebufferSize(m_window, &m_frameWidth, &m_frameHeight);
 
 	// Calculate pixel ration for hi-dpi devices.
 	m_devicePixelRatio = (float)m_frameWidth / (float)m_winWidth;
 
-	// calculate current transform // TODO
-	float t[6];
-	nvgTransformIdentity(m_transform);
-	nvgTransformTranslate(t, m_translation.x, m_translation.y);
-	nvgTransformPremultiply(m_transform, t);
-	nvgTransformScale(t, m_scale, m_scale);
-	nvgTransformPremultiply(m_transform, t);
-	nvgTransformRotate(t, m_rotation);
-	nvgTransformPremultiply(m_transform, t);
+	double mx = 0, my = 0;
+	glfwGetCursorPos(m_window, &mx, &my);
+	ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
+	ImGui_ImplOpenGL3_NewFrame();
+	ImGui_ImplGlfw_NewFrame();
+	ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
 
-	// get the position of the mouse in world space
-	float pwx, pwy;
-	nvgTransformInverse(m_inverseTransform, m_transform);
-	double x, y;
-	glfwGetCursorPos(m_window, &x, &y);
-	nvgTransformPoint(&pwx, &pwy, m_inverseTransform, (float)x, (float)y);
-	m_pointer.x = (float)x;
-	m_pointer.y = (float)y;
-	m_pointerWorld.x = pwx;
-	m_pointerWorld.y = pwy;
+	const float cameraWidth = float(m_winWidth) / m_windowScale;
+	const float cameraHeight = float(m_winHeight) / m_windowScale;
+	ImGuiIO &io = ImGui::GetIO();
+	io.DisplaySize.x = cameraWidth;
+	io.DisplaySize.y = cameraHeight;
+	io.DisplayFramebufferScale.x = float(m_frameWidth) / cameraWidth;
+	io.DisplayFramebufferScale.y = float(m_frameHeight) / cameraHeight;
 
-	// do not allow large time gap and improve stability
-	double fixedDelta = 1.f / m_hertz;
-	double curTime = glfwGetTime(); // nvgTime_sec(nvgTimeNow());
-	double deltaTime = curTime - m_prevTime;
-	//		if (deltaTime > 0.2f) deltaTime = 0.2f; // TODO
-	m_accumulator += deltaTime;
-	m_delta = (float)deltaTime;
-	while (m_accumulator > fixedDelta)
-	{
-		update((float)fixedDelta); // TODO
-		m_accumulator -= (float)fixedDelta;
-	}
+	ImGui::NewFrame();
 
+	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+	ImGui::SetNextWindowSize(ImVec2(cameraWidth, cameraHeight));
+	ImGui::SetNextWindowBgAlpha(0.0f);
+	ImGui::Begin(
+	    "Overlay", nullptr,
+	    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs |
+	        ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar);
+	ImGui::End();
+
+	char buffer[128];
+	sprintf(buffer, "fps %.1f", 1.f / m_frameTime);
+	ImGui::Begin(
+	    "Overlay", nullptr,
+	    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs |
+	        ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar);
+	ImGui::SetCursorPos(ImVec2(5.0f, cameraHeight - 20.0f));
+	ImGui::TextColored(ImColor(153, 230, 153, 255), "%s", buffer);
+	ImGui::End();
+
+	ImGui::Render();
+
+	glViewport(0, 0, m_frameWidth, m_frameHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	update(m_frameTime);
 	render();
-	m_prevTime = curTime;
+
+	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 	glfwSwapBuffers(m_window);
 	glfwPollEvents();
+
+	// Limit frame rate
+	double time2 = glfwGetTime();
+	//	double targetTime = time1 + 1.0f / m_hertz;
+	//	int loopCount = 0;
+	//	while (time2 < targetTime)
+	//	{
+	//		time2 = glfwGetTime();
+	//		++loopCount;
+	//	}
+	m_frameTime = (float)(time2 - time1);
+	++m_frame;
 }

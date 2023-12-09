@@ -186,12 +186,12 @@ public:
 
 	pointer allocate(size_type n, const void* /*hint*/ = nullptr)
 	{
-		auto const ret = reinterpret_cast<pointer>(malloc(n * sizeof(value_type)));
+		auto const ret = reinterpret_cast<pointer>(_malloc(n * sizeof(value_type)));
 		if (ret == nullptr) { throw std::bad_alloc(); }
 		return ret;
 	}
 
-	void deallocate(pointer p, size_type) { free(p); }
+	void deallocate(pointer p, size_type) { _free(p); }
 
 	size_type max_size() const noexcept // NOLINT(modernize-use-nodiscard)
 	{
@@ -214,9 +214,9 @@ public:
 	}
 #endif // IE_ARRAY_SIZE_AWARE_COMPAT
 
-	pointer realloc(pointer p, size_type const n)
+	pointer realloc_memory(pointer p, size_type const n)
 	{
-		auto const ret = reinterpret_cast<pointer>(::realloc(p, n * sizeof(value_type)));
+		auto const ret = reinterpret_cast<pointer>(_realloc(p, n * sizeof(value_type)));
 		if (ret == nullptr) { throw std::bad_alloc(); }
 		return ret;
 	}
@@ -257,35 +257,37 @@ struct recommended_size_dummy
 {
 	template <class SizeType>
 	static inline SizeType
-	recommended(SizeType const /*ms*/, SizeType const /*old_cap*/, SizeType const new_cap)
+	recommended(SizeType const /*maxSize*/, SizeType const /*oldCap*/, SizeType const newCap)
 	{
-		return new_cap;
+		return newCap;
 	}
 };
 
-// multiply the old capacity by a rational fraction. This is the one used by default with 3/2
-template <size_t Num = 3, size_t Dem = 2>
+/// multiply the old capacity by a rational fraction. This is the one used by default with 3/2
+/// \tparam N nominator
+/// \tparam D denominator
+template <size_t N = 3, size_t D = 2>
 struct recommended_size_multiply_by
 {
-	static_assert(Num > Dem, "Num <= Dem !");
+	static_assert(N > D, "Num <= Dem !");
 
 	template <class SizeType>
 	static inline SizeType
-	recommended(SizeType const ms, SizeType const old_cap, SizeType const new_cap)
+	recommended(SizeType const maxSize, SizeType const oldCap, SizeType const newCap)
 	{
 #ifndef _MSC_VER
 		static_assert(
-		    Num < std::numeric_limits<SizeType>::max(),
-		    "Num is too big for current "
-		    "size_type");
+		    N < std::numeric_limits<SizeType>::max(),
+		    "N is too big for current "
+		    "SizeType");
 		static_assert(
-		    Dem < std::numeric_limits<SizeType>::max(),
-		    "Dem is too big for current "
-		    "size_type");
+		    D < std::numeric_limits<SizeType>::max(),
+		    "D is too big for current "
+		    "SizeType");
 #endif
 
-		if (old_cap >= ((ms / Num) * Dem)) { return ms; }
-		return std::max((SizeType)((Num * old_cap + (Dem - 1)) / Dem), new_cap);
+		if (oldCap >= ((maxSize / N) * D)) { return maxSize; }
+		return std::max((SizeType)((N * oldCap + (D - 1)) / D), newCap);
 	}
 };
 
@@ -295,18 +297,18 @@ struct recommended_size_add_by
 {
 	template <class SizeType>
 	static inline SizeType
-	recommended(SizeType const& ms, SizeType const old_cap, SizeType const new_cap)
+	recommended(SizeType const& maxSize, SizeType const oldCap, SizeType const newCap)
 	{
 #ifndef _MSC_VER
 		static_assert(
 		    N < std::numeric_limits<SizeType>::max(),
 		    "N is too big for current "
-		    "size_type");
+		    "SizeType");
 #endif
 		static constexpr SizeType N_ = N;
 
-		if (old_cap >= (ms - N_)) { return ms; }
-		return std::max((SizeType)(old_cap + N_), new_cap);
+		if (oldCap >= (maxSize - N_)) { return maxSize; }
+		return std::max((SizeType)(oldCap + N_), newCap);
 	}
 };
 
@@ -343,9 +345,7 @@ struct size_storage_impl<Alloc, SizeType, false>
 
 public:
 	size_storage_impl() : _n(0), _alloc(0) { }
-
 	size_storage_impl(size_storage_impl const& o) : _n(o._n), _alloc(o._alloc) { }
-
 	size_storage_impl(size_type const n, size_type const alloc) : _n(n), _alloc(alloc) { }
 
 public:
@@ -373,9 +373,7 @@ struct size_storage_impl<Alloc, SizeType, true>
 
 public:
 	size_storage_impl() : _n(0) { }
-
 	size_storage_impl(size_storage_impl const& o) : _n(o._n) { }
-
 	size_storage_impl(size_type const n, size_type const) : _n(n) { }
 
 public:
@@ -403,7 +401,7 @@ struct pod_reallocate_impl<true>
 	static inline Pointer
 	reallocate(PS& ps, Pointer buf, const SizeType, const SizeType, const SizeType new_size)
 	{
-		return ps.allocator().realloc(buf, new_size);
+		return ps.allocator().realloc_memory(buf, new_size);
 	}
 };
 
@@ -471,7 +469,7 @@ protected:
 		o._sizes.set_zero();
 	}
 
-	~vector_storage_base() { free(); }
+	~vector_storage_base() { free_memory(); }
 
 public:
 	storage_type& storage_() { return static_cast<storage_type&>(*this); }
@@ -490,7 +488,7 @@ public:
 	vector_storage_base& operator=(vector_storage_base&& o) noexcept
 	{
 		// self-assignment already checked!
-		free();
+		free_memory();
 		_buf = o._buf;
 		_sizes = o._sizes;
 		o._buf = nullptr;
@@ -508,24 +506,22 @@ protected:
 
 	void allocate_if_needed(const size_type n)
 	{
-		if (n <= storage_size()) { return; }
+		if (n <= storage_size()) return; 
 		force_allocate(n);
 	}
 
 	inline size_type compute_size_grow(size_type const grow_by) const
 	{
 		const size_type size_ = size();
-		if (check_size_overflow && (size_ > (max_size() - grow_by)))
-		{
+		if (check_size_overflow && size_ > (max_size() - grow_by))
 			throw std::length_error("size will overflow");
-		}
 		return size_ + grow_by;
 	}
 
 	size_type max_size() const
 	{
-		return std::min(
-		    (size_t)allocator().max_size(), (size_t)std::numeric_limits<size_type>::max());
+		return static_cast<size_type>(std::min(
+		    (size_t)allocator().max_size(), (size_t)std::numeric_limits<size_type>::max()));
 	}
 
 	size_type grow_if_needed(const size_type grow_by)
@@ -570,7 +566,7 @@ protected:
 		return true;
 	}
 
-	void free()
+	void free_memory()
 	{
 		if (begin())
 		{
@@ -1062,11 +1058,8 @@ public:
 
 public:
 	vector() = default;
-
 	explicit vector(allocator_type const& alloc) : _storage(alloc) { }
-
 	vector(vector const& o) : _storage(o._storage) { }
-
 	vector(vector&& o) noexcept : _storage(std::move(o._storage)) { }
 
 	vector(std::initializer_list<value_type> const& il)
@@ -1368,11 +1361,11 @@ private:
 			_storage.construct_move(buf, _storage.begin(), _storage.begin() + npos);
 		}
 		else { buf = _storage.begin(); }
-		// Make room for the new objects
+		// make room for the new objects
 		_storage.construct_move_alias_reverse(
 		    buf + npos + count, _storage.begin() + npos, _storage.end());
 
-		// Insert objects
+		// insert objects
 		fins(&buf[npos], &buf[npos + count]);
 
 		if (alloc_size > 0)
@@ -1416,4 +1409,7 @@ swap(ie::vector<T, Alloc, SizeType, RS, co>& a, ie::vector<T, Alloc, SizeType, R
 
 } // namespace std
 
+/*----------------------------------------------------------------------------*/
+
+/*----------------------------------------------------------------------------*/
 #endif // IE_ARRAY_HPP

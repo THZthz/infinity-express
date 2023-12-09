@@ -1,12 +1,19 @@
 #ifndef IE_MAIN_SCENE_HPP
 #define IE_MAIN_SCENE_HPP
 
-#include "Physics/World.hpp"
+#include "World.hpp"
 
 class MainWorld : public PhysicsWorld
 {
 public:
-	explicit MainWorld(ie::Scene *scene) : PhysicsWorld(scene) { }
+	explicit MainWorld(ie::Scene *scene) : PhysicsWorld(scene)
+	{
+		printf("Infinity Express v%s\n", INFINITY_EXPRESS_VERSION_STR);
+		printf("\tworking directory %s\n", INFINITY_EXPRESS_WORKING_DIR);
+		printf("\tc++ standard version: %ld\n", __cplusplus);
+		printf("\tOpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
+		       glGetString(GL_SHADING_LANGUAGE_VERSION));
+	}
 
 	void initialize() override
 	{
@@ -110,41 +117,49 @@ private:
 class App : public ie::Scene
 {
 public:
-	App() : ie::Scene("Infinity Express", 1000, 600), m_physicsWorld(this) { m_scale = 10; }
+	App() : ie::Scene("Infinity Express", 800, 600), m_physicsWorld(this)
+	{
+		m_camera.setSize(m_winWidth, m_winHeight);
+	}
 
 	void preload() override { m_physicsWorld.initialize(); }
 
 	void cleanup() override { m_physicsWorld.destroy(); }
 
-	void update(float delta) override { m_physicsWorld.update(); }
+	void update(float delta) override { m_physicsWorld.update(delta); }
 
 	void render() override
 	{
-		int prevFBO = nvgluBindFramebuffer(m_framebuffer);
-		nvgluSetFramebufferSize(m_framebuffer, m_frameWidth, m_frameHeight, 0);
+		//		int prevFBO = nvgluBindFramebuffer(m_framebuffer);
+		//		nvgluSetFramebufferSize(m_framebuffer, m_frameWidth, m_frameHeight, 0);
+		//
+		//		// Update and render
+		//		nvgluSetViewport(0, 0, m_frameWidth, m_frameHeight);
+		//		//		nvgluClear(nvgRGBAf(0.3f, 0.3f, 0.32f, 1.0f));
+		//		nvgluClear(nvgRGBAf(0.2f, 0.2f, 0.2f, 1.0f));
+		//
+		//
+		//		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
+		//		nvgSave(m_vg);
+		//
+		//
+		//		//		nvgBeginPath(m_vg);
+		//		//		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
+		//		//		nvgCircle(m_vg, m_pointerWorld.x, m_pointerWorld.y, 3 / m_scale);
+		//		//		//		nvgCircle(m_vg, m_pointer.x, m_pointer.y, 3);
+		//		//		nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
+		//		//		nvgFill(m_vg);
+		//
+		//		nvgRestore(m_vg);
+		//		nvgEndFrame(m_vg);
+		//
+		//		nvgluBlitFramebuffer(m_framebuffer, prevFBO); // blit to prev FBO and rebind it
 
-		// Update and render
-		nvgluSetViewport(0, 0, m_frameWidth, m_frameHeight);
-		//		nvgluClear(nvgRGBAf(0.3f, 0.3f, 0.32f, 1.0f));
-		nvgluClear(nvgRGBAf(0.2f, 0.2f, 0.2f, 1.0f));
 
-
-		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
-		nvgSave(m_vg);
-		nvgTransform(m_vg, m_transform);
-
+		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glViewport(0, 0, m_frameWidth, m_frameHeight);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		m_physicsWorld.debugRender();
-
-		nvgBeginPath(m_vg);
-		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
-		nvgCircle(m_vg, m_pointerWorld.x, m_pointerWorld.y, 3 / m_scale);
-		//		nvgCircle(m_vg, m_pointer.x, m_pointer.y, 3);
-		nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
-		nvgFill(m_vg);
-		nvgRestore(m_vg);
-		nvgEndFrame(m_vg);
-
-		nvgluBlitFramebuffer(m_framebuffer, prevFBO); // blit to prev FBO and rebind it
 	}
 
 	// ----------------------------------------------------------------
@@ -153,14 +168,19 @@ public:
 
 	void onMouseButton(int button, int action, int mods) override
 	{
-		m_physicsWorld.onMouseButton(button, action, mods);
+		double xd, yd;
+		glfwGetCursorPos(m_window, &xd, &yd);
+		glm::vec2 pw = m_camera.convertScreenToWorld(
+		    {float(xd) / m_windowScale, float(yd) / m_windowScale});
+
+		m_physicsWorld.onMouseButton({pw.x, pw.y}, button, action, mods);
 
 		if (button == GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			if (action == GLFW_PRESS)
 			{
 				m_isRightMousePressed = true;
-				m_prevPos = m_pointer;
+				m_prevPos = pw;
 			}
 			else { m_isRightMousePressed = false; }
 		}
@@ -168,27 +188,28 @@ public:
 
 	void onCursorPos(double x, double y) override
 	{
-		m_physicsWorld.onCursorPos();
+		glm::vec2 pw = m_camera.convertScreenToWorld({x / m_windowScale, y / m_windowScale});
+		m_physicsWorld.onCursorPos({pw.x, pw.y});
 
 		if (m_isRightMousePressed)
 		{
-			m_translation = m_translation + (m_pointer - m_prevPos);
-			m_prevPos = m_pointer;
+			glm::vec2 d = pw - m_prevPos;
+			m_camera.translate(d.x, d.y);
+			m_prevPos = m_camera.convertScreenToWorld({x, y});
 		}
 	}
 
 	void onScroll(double x, double y) override
 	{
-		if (y > 0)
-		{
-			//			m_scale += 0.12f;
-			m_scale *= 1.1f;
-		}
-		else if (y < 0)
-		{
-			//			m_scale -= 0.12f;
-			m_scale *= 0.9f;
-		}
+		if (y > 0) m_camera.setZoom(m_camera.getZoom() * 0.9f);
+		else if (y < 0) m_camera.setZoom(m_camera.getZoom() * 1.1f);
+	}
+
+	void onFramebufferSize(int w, int h) override
+	{
+		m_camera.setSize(
+		    static_cast<int>((float)w / m_windowScale),
+		    static_cast<int>((float)h / m_windowScale));
 	}
 
 private:

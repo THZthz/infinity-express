@@ -8,7 +8,6 @@
 #	pragma warning(disable : 4514)
 #endif
 
-// NOLINTBEGIN(modernize-use-nodiscard)
 namespace ie {
 
 //! \defgroup aabb
@@ -21,19 +20,20 @@ namespace ie {
 //██║  ██║██║  ██║██████╔╝██████╔╝
 //╚═╝  ╚═╝╚═╝  ╚═╝╚═════╝ ╚═════╝
 
+// NOLINTBEGIN(modernize-use-nodiscard)
 template <typename T>
-class AABB_
+class TBox
 {
 public:
 	vec<2, T> l;
 	vec<2, T> u;
 
-	AABB_() : l(0, 0), u(0, 0) { }
-	AABB_(const vec<2, T> &lower, const vec<2, T> &upper) : l(lower), u(upper) { }
+	TBox() : l(0, 0), u(0, 0) { }
+	TBox(const vec<2, T> &lower, const vec<2, T> &upper) : l(lower), u(upper) { }
 
-	AABB_ Union(const AABB_ &b) const
+	TBox combine(const TBox &b) const
 	{
-		AABB_ res = b;
+		TBox res = b;
 		if (l.x < res.l.x) res.l.x = l.x;
 		if (l.y < res.l.y) res.l.y = l.y;
 		if (u.x > res.u.x) res.u.x = u.x;
@@ -41,18 +41,18 @@ public:
 		return res;
 	}
 
-	bool Contains(const AABB_ &b) const
+	bool contains(const TBox &b) const
 	{
 		return (l.x <= b.l.x && l.y <= b.l.y && b.u.x <= u.x && b.u.y <= u.y);
 	}
 
-	bool Contains(const vec<2, T> &p) const
+	bool contains(const vec<2, T> &p) const
 	{
 		return p.x <= u.x && p.x >= l.x && p.y <= u.y && p.y >= l.y;
 	}
 
-	// Test whether two aabb boxes overlaps.
-	bool Overlaps(const AABB_ &b) const
+	// test whether two aabb boxes overlaps.
+	bool overlaps(const TBox &b) const
 	{
 		vec<2, T> d1{b.l.x - u.x, b.l.y - u.y};
 		vec<2, T> d2{l.x - b.u.x, l.y - b.u.y};
@@ -61,13 +61,13 @@ public:
 		return true;
 	}
 
-	void SetLower(const vec<2, T> &lowerBound) { l = lowerBound; }
-	void SetUpper(const vec<2, T> &upperBound) { u = upperBound; }
-	vec<2, T> GetLower() const { return l; }
-	vec<2, T> GetUpper() const { return u; }
+	void setLower(const vec<2, T> &lowerBound) { l = lowerBound; }
+	void setUpper(const vec<2, T> &upperBound) { u = upperBound; }
+	vec<2, T> getLower() const { return l; }
+	vec<2, T> getUpper() const { return u; }
 
 	// Expand the bounding box to contain a point.
-	void Expand(vec<2, T> p)
+	void expand(vec<2, T> p)
 	{
 		if (p.x < l.x) l.x = p.x;
 		else if (p.x > u.x) u.x = p.x;
@@ -77,33 +77,33 @@ public:
 	}
 };
 
-using AABB64 = AABB_<int64_t>;
+using Box64 = TBox<int64_t>;
 
-class AABB : public AABB_<float>
+class Box : public TBox<float>
 {
 public:
-	AABB() : AABB_() { }
-	AABB(const vec2 &lower, const vec2 &upper) : AABB_(lower, upper) { }
+	Box() : TBox() { }
+	Box(const vec2 &lower, const vec2 &upper) : TBox(lower, upper) { }
 
-	float Perimeter() const;
-	AABB GetRotated(float rad) const;
-	vec2 Center() const;
-	vec2 Extents() const;
-	vec2 Dims() const;
-	vec2 HalfDims() const;
-	void SetCenter(const vec2 &center);
-	void IncCenter(const vec2 &increment);
-	void SetHalfDims(const vec2 &dim);
-	void SetDims(const vec2 &dim);
+	float perimeter() const;
+	Box getRotated(float rad) const;
+	vec2 center() const;
+	vec2 extents() const;
+	vec2 dimensions() const;
+	vec2 halfDimensions() const;
+	void setCenter(const vec2 &center);
+	void incCenter(const vec2 &increment);
+	void setHalfDims(const vec2 &dim);
+	void setDims(const vec2 &dim);
 
 	// Any other way to avoid this? ;)
-	explicit AABB(const AABB_<float> &rhs) : AABB_(rhs) { }
-	AABB &operator=(const AABB_<float> &rhs);
+	explicit Box(const TBox<float> &rhs) : TBox(rhs) { }
+	Box &operator=(const TBox<float> &rhs);
 };
 // NOLINTEND(modernize-use-nodiscard)
 
-inline AABB &
-AABB::operator=(const AABB_<float> &rhs)
+inline Box &
+Box::operator=(const TBox<float> &rhs)
 {
 	l = rhs.l;
 	u = rhs.u;
@@ -111,76 +111,75 @@ AABB::operator=(const AABB_<float> &rhs)
 }
 
 inline float
-AABB::Perimeter() const
+Box::perimeter() const
 {
 	return 2.0f * (u.x - l.x + u.y - l.y);
 }
 
-inline AABB
-AABB::GetRotated(float rad) const
+inline Box
+Box::getRotated(float rad) const
 {
-	// Get new dimensions.
+	// get new dimensions
 	float c = Cos(rad);
 	float s = Sin(rad);
-
-	vec2 extent = Extents();
+	vec2 extent = extents();
 	vec2 newExtent(extent.y * s + extent.x * c, extent.x * s + extent.y * c);
-	vec2 center = Center();
+	vec2 ce = center();
 
-	return {SubV(center, newExtent), AddV(center, newExtent)};
+	return {SubV(ce, newExtent), AddV(ce, newExtent)};
 }
 
 inline vec2
-AABB::Center() const
+Box::center() const
 {
 	return {0.5f * (l.x + u.x), 0.5f * (l.y + u.y)};
 }
 
 inline vec2
-AABB::Extents() const
+Box::extents() const
 {
 	return {0.5f * (u.x - l.x), 0.5f * (u.y - l.y)};
 }
 
 inline vec2
-AABB::Dims() const
+Box::dimensions() const
 {
 	return {u.x - l.x, u.y - l.y};
 }
 
 inline vec2
-AABB::HalfDims() const
+Box::halfDimensions() const
 {
-	return Extents();
+	return extents();
 }
 
 inline void
-AABB::SetCenter(const vec2 &center)
+Box::setCenter(const vec2 &center)
 {
-	vec2 ex = Extents();
-	SetLower(SubV(center, ex));
-	SetUpper(AddV(center, ex));
+	vec2 ex = extents();
+	setLower(SubV(center, ex));
+	setUpper(AddV(center, ex));
 }
 
 inline void
-AABB::IncCenter(const vec2 &increment)
+Box::incCenter(const vec2 &increment)
 {
-	vec2 center = AddV(Center(), increment);
-	SetCenter(center);
+	vec2 c = AddV(center(), increment);
+	setCenter(c);
 }
 
 inline void
-AABB::SetHalfDims(const vec2 &dim)
+Box::setHalfDims(const vec2 &dim)
 {
-	vec2 center = Center();
-	SetLower(SubV(center, dim));
-	SetUpper(AddV(center, dim));
+	vec2 c = center();
+	setLower(SubV(c, dim));
+	setUpper(AddV(c, dim));
 }
 
 inline void
-AABB::SetDims(const vec2 &dim)
+Box::setDims(const vec2 &dim)
 {
-	SetHalfDims(ScaleV(dim, 0.5f));
+	setHalfDims(ScaleV(dim, 0.5f));
 }
 
 //! @}

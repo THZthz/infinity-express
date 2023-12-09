@@ -14,6 +14,12 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 # -------------------------------------------------------------------------------
+if (${CMAKE_GENERATOR} MATCHES "Visual Sudio*")
+    set(EXECUTABLE_OUTPUT_PATH ${CMAKE_CURRENT_SOURCE_DIR}/build/.vs)
+    set(LIBRARY_OUTPUT_PATH ${EXECUTABLE_OUTPUT_PATH})
+endif ()
+
+# -------------------------------------------------------------------------------
 # LIBOPUS_IS_MAIN determines whether the project is being used from root
 # or if it is added as a dependency (through add_subdirectory for example).
 if ("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -53,26 +59,24 @@ fetch(glm https://github.com/g-truc/glm.git 0.9.9.8)
 fetch(tracy https://github.com/wolfpld/tracy.git v0.10)
 fetch(libtess2 https://github.com/memononen/libtess2.git master)
 fetch(imgui https://github.com/ocornut/imgui.git v1.90)
+#add_subdirectory(modules/boost)
 
 # -------------------------------------------------------------------------------
 set(INCLUDES_
-        # Generator
-        include/Generator/CellAutomata.hpp
-
-        # Physics
-        include/Physics/World.hpp
-        include/Physics/DebugDraw.hpp
-
-        # Scenes
-        include/Scenes/Main.hpp
+        include/CellAutomata.hpp
+        include/World.hpp
+        include/DebugDraw.hpp
+        include/Main.hpp
 
         # utils
         include/utils/AABB.hpp
-        include/utils/Array.hpp
+        include/utils/vector.hpp
+        include/utils/bitwise_enum.hpp
         include/utils/BVH.hpp
-        include/utils/Color.hpp
-        include/utils/Easing.hpp
-        include/utils/Flex.hpp
+        include/utils/color.hpp
+        include/utils/easing.hpp
+        include/utils/flex.hpp
+        include/utils/fontstash.hpp
         include/utils/FSM.hpp
         include/utils/GJK.hpp
         include/utils/Heap.hpp
@@ -84,19 +88,19 @@ set(INCLUDES_
         include/utils/LockLessMultiReadPipe.hpp
         include/utils/Macros.hpp
         include/utils/Memory.hpp
-        include/utils/Optional.hpp
+        include/utils/optional.hpp
         include/utils/Profile.hpp
         include/utils/Robinhood.hpp
         include/utils/Scene.hpp
         include/utils/Spatial.hpp
         include/utils/TaskScheduler.hpp
         include/utils/Tween.hpp
+        include/utils/VG.hpp
         )
 set(SOURCES_
-        src/main/main.cpp
-
-        # Generator
-        src/Generator/CellAutomata.cpp
+        src/main.cpp
+        src/CellAutomata.cpp
+        src/DebugDraw.cpp
 
         # utils
         src/utils/gjk/gjk.cpp
@@ -110,6 +114,7 @@ set(SOURCES_
         src/utils/Scene.cpp
         src/utils/TaskScheduler.cpp
         src/utils/Tween.cpp
+        src/utils/VG.cpp
 
         # nanovg
         modules/nanovgxc/src/nanovg.c
@@ -120,6 +125,8 @@ set(SOURCES_
         ${imgui_SOURCE_DIR}/imgui_draw.cpp
         ${imgui_SOURCE_DIR}/imgui_tables.cpp
         ${imgui_SOURCE_DIR}/imgui_widgets.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 
         # libtess2
         ${libtess2_SOURCE_DIR}/Source/bucketalloc.c

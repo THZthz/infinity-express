@@ -1195,17 +1195,17 @@ ie::gjk::PointInPolygon(vec2 point, const Polygon* shape)
 	return output.distance <= shape->radius;
 }
 
-AABB
+Box
 ie::gjk::ComputeCircleAABB(const Circle* shape, const Xf2d& xf)
 {
 	vec2 p = TransformPoint(xf, shape->point);
 	float r = shape->radius;
 
-	AABB aabb = {{p.x - r, p.y - r}, {p.x + r, p.y + r}};
+	Box aabb = {{p.x - r, p.y - r}, {p.x + r, p.y + r}};
 	return aabb;
 }
 
-AABB
+Box
 ie::gjk::ComputeCapsuleAABB(const Capsule* shape, const Xf2d& xf)
 {
 	vec2 v1 = TransformPoint(xf, shape->point1);
@@ -1215,11 +1215,11 @@ ie::gjk::ComputeCapsuleAABB(const Capsule* shape, const Xf2d& xf)
 	vec2 lower = SubV(MinV(v1, v2), r);
 	vec2 upper = AddV(MaxV(v1, v2), r);
 
-	AABB aabb = {lower, upper};
+	Box aabb = {lower, upper};
 	return aabb;
 }
 
-AABB
+Box
 ie::gjk::ComputePolygonAABB(const Polygon* shape, const Xf2d& xf)
 {
 	assert(shape->count > 0);
@@ -1237,11 +1237,11 @@ ie::gjk::ComputePolygonAABB(const Polygon* shape, const Xf2d& xf)
 	lower = SubV(lower, r);
 	upper = AddV(upper, r);
 
-	AABB aabb = {lower, upper};
+	Box aabb = {lower, upper};
 	return aabb;
 }
 
-AABB
+Box
 ie::gjk::ComputeSegmentAABB(const Segment* shape, const Xf2d& xf)
 {
 	vec2 v1 = TransformPoint(xf, shape->p1);
@@ -1250,7 +1250,7 @@ ie::gjk::ComputeSegmentAABB(const Segment* shape, const Xf2d& xf)
 	vec2 lower = MinV(v1, v2);
 	vec2 upper = MaxV(v1, v2);
 
-	AABB aabb = {lower, upper};
+	Box aabb = {lower, upper};
 	return aabb;
 }
 
@@ -1326,7 +1326,7 @@ ie::gjk::ComputeHull(const vec2* points, int32_t count)
 
 	count = Min(count, MAX_POLY_VERTS);
 
-	AABB aabb = {{FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX}};
+	Box aabb = {{FLT_MAX, FLT_MAX}, {-FLT_MAX, -FLT_MAX}};
 
 	// Perform aggressive point welding. First point always remains.
 	// Also compute the bounding box for later.
@@ -1363,7 +1363,7 @@ ie::gjk::ComputeHull(const vec2* points, int32_t count)
 	}
 
 	// Find an extreme point as the first point on the hull
-	vec2 c = aabb.Center();
+	vec2 c = aabb.center();
 	int32_t f1 = 0;
 	float dsq1 = DistSqV(c, ps[f1]);
 	for (int32_t i = 1; i < n; ++i)

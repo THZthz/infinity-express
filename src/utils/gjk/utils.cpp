@@ -107,10 +107,10 @@ ie::gjk::MakeCapsule(vec2 p1, vec2 p2, float radius)
 }
 
 gjk::Polygon
-ie::gjk::MakeAABB(const AABB &aabb)
+ie::gjk::MakeAABB(const Box &aabb)
 {
-	vec2 ex = aabb.Extents();
-	return MakeOffsetBox(ex.x, ex.y, aabb.Center(), 0.f);
+	vec2 ex = aabb.extents();
+	return MakeOffsetBox(ex.x, ex.y, aabb.center(), 0.f);
 }
 
 bool

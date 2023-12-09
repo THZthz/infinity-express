@@ -53,6 +53,8 @@
 #	include <string_view>
 #endif
 
+#include "utils/Memory.hpp"
+
 // all non-argument macros should use this facility. See
 // https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
 #define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
@@ -190,7 +192,7 @@
 #	define ROBIN_HOOD_PRIVATE_DEFINITION_NODISCARD()
 #endif
 
-namespace robin_hood {
+namespace ie {
 
 #if ROBIN_HOOD(CXX) >= ROBIN_HOOD(CXX14)
 #	define ROBIN_HOOD_STD std
@@ -394,7 +396,7 @@ public:
 		{
 			T* tmp = *mListForFree;
 
-			std::free(mListForFree);
+			_free(mListForFree);
 			mListForFree = reinterpret_cast_no_cast_align_warning<T**>(tmp);
 		}
 		mHead = nullptr;
@@ -432,7 +434,7 @@ public:
 		{
 			// not enough data for at least one element. Free and return.
 
-			std::free(ptr);
+			_free(ptr);
 		}
 		else { add(ptr, numBytes); }
 	}
@@ -503,7 +505,7 @@ private:
 
 		// alloc new memory: [prev |T, T, ... T]
 		size_t const bytes = ALIGNMENT + ALIGNED_SIZE * numElementsToAlloc;
-		add(assertNotNull<std::bad_alloc>(std::malloc(bytes)), bytes);
+		add(assertNotNull<std::bad_alloc>(_malloc(bytes)), bytes);
 		return mHead;
 	}
 
@@ -540,7 +542,7 @@ struct NodeAllocator<T, MinSize, MaxSize, true>
 	// we are not using the data, so just free it.
 	void addOrFree(void* ptr, size_t ROBIN_HOOD_UNUSED(numBytes) /*unused*/) noexcept
 	{
-		std::free(ptr);
+		_free(ptr);
 	}
 };
 
@@ -974,8 +976,7 @@ class Table
           typename std::conditional<
               std::is_void<T>::value,
               Key,
-              robin_hood::pair<typename std::conditional<IsFlat, Key, Key const>::type, T>>::
-              type,
+              ie::pair<typename std::conditional<IsFlat, Key, Key const>::type, T>>::type,
           4,
           16384,
           IsFlat>
@@ -992,7 +993,7 @@ public:
 	using value_type = typename std::conditional<
 	    is_set,
 	    Key,
-	    robin_hood::pair<typename std::conditional<is_flat, Key, Key const>::type, T>>::type;
+	    ie::pair<typename std::conditional<is_flat, Key, Key const>::type, T>>::type;
 	using size_type = size_t;
 	using hasher = Hash;
 	using key_equal = KeyEqual;
@@ -1208,7 +1209,7 @@ private:
 		return k;
 	}
 
-	// in case we have non-void mapped_type, we have a standard robin_hood::pair
+	// in case we have non-void mapped_type, we have a standard ie::pair
 	template <typename Q = mapped_type>
 	ROBIN_HOOD(NODISCARD)
 	typename std::enable_if<!std::is_void<Q>::value, key_type const&>::type
@@ -1710,7 +1711,7 @@ public:
 
 			mHashMultiplier = o.mHashMultiplier;
 			mKeyVals = static_cast<Node*>(
-			    detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+			    detail::assertNotNull<std::bad_alloc>(_malloc(numBytesTotal)));
 			// no need for calloc because clonData does memcpy
 			mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
 			mNumElements = o.mNumElements;
@@ -1764,13 +1765,13 @@ public:
 			{
 				// only deallocate if we actually have data!
 
-				std::free(mKeyVals);
+				_free(mKeyVals);
 			}
 
 			auto const numElementsWithBuffer = calcNumElementsWithBuffer(o.mMask + 1);
 			auto const numBytesTotal = calcNumBytesTotal(numElementsWithBuffer);
 			mKeyVals = static_cast<Node*>(
-			    detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+			    detail::assertNotNull<std::bad_alloc>(_malloc(numBytesTotal)));
 
 			// no need for calloc here because cloneData performs a memcpy.
 			mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
@@ -2229,30 +2230,26 @@ public:
 		if (newSize < mMask + 1) { rehashPowerOfTwo(newSize, true); }
 	}
 
-	size_type size() const noexcept
-	{ // NOLINT(modernize-use-nodiscard)
-
+	size_type size() const noexcept // NOLINT(modernize-use-nodiscard)
+	{
 		return mNumElements;
 	}
 
-	size_type max_size() const noexcept
-	{ // NOLINT(modernize-use-nodiscard)
-
+	size_type max_size() const noexcept // NOLINT(modernize-use-nodiscard)
+	{
 		return static_cast<size_type>(-1);
 	}
 
 	ROBIN_HOOD(NODISCARD) bool empty() const noexcept { return 0 == mNumElements; }
 
-	float max_load_factor() const noexcept
-	{ // NOLINT(modernize-use-nodiscard)
-
+	float max_load_factor() const noexcept // NOLINT(modernize-use-nodiscard)
+	{
 		return MaxLoadFactor100 / 100.0F;
 	}
 
 	// Average number of elements per bucket. Since we allow only 1 per bucket
-	float load_factor() const noexcept
-	{ // NOLINT(modernize-use-nodiscard)
-
+	float load_factor() const noexcept // NOLINT(modernize-use-nodiscard)
+	{
 		return static_cast<float>(size()) / static_cast<float>(mMask + 1);
 	}
 
@@ -2368,7 +2365,7 @@ private:
 			if (oldKeyVals != reinterpret_cast_no_cast_align_warning<Node*>(&mMask))
 			{
 				// don't destroy old data: put it into the pool instead
-				if (forceFree) { std::free(oldKeyVals); }
+				if (forceFree) { _free(oldKeyVals); }
 				else
 				{
 					DataPool::addOrFree(
@@ -2381,7 +2378,7 @@ private:
 	ROBIN_HOOD(NOINLINE) void throwOverflowError() const
 	{
 #if ROBIN_HOOD(HAS_EXCEPTIONS)
-		throw std::overflow_error("robin_hood::map overflow");
+		throw std::overflow_error("ie::map overflow");
 #else
 		abort();
 #endif
@@ -2460,7 +2457,7 @@ private:
 		// malloc & zero mInfo. Faster than calloc everything.
 		auto const numBytesTotal = calcNumBytesTotal(numElementsWithBuffer);
 		mKeyVals = reinterpret_cast<Node*>(
-		    detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+		    detail::assertNotNull<std::bad_alloc>(_malloc(numBytesTotal)));
 		mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
 		std::memset(mInfo, 0, numBytesTotal - numElementsWithBuffer * sizeof(Node));
 
@@ -2621,7 +2618,7 @@ private:
 		// [-Werror=free-nonheap-object]
 		if (mKeyVals != reinterpret_cast_no_cast_align_warning<Node*>(&mMask))
 		{
-			std::free(mKeyVals);
+			_free(mKeyVals);
 		}
 	}
 
@@ -2675,9 +2672,9 @@ template <
     typename KeyEqual = std::equal_to<Key>,
     size_t MaxLoadFactor100 = 80>
 using unordered_map = detail::Table<
-    sizeof(robin_hood::pair<Key, T>) <= sizeof(size_t) * 6 &&
-        std::is_nothrow_move_constructible<robin_hood::pair<Key, T>>::value &&
-        std::is_nothrow_move_assignable<robin_hood::pair<Key, T>>::value,
+    sizeof(ie::pair<Key, T>) <= sizeof(size_t) * 6 &&
+        std::is_nothrow_move_constructible<ie::pair<Key, T>>::value &&
+        std::is_nothrow_move_assignable<ie::pair<Key, T>>::value,
     MaxLoadFactor100,
     Key,
     T,
@@ -2714,6 +2711,6 @@ using unordered_set = detail::Table<
     Hash,
     KeyEqual>;
 
-} // namespace robin_hood
+} // namespace ie
 
 #endif

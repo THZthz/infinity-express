@@ -1,0 +1,4 @@
+#ifndef IE_FONT_STASH_HPP
+#define IE_FONT_STASH_HPP
+
+#endif // IE_FONT_STASH_HPP

@@ -22,7 +22,6 @@ struct Interval final // Make sure this struct is trivial.
 	using interval_type = typename std::decay<IntervalType>::type;
 	using value_type = typename std::decay<ValueType>::type;
 
-
 	template <
 	    typename I,
 	    typename V = ValueType,
@@ -33,7 +32,6 @@ struct Interval final // Make sure this struct is trivial.
 	Interval(I a, I b, V val = {}) : low(Min(a, b)), high(Max(a, b)), value(val)
 	{
 	}
-
 
 	template <
 	    typename I,
@@ -49,7 +47,6 @@ struct Interval final // Make sure this struct is trivial.
 	{
 	}
 
-
 	template <
 	    typename I,
 	    typename V = ValueType,
@@ -61,7 +58,6 @@ struct Interval final // Make sure this struct is trivial.
 	    : low(std::forward<I>(a < b ? a : b)), high(std::forward<I>(b < a ? a : b)), value(val)
 	{
 	}
-
 
 	template <
 	    typename I,
@@ -75,7 +71,6 @@ struct Interval final // Make sure this struct is trivial.
 	{
 	}
 
-
 	template <
 	    typename V = ValueType,
 	    typename =
@@ -84,7 +79,6 @@ struct Interval final // Make sure this struct is trivial.
 	    : Interval(std::get<0>(interval), std::get<1>(interval), val)
 	{
 	}
-
 
 	template <
 	    typename V = ValueType,
@@ -118,7 +112,6 @@ public:
 	using Intervals = std::vector<Interval>;
 	using size_type = std::size_t;
 
-
 	IntervalTree() : m_nill(new Node()), m_root(m_nill) { }
 
 	template <typename Container>
@@ -130,7 +123,6 @@ public:
 	IntervalTree &operator=(const IntervalTree &other);
 	IntervalTree &operator=(IntervalTree &&other) noexcept;
 	virtual ~IntervalTree();
-
 
 	void Swap(IntervalTree &other) noexcept;
 	bool Insert(Interval interval);
@@ -153,7 +145,6 @@ public:
 	size_type Size() const;
 	void Clear();
 
-
 private:
 	enum class Color : char
 	{
@@ -167,7 +158,6 @@ private:
 		Right
 	};
 
-
 	struct Appender final
 	{
 		template <typename Interval>
@@ -178,7 +168,6 @@ private:
 
 		Intervals &intervals;
 	};
-
 
 	struct Counter final
 	{
@@ -191,7 +180,6 @@ private:
 		size_type &count;
 	};
 
-
 	struct HighComparator final
 	{
 		template <typename T>
@@ -200,7 +188,6 @@ private:
 			return (lhs.high < rhs.high);
 		}
 	};
-
 
 	struct Node
 	{

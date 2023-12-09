@@ -25,17 +25,18 @@
 #include <algorithm>
 #include <limits>
 #include <cstdint>
+/*----------------------------------------------------------------------------*/
 
 namespace ie {
-static inline void*
+
+inline void*
 _malloc(size_t size)
 {
 	void* ptr = malloc(size);
-	assert(ptr);
 	return ptr;
 }
 
-static inline void*
+inline void*
 _realloc(void* ptr, size_t size)
 {
 	void* n_ptr = realloc(ptr, size);
@@ -43,301 +44,27 @@ _realloc(void* ptr, size_t size)
 	return n_ptr;
 }
 
-static inline void
+inline void
 _free(void* ptr)
 {
 	free(ptr);
 }
 
-static inline void*
+inline void*
 _calloc(size_t n, size_t size)
 {
 	void* ptr = calloc(n, size);
 	assert(ptr);
 	return ptr;
 }
+
 } // namespace ie
+/*----------------------------------------------------------------------------*/
 
 namespace ie {
 
-uint64_t GetSystemMemory();
-uint64_t GetTotalMemoryUsed();
-uint64_t GetProcessMemoryUsed();
-uint64_t GetPhysicalMemory();
-
-// NOLINTBEGIN(modernize-use-nodiscard)
-/// \brief BlockAllocator is mostly compliant with the C++ Standard Library allocators.
-/// This means you can use it with <b>allocator_traits</b> http://www.cplusplus.com/reference/memory/allocator_traits/
-/// or just like you would use the <b>std::allocator</b> http://www.cplusplus.com/reference/memory/allocator/.
-/// There are some differences though:<br />
-/// 	- Cannot allocate multiple objects with a single call to allocate and will
-/// 	  simply ignore the count value you pass to the allocate/deallocate function.
-/// 	  Fixing this is not too hard, but it would deteriorate performance and create memory
-/// 	  fragmentation.
-///		- This is <i>NOT</i> thread safe. You should create a different instance for each thread
-/// 	  (suggested) or find some way of scheduling queries to the allocator.
-///
-/// <b>T</b> can be any object, while <b>BlockSize</b> needs to be at least twice the size of <b>T</b>.
-///
-/// <h3>Pick correct BlockSize</h3>
-/// BlockSize is the size of the chunks in bytes the allocator will ask from the system.
-/// It has to be large enough to contain at least two pointers or two T objects,
-/// depending on which is bigger.
-///
-/// Picking the correct BlockSize is essential for good performance. I suggest you pick a power
-/// of two, which may decrease memory fragmentation depending on your system. Also, make sure
-/// that BlockSize is at least several hundred times larger than the size of T for maximum
-/// performance. The idea is, the greater the BlockSize, the less calls to malloc the library
-/// will make. However, picking a size too big might increase memory usage unnecessarily and
-/// actually decrease the performance because malloc may need to make many system calls.
-///
-/// For objects that contain several pointers, the default size of 4096 bytes should be good.
-/// If you need bigger object, you may need to time your code with larger sizes and see what
-/// works best. Unless you will be maintaining many BlockAllocator objects, I do not think you need
-/// to go smaller than 4096 bytes. Though if you are working on a more limited platform (that
-/// has a compiler with C++11 support), you may need to go for smaller values.
-template <typename T, size_t BlockSize = 4096>
-class BlockAllocator
-{
-public:
-	/* Member types */
-	using value_type = T;
-	using pointer = T*;
-	using reference = T&;
-	using const_pointer = const T*;
-	using const_reference = const T&;
-	using size_type = size_t;
-	using difference_type = ptrdiff_t;
-	using propagate_on_container_copy_assignment = int;
-	using propagate_on_container_move_assignment = int;
-	using propagate_on_container_swap = int;
-
-	template <typename U>
-	struct rebind
-	{
-		using other = BlockAllocator<U>;
-	};
-
-	/* Member functions */
-	BlockAllocator() noexcept;
-	BlockAllocator(const BlockAllocator& memoryPool) noexcept;
-	BlockAllocator(BlockAllocator&& memoryPool) noexcept;
-	template <class U>
-	explicit BlockAllocator(const BlockAllocator<U>& memoryPool) noexcept;
-
-	~BlockAllocator() noexcept;
-
-	BlockAllocator& operator=(const BlockAllocator& memoryPool) = delete;
-	BlockAllocator& operator=(BlockAllocator&& memoryPool) noexcept;
-
-	pointer address(reference x) const noexcept;
-	const_pointer address(const_reference x) const noexcept;
-
-	// Can only allocate one object at a time. n and hint are ignored
-	pointer allocate(size_type n, const_pointer hint);
-	void deallocate(pointer p, size_type n);
-
-	size_type max_size() const noexcept;
-
-	template <class U, class... Args>
-	void construct(U* p, Args&&... args);
-	template <class U>
-	void destroy(U* p);
-
-	template <class... Args>
-	pointer newElement(Args&&... args);
-	void deleteElement(pointer p);
-
-private:
-	union Slot
-	{
-		value_type element;
-		Slot* next;
-	};
-
-	Slot *mCurrentBlock, mCurrentSlot, mLastSlot, mFreeSlots;
-
-	size_type PadPointer(const char* p, size_type align) const noexcept;
-	void AllocateBlock();
-
-	static_assert(BlockSize >= 2 * sizeof(Slot), "BlockSize too small.");
-};
-// NOLINTEND(modernize-use-nodiscard)
-
-template <typename T, size_t BlockSize>
-inline typename BlockAllocator<T, BlockSize>::size_type
-BlockAllocator<T, BlockSize>::PadPointer(const char* p, size_type align) const noexcept
-{
-	auto result = reinterpret_cast<uintptr_t>(p);
-	return ((align - result) % align);
-}
-
-template <typename T, size_t BlockSize>
-BlockAllocator<T, BlockSize>::BlockAllocator() noexcept
-{
-	mCurrentBlock = nullptr;
-	mCurrentSlot.next = nullptr;
-	mLastSlot.next = nullptr;
-	mFreeSlots.next = nullptr;
-}
-
-template <typename T, size_t BlockSize>
-BlockAllocator<T, BlockSize>::BlockAllocator(const BlockAllocator& memoryPool) noexcept
-    : BlockAllocator()
-{
-	(void)memoryPool;
-}
-
-template <typename T, size_t BlockSize>
-BlockAllocator<T, BlockSize>::BlockAllocator(BlockAllocator&& memoryPool) noexcept
-{
-	mCurrentBlock = memoryPool.mCurrentBlock;
-	memoryPool.mCurrentBlock = nullptr;
-	mCurrentSlot = memoryPool.mCurrentSlot;
-	mLastSlot = memoryPool.mLastSlot;
-	mFreeSlots = memoryPool.freeSlots;
-}
-
-template <typename T, size_t BlockSize>
-template <class U>
-BlockAllocator<T, BlockSize>::BlockAllocator(const BlockAllocator<U>& memoryPool) noexcept
-    : BlockAllocator()
-{
-	(void)memoryPool;
-}
-
-template <typename T, size_t BlockSize>
-BlockAllocator<T, BlockSize>&
-BlockAllocator<T, BlockSize>::operator=(BlockAllocator&& memoryPool) noexcept
-{
-	if (this != &memoryPool)
-	{
-		std::swap(mCurrentBlock, memoryPool.mCurrentBlock);
-		mCurrentSlot = memoryPool.mCurrentSlot;
-		mLastSlot = memoryPool.mLastSlot;
-		mFreeSlots = memoryPool.freeSlots;
-	}
-	return *this;
-}
-
-template <typename T, size_t BlockSize>
-BlockAllocator<T, BlockSize>::~BlockAllocator() noexcept
-{
-	Slot* curr = mCurrentBlock;
-	while (curr != nullptr)
-	{
-		Slot* prev = curr->next;
-		operator delete(reinterpret_cast<void*>(curr));
-		curr = prev;
-	}
-}
-
-template <typename T, size_t BlockSize>
-inline typename BlockAllocator<T, BlockSize>::pointer
-BlockAllocator<T, BlockSize>::address(reference x) const noexcept
-{
-	return &x;
-}
-
-template <typename T, size_t BlockSize>
-inline typename BlockAllocator<T, BlockSize>::const_pointer
-BlockAllocator<T, BlockSize>::address(const_reference x) const noexcept
-{
-	return &x;
-}
-
-template <typename T, size_t BlockSize>
-void
-BlockAllocator<T, BlockSize>::AllocateBlock()
-{
-	// Allocate space for the new block and store a pointer to the previous one
-	char* newBlock = reinterpret_cast<char*>(operator new(BlockSize));
-	reinterpret_cast<Slot*>(newBlock)->next = mCurrentBlock;
-	mCurrentBlock = reinterpret_cast<Slot*>(newBlock);
-	// Pad block body to satisfy the alignment requirements for elements
-	char* body = newBlock + sizeof(Slot*);
-	size_type bodyPadding = PadPointer(body, alignof(Slot));
-	mCurrentSlot = reinterpret_cast<Slot*>(body + bodyPadding);
-	mLastSlot = reinterpret_cast<Slot*>(newBlock + BlockSize - sizeof(Slot) + 1);
-}
-
-template <typename T, size_t BlockSize>
-inline typename BlockAllocator<T, BlockSize>::pointer
-BlockAllocator<T, BlockSize>::allocate(size_type n, const_pointer hint)
-{
-	(void)n;
-	(void)hint;
-	if (mFreeSlots != nullptr)
-	{
-		auto result = reinterpret_cast<pointer>(mFreeSlots);
-		mFreeSlots = mFreeSlots->next;
-		return result;
-	}
-	else
-	{
-		if (mCurrentSlot >= mLastSlot) AllocateBlock();
-		return reinterpret_cast<pointer>(mCurrentSlot++);
-	}
-}
-
-template <typename T, size_t BlockSize>
-inline void
-BlockAllocator<T, BlockSize>::deallocate(pointer p, size_type n)
-{
-	if (p != nullptr)
-	{
-		reinterpret_cast<Slot*>(p)->next = mFreeSlots.next;
-		mFreeSlots.next = reinterpret_cast<Slot*>(p);
-	}
-}
-
-template <typename T, size_t BlockSize>
-inline typename BlockAllocator<T, BlockSize>::size_type
-BlockAllocator<T, BlockSize>::max_size() const noexcept
-{
-	size_type maxBlocks = -1 / BlockSize;
-	return (BlockSize - sizeof(char*)) / sizeof(Slot) * maxBlocks;
-}
-
-template <typename T, size_t BlockSize>
-template <class U, class... Args>
-inline void
-BlockAllocator<T, BlockSize>::construct(U* p, Args&&... args)
-{
-	new (p) U(std::forward<Args>(args)...);
-}
-
-template <typename T, size_t BlockSize>
-template <class U>
-inline void
-BlockAllocator<T, BlockSize>::destroy(U* p)
-{
-	p->~U();
-}
-
-template <typename T, size_t BlockSize>
-template <class... Args>
-inline typename BlockAllocator<T, BlockSize>::pointer
-BlockAllocator<T, BlockSize>::newElement(Args&&... args)
-{
-	pointer result = allocate();
-	construct<value_type>(result, std::forward<Args>(args)...);
-	return result;
-}
-
-template <typename T, size_t BlockSize>
-inline void
-BlockAllocator<T, BlockSize>::deleteElement(pointer p)
-{
-	if (p != nullptr)
-	{
-		p->~value_type();
-		deallocate(p);
-	}
-}
-
 inline uint64_t
-GetSystemMemory()
+getSystemMemory()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
 	MEMORYSTATUSEX memInfo;
@@ -377,7 +104,7 @@ GetSystemMemory()
 }
 
 inline uint64_t
-GetTotalMemoryUsed()
+getTotalMemoryUsed()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
 	MEMORYSTATUSEX memInfo;
@@ -420,7 +147,7 @@ GetTotalMemoryUsed()
 }
 
 inline uint64_t
-GetProcessMemoryUsed()
+getProcessMemoryUsed()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
 	PROCESS_MEMORY_COUNTERS_EX pmc;
@@ -459,7 +186,7 @@ GetProcessMemoryUsed()
 }
 
 inline uint64_t
-GetPhysicalMemory()
+getPhysicalMemory()
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
 	MEMORYSTATUSEX memInfo;
@@ -480,5 +207,250 @@ GetPhysicalMemory()
 }
 
 } // namespace ie
+/*----------------------------------------------------------------------------*/
+namespace ie {
+
+template <typename T, size_t BlockSize = 4096>
+class block_allocator
+{
+public:
+	using value_type = T;
+	using pointer = T*;
+	using reference = T&;
+	using const_pointer = const T*;
+	using const_reference = const T&;
+	using size_type = size_t;
+	using difference_type = ptrdiff_t;
+	using propagate_on_container_copy_assignment = std::false_type;
+	using propagate_on_container_move_assignment = std::true_type;
+	using propagate_on_container_swap = std::true_type;
+
+	template <typename U>
+	struct rebind
+	{
+		typedef block_allocator<U> other;
+	};
+
+	block_allocator() noexcept;
+	block_allocator(const block_allocator& memoryPool) noexcept;
+	block_allocator(block_allocator&& memoryPool) noexcept;
+	template <class U>
+	explicit block_allocator(const block_allocator<U>& memoryPool) noexcept;
+
+	~block_allocator() noexcept;
+
+	block_allocator& operator=(const block_allocator& memoryPool) = delete;
+	block_allocator& operator=(block_allocator&& memoryPool) noexcept;
+
+	pointer address(reference x) const noexcept;
+	const_pointer address(const_reference x) const noexcept;
+
+	// can only allocate one object at a time. n and hint are ignored
+	pointer allocate(size_type n = 1, const_pointer hint = nullptr);
+	void deallocate(pointer p, size_type n = 1);
+
+	size_type max_size() const noexcept;
+
+	template <class U, class... Args>
+	void construct(U* p, Args&&... args);
+	template <class U>
+	void destroy(U* p);
+
+	template <class... Args>
+	pointer new_element(Args&&... args);
+	void delete_element(pointer p);
+
+private:
+	union Slot
+	{
+		value_type element;
+		Slot* next;
+	};
+
+	typedef char* data_pointer;
+	typedef Slot slot_type;
+	typedef Slot* slot_pointer;
+
+	slot_pointer m_currentBlock;
+	slot_pointer m_currentSlot;
+	slot_pointer m_lastSlot;
+	slot_pointer m_freeSlots;
+
+	size_type pad_pointer(data_pointer p, size_type align) const noexcept;
+	void allocateBlock();
+
+	static_assert(BlockSize >= 2 * sizeof(slot_type), "BlockSize too small.");
+};
+
+template <typename T, size_t BlockSize>
+inline typename block_allocator<T, BlockSize>::size_type
+block_allocator<T, BlockSize>::pad_pointer(data_pointer p, size_type align) const noexcept
+{
+	auto result = reinterpret_cast<uintptr_t>(p);
+	return ((align - result) % align);
+}
+
+template <typename T, size_t BlockSize>
+block_allocator<T, BlockSize>::block_allocator() noexcept
+{
+	m_currentBlock = nullptr;
+	m_currentSlot = nullptr;
+	m_lastSlot = nullptr;
+	m_freeSlots = nullptr;
+}
+
+template <typename T, size_t BlockSize>
+block_allocator<T, BlockSize>::block_allocator(const block_allocator& memoryPool) noexcept
+    : block_allocator()
+{
+}
+
+template <typename T, size_t BlockSize>
+block_allocator<T, BlockSize>::block_allocator(block_allocator&& memoryPool) noexcept
+{
+	m_currentBlock = memoryPool.m_currentBlock;
+	memoryPool.m_currentBlock = nullptr;
+	m_currentSlot = memoryPool.m_currentSlot;
+	m_lastSlot = memoryPool.m_lastSlot;
+	m_freeSlots = memoryPool.freeSlots;
+}
+
+template <typename T, size_t BlockSize>
+template <class U>
+block_allocator<T, BlockSize>::block_allocator(const block_allocator<U>& memoryPool) noexcept
+    : block_allocator()
+{
+}
+
+template <typename T, size_t BlockSize>
+block_allocator<T, BlockSize>&
+block_allocator<T, BlockSize>::operator=(block_allocator&& memoryPool) noexcept
+{
+	if (this != &memoryPool)
+	{
+		std::swap(m_currentBlock, memoryPool.m_currentBlock);
+		m_currentSlot = memoryPool.m_currentSlot;
+		m_lastSlot = memoryPool.m_lastSlot;
+		m_freeSlots = memoryPool.freeSlots;
+	}
+	return *this;
+}
+
+template <typename T, size_t BlockSize>
+block_allocator<T, BlockSize>::~block_allocator() noexcept
+{
+	slot_pointer curr = m_currentBlock;
+	while (curr != nullptr)
+	{
+		slot_pointer prev = curr->next;
+		operator delete(reinterpret_cast<void*>(curr));
+		curr = prev;
+	}
+}
+
+template <typename T, size_t BlockSize>
+inline typename block_allocator<T, BlockSize>::pointer
+block_allocator<T, BlockSize>::address(reference x) const noexcept
+{
+	return &x;
+}
+
+template <typename T, size_t BlockSize>
+inline typename block_allocator<T, BlockSize>::const_pointer
+block_allocator<T, BlockSize>::address(const_reference x) const noexcept
+{
+	return &x;
+}
+
+template <typename T, size_t BlockSize>
+void
+block_allocator<T, BlockSize>::allocateBlock()
+{
+	// Allocate space for the new block and store a pointer to the previous one
+	auto newBlock = reinterpret_cast<data_pointer>(operator new(BlockSize));
+	reinterpret_cast<slot_pointer>(newBlock)->next = m_currentBlock;
+	m_currentBlock = reinterpret_cast<slot_pointer>(newBlock);
+	// Pad block body to satisfy the alignment requirements for elements
+	data_pointer body = newBlock + sizeof(slot_pointer);
+	size_type bodyPadding = pad_pointer(body, alignof(slot_type));
+	m_currentSlot = reinterpret_cast<slot_pointer>(body + bodyPadding);
+	m_lastSlot = reinterpret_cast<slot_pointer>(newBlock + BlockSize - sizeof(slot_type) + 1);
+}
+
+template <typename T, size_t BlockSize>
+inline typename block_allocator<T, BlockSize>::pointer
+block_allocator<T, BlockSize>::allocate(size_type n, const_pointer hint)
+{
+	if (m_freeSlots != nullptr)
+	{
+		auto result = reinterpret_cast<pointer>(m_freeSlots);
+		m_freeSlots = m_freeSlots->next;
+		return result;
+	}
+	else
+	{
+		if (m_currentSlot >= m_lastSlot) allocateBlock();
+		return reinterpret_cast<pointer>(m_currentSlot++);
+	}
+}
+
+template <typename T, size_t BlockSize>
+inline void
+block_allocator<T, BlockSize>::deallocate(pointer p, size_type n)
+{
+	if (p != nullptr)
+	{
+		reinterpret_cast<slot_pointer>(p)->next = m_freeSlots;
+		m_freeSlots = reinterpret_cast<slot_pointer>(p);
+	}
+}
+
+template <typename T, size_t BlockSize>
+inline typename block_allocator<T, BlockSize>::size_type
+block_allocator<T, BlockSize>::max_size() const noexcept
+{
+	size_type maxBlocks = -1 / BlockSize;
+	return (BlockSize - sizeof(data_pointer)) / sizeof(slot_type) * maxBlocks;
+}
+
+template <typename T, size_t BlockSize>
+template <class U, class... Args>
+inline void
+block_allocator<T, BlockSize>::construct(U* p, Args&&... args)
+{
+	new (p) U(std::forward<Args>(args)...);
+}
+
+template <typename T, size_t BlockSize>
+template <class U>
+inline void
+block_allocator<T, BlockSize>::destroy(U* p)
+{
+	p->~U();
+}
+
+template <typename T, size_t BlockSize>
+template <class... Args>
+inline typename block_allocator<T, BlockSize>::pointer
+block_allocator<T, BlockSize>::new_element(Args&&... args)
+{
+	pointer result = allocate();
+	construct<value_type>(result, std::forward<Args>(args)...);
+	return result;
+}
+
+template <typename T, size_t BlockSize>
+inline void
+block_allocator<T, BlockSize>::delete_element(pointer p)
+{
+	if (p != nullptr)
+	{
+		p->~value_type();
+		deallocate(p);
+	}
+}
+
+} // namespace ie
+/*----------------------------------------------------------------------------*/
 
 #endif // IE_MEMORY_HPP

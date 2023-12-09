@@ -5,6 +5,7 @@
 #include <sstream>
 #include <iostream>
 #include <cstdint>
+#include <cstdlib>
 
 // implements nanovg
 #define FONS_SDF
@@ -22,24 +23,29 @@
 #include "utils/Color.hpp"
 #include "utils/TaskScheduler.hpp"
 #include "utils/Linear.hpp"
-#include "Physics/DebugDraw.hpp"
-#include "Physics/World.hpp"
-#include "Scenes/Main.hpp"
-#include "Generator/CellAutomata.hpp"
-#include "utils/Array.hpp"
+#include "utils/vector.hpp"
+#include "Main.hpp"
+#include "CellAutomata.hpp"
+
+#include "utils/tests/tests_Array.hpp"
+#include "utils/tests/tests_Memory.hpp"
+#include "utils/tests/tests_BitwiseEnum.hpp"
+#include "utils/tests/tests_Optional.hpp"
+
 
 int
 main()
 {
-	printf("Infinity Express v%s\n", INFINITY_EXPRESS_VERSION_STR);
-	printf("\tworking directory %s\n", INFINITY_EXPRESS_WORKING_DIR);
-	printf("\tc++ standard version: %ld\n", __cplusplus);
+	test_Array();
+	test_Memory();
+	test_BitwiseEnum();
+	test_optional();
 
 	//	App app;
 	//	app.start();
 
-	CellAutomata gen;
-	gen.generate();
+	//	CellAutomata gen;
+	//	gen.generate();
 
 
 	return EXIT_SUCCESS;

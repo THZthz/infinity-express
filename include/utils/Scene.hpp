@@ -15,12 +15,54 @@
 #include "nanovg_gl_utils.h"
 
 #include <glm/vec2.hpp>
+#include <glm/vec4.hpp>
 #include "glad/glad.h"
+#define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
 namespace ie {
 class Scene
 {
+public:
+	class Camera
+	{
+	public:
+		Camera();
+
+		void resetView();
+		glm::vec2 convertScreenToWorld(glm::vec2 screenPoint) const;
+		glm::vec2 convertWorldToScreen(glm::vec2 worldPoint) const;
+
+		glm::vec4 getBoundingBox() const;
+
+		/// Convert from world coordinates to normalized device coordinates.
+		/// http://www.songho.ca/opengl/gl_projectionmatrix.html
+		/// This also includes the view transform
+		/// \param m 4x4 projection matrix
+		void buildProjectionMatrix(float *m, float zBias = 1) const;
+
+		void setSize(int width, int height);
+		void setCenter(float x, float y);
+		void setZoom(float zoom);
+
+		int getWidth() const;
+		int getHeight() const;
+		float getZoom() const;
+		const glm::vec2 &getCenter() const;
+
+		void translate(float x, float y);
+		void scale(float s, float x, float y);
+
+	private:
+		glm::vec2 m_center{};
+		float m_zoom = 1.f;
+		int32_t m_width = 0;
+		int32_t m_height = 0;
+
+		float m_viewHeight = 20.f;
+	};
+
+
 public:
 	Scene(const std::string &name, int width, int height);
 	~Scene();
@@ -79,53 +121,13 @@ public:
 	NVGcontext *getVg() const { return m_vg; }
 	float getFreq() const { return m_hertz; }
 	void setFreq(float freq) { m_hertz = freq; }
-	const glm::vec2 &getTranslation() const { return m_translation; }
-	float getScale() const { return m_scale; }
-	float getRotation() const { return m_rotation; }
-	const float *getTransform() const { return m_transform; }
-	const float *getInverseTransform() const { return m_inverseTransform; }
 
-	void setTranslation(const glm::vec2 &trans)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_translation = trans;
-	}
+	int getWinWidth() const { return m_winWidth; }
+	int getWinHeight() const { return m_winHeight; }
+	int getFrameWidth() const { return m_frameWidth; }
+	int getFrameHeight() const { return m_frameHeight; }
 
-	void setScale(float scale)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_scale = scale;
-	}
-
-	void setTransX(float x)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_translation.x = x;
-	}
-
-	void setTransY(float y)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_translation.y = y;
-	}
-
-	void translate(float x, float y)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_translation.x += x;
-		m_translation.y += y;
-	}
-
-	void rotate(float rad)
-	{
-		m_shouldUpdateInvTransform = true;
-		m_rotation += rad;
-	}
-
-	/*----------------------------------------------------------------------------*/
-
-	glm::vec2 getPointer() const { return m_pointer; }
-	const glm::vec2 &getPointerWorld() const { return m_pointerWorld; }
+	Camera &getCamera() { return m_camera; }
 
 	/*----------------------------------------------------------------------------*/
 private:
@@ -151,21 +153,13 @@ private:
 protected:
 	std::string m_name;
 
-	glm::vec2 m_translation{0.f, 0.f};
-	float m_scale = 1.f;
-	float m_rotation{0.f}; // in radians
-	float m_transform[6];
-	float m_inverseTransform[6];
-	bool m_shouldUpdateInvTransform{false};
+	Camera m_camera;
 
-	glm::vec2 m_pointer{};
-	glm::vec2 m_pointerWorld{};
-
-	double m_accumulator{};
-	double m_prevTime{};
-	float m_fps{};
-	float m_hertz{60}; // game logic update rate.
-	float m_delta{};
+	float m_frameTime = 0.f;
+	int32_t m_frame = 0;
+	float m_prevTime = 0.f;
+	float m_accumulator = 0.f;
+	float m_hertz = 80.f; // game logic update rate
 
 	bool m_preloaded = false;
 	bool m_running = false;
@@ -175,6 +169,9 @@ protected:
 	NVGcontext *m_vg = nullptr;
 	GLFWwindow *m_window;
 	NVGLUframebuffer *m_framebuffer = nullptr;
+
+	float m_windowScale = 1.f;
+	float m_framebufferScale = 1.f;
 
 	int m_winWidth;
 	int m_winHeight;
@@ -197,6 +194,9 @@ protected:
 	std::vector<MouseButtonCallback> m_mouseButtonCallbacks;
 	std::vector<ScrollCallback> m_scrollCallbacks;
 };
+
+
+
 } // namespace ie
 
 #endif // IE_SCENE_HPP

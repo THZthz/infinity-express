@@ -356,7 +356,7 @@ ie::gjk::RayCastPolygon(const RayCast* input, const Polygon* shape)
 }
 
 bool
-ie::gjk::RaycastAABB(const AABB &a, const vec2 &p1, const vec2 &p2, RayHit *output)
+ie::gjk::RaycastAABB(const Box &a, const vec2 &p1, const vec2 &p2, RayHit *output)
 {
 	// Radius not handled
 	output->normal = {0, 0};

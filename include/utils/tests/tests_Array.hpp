@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <cassert>
-#include "utils/Array.hpp"
+#include "utils/vector.hpp"
 
 using vector_int = ie::vector<int>;
 using vector_int_ea = ie::vector<int, ie::malloc_allocator<int>>;

@@ -370,7 +370,7 @@ Polygon MakeBox(float hx, float hy);
 Polygon MakeRoundedBox(float hx, float hy, float radius);
 Polygon MakeOffsetBox(float hx, float hy, vec2 center, float angle);
 Polygon MakeCapsule(vec2 p1, vec2 p2, float radius);
-Polygon MakeAABB(const AABB& aabb);
+Polygon MakeAABB(const Box& aabb);
 
 // Ray cast versus shape in shape local space. Initial overlap is treated as a miss.
 RayHit RayCastCircle(const RayCast* input, const Circle* shape);
@@ -379,10 +379,10 @@ RayHit RayCastSegment(const RayCast* input, const Segment* shape);
 RayHit RayCastPolygon(const RayCast* input, const Polygon* shape);
 
 /// These compute the bounding box in world space
-AABB ComputeCircleAABB(const Circle* shape, const Xf2d& xf);
-AABB ComputeCapsuleAABB(const Capsule* shape, const Xf2d& xf);
-AABB ComputePolygonAABB(const Polygon* shape, const Xf2d& xf);
-AABB ComputeSegmentAABB(const Segment* shape, const Xf2d& xf);
+Box ComputeCircleAABB(const Circle* shape, const Xf2d& xf);
+Box ComputeCapsuleAABB(const Capsule* shape, const Xf2d& xf);
+Box ComputePolygonAABB(const Polygon* shape, const Xf2d& xf);
+Box ComputeSegmentAABB(const Segment* shape, const Xf2d& xf);
 
 /// Compute the convex hull of a set of points. Returns an empty hull if it fails.
 /// Some failure cases:
@@ -455,7 +455,7 @@ bool RayIntersect(
 
 
 // From Real-time Collision Detection, p179.
-bool RaycastAABB(const AABB& a, const vec2& p1, const vec2& p2, RayHit* output);
+bool RaycastAABB(const Box& a, const vec2& p1, const vec2& p2, RayHit* output);
 
 //! @}
 } // namespace gjk

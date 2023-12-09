@@ -177,6 +177,8 @@ void fonsDrawDebug(FONScontext* s, float x, float y);
 
 #ifdef FONTSTASH_IMPLEMENTATION
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define FONS_NOTUSED(v) (void)sizeof(v)
 
 // basic idea of "summed" rendering is to add up values from glyph coverage bitmap to create a cumulative
@@ -914,7 +916,7 @@ int
 fonsAddFont(FONScontext* stash, const char* name, const char* path)
 {
 	char* path2 = malloc(strlen(path) + 1);
-	return fonsAddFontMem(stash, name, strcpy(path2, path), 0, 1);
+	return fonsAddFontMem(stash, name, (unsigned char*)strcpy(path2, path), 0, 1);
 }
 
 static unsigned char*
@@ -1725,4 +1727,5 @@ fonsResetAtlas(
 	return 1;
 }
 
+#undef _CRT_SECURE_NO_WARNINGS
 #endif

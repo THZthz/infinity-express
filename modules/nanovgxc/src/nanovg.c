@@ -2724,8 +2724,8 @@ nvg__renderText(NVGcontext* ctx, NVGvertex* verts, int nverts)
 	// Render triangles.
 	paint.image = ctx->fontImages[ctx->fontImageIdx];
 	// Apply global alpha
-	paint.innerColor.a *= state->alpha;
-	paint.outerColor.a *= state->alpha;
+	paint.innerColor.a = paint.innerColor.a * state->alpha;
+	paint.outerColor.a = paint.outerColor.a * state->alpha;
 	// feather is used a flag to enable gamma adjust for text
 	//paint.feather = ctx->sRGBTextAdj ? 1 : 0;
 	paint.radius = state->fontBlur;
@@ -3046,10 +3046,15 @@ nvgRoundPolygon(NVGcontext* ctx, int count, float* verts_, float r)
 
 	if (count == 2)
 	{
-		return nvgCapsule(ctx, verts[0].x, verts[0].y, verts[1].x, verts[1].y, r);
+		 nvgCapsule(ctx, verts[0].x, verts[0].y, verts[1].x, verts[1].y, r);
+		 return;
 	}
 
-	if (nvg__absf(r) <= ctx->distTol) { return nvgPolygon(ctx, count, verts_); }
+	if (nvg__absf(r) <= ctx->distTol)
+	{
+		nvgPolygon(ctx, count, verts_);
+		return;
+	}
 
 	p1 = verts[count - 1]; // Start at end of path.
 

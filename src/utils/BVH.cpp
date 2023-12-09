@@ -15,95 +15,95 @@ namespace ie {
 
 BVH::BVH()
 {
-	mRoot = BVH_NullIndex;
+	m_root = BVH_NullIndex;
 
-	mNodeCapacity = 16;
-	mNodeCount = 0;
-	mNodes = (Node*)_malloc(mNodeCapacity * sizeof(Node));
-	memset(mNodes, 0, mNodeCapacity * sizeof(Node));
+	m_nodeCapacity = 16;
+	m_nodeCount = 0;
+	m_nodes = (Node*)_malloc(m_nodeCapacity * sizeof(Node));
+	memset(m_nodes, 0, m_nodeCapacity * sizeof(Node));
 
 	// Build a linked list for the free list.
-	for (int32_t i = 0; i < mNodeCapacity - 1; ++i)
+	for (int32_t i = 0; i < m_nodeCapacity - 1; ++i)
 	{
-		mNodes[i].next = i + 1;
-		mNodes[i].height = -1;
+		m_nodes[i].next = i + 1;
+		m_nodes[i].height = -1;
 	}
-	mNodes[mNodeCapacity - 1].next = BVH_NullIndex;
-	mNodes[mNodeCapacity - 1].height = -1;
-	mFreeList = 0;
+	m_nodes[m_nodeCapacity - 1].next = BVH_NullIndex;
+	m_nodes[m_nodeCapacity - 1].height = -1;
+	m_freeList = 0;
 
-	mProxyCount = 0;
+	m_proxyCount = 0;
 }
 
-BVH::~BVH() { _free(mNodes); }
+BVH::~BVH() { _free(m_nodes); }
 
 // Allocate a node from the pool. Grow the pool if necessary.
 int32_t
-BVH::AllocLeaf()
+BVH::allocLeaf()
 {
 	// Expand the node pool as needed.
-	if (mFreeList == BVH_NullIndex)
+	if (m_freeList == BVH_NullIndex)
 	{
-		assert(mNodeCount == mNodeCapacity);
+		assert(m_nodeCount == m_nodeCapacity);
 
 		// The free list is empty. Rebuild a bigger pool.
-		Node* oldNodes = mNodes;
-		int32_t oldCapcity = mNodeCapacity;
-		mNodeCapacity += oldCapcity >> 1;
-		mNodes = (Node*)_malloc(mNodeCapacity * sizeof(Node));
-		memcpy(mNodes, oldNodes, mNodeCount * sizeof(Node));
+		Node* oldNodes = m_nodes;
+		int32_t oldCapcity = m_nodeCapacity;
+		m_nodeCapacity += oldCapcity >> 1;
+		m_nodes = (Node*)_malloc(m_nodeCapacity * sizeof(Node));
+		memcpy(m_nodes, oldNodes, m_nodeCount * sizeof(Node));
 		_free(oldNodes); //, oldCapcity * sizeof(Node));
 
 		// Build a linked list for the free list. The parent
 		// pointer becomes the "next" pointer.
-		for (int32_t i = mNodeCount; i < mNodeCapacity - 1; ++i)
+		for (int32_t i = m_nodeCount; i < m_nodeCapacity - 1; ++i)
 		{
-			mNodes[i].next = i + 1;
-			mNodes[i].height = -1;
+			m_nodes[i].next = i + 1;
+			m_nodes[i].height = -1;
 		}
-		mNodes[mNodeCapacity - 1].next = BVH_NullIndex;
-		mNodes[mNodeCapacity - 1].height = -1;
-		mFreeList = mNodeCount;
+		m_nodes[m_nodeCapacity - 1].next = BVH_NullIndex;
+		m_nodes[m_nodeCapacity - 1].height = -1;
+		m_freeList = m_nodeCount;
 	}
 
 	// Peel a node off the free list.
-	int32_t nodeId = mFreeList;
-	Node* node = mNodes + nodeId;
-	mFreeList = node->next;
-	node->SetDefault();
-	++mNodeCount;
+	int32_t nodeId = m_freeList;
+	Node* node = m_nodes + nodeId;
+	m_freeList = node->next;
+	node->setDefault();
+	++m_nodeCount;
 	return nodeId;
 }
 
 // Return a node to the pool.
 void
-BVH::FreeLeaf(int32_t nodeId)
+BVH::freeLeaf(int32_t nodeId)
 {
-	assert(0 <= nodeId && nodeId < mNodeCapacity);
-	assert(0 < mNodeCount);
-	mNodes[nodeId].next = mFreeList;
-	mNodes[nodeId].height = -1;
-	mFreeList = nodeId;
-	--mNodeCount;
+	assert(0 <= nodeId && nodeId < m_nodeCapacity);
+	assert(0 < m_nodeCount);
+	m_nodes[nodeId].next = m_freeList;
+	m_nodes[nodeId].height = -1;
+	m_freeList = nodeId;
+	--m_nodeCount;
 }
 
 // Perform a left or right rotation if node A is imbalanced.
 // Returns the new root index.
 int32_t
-BVH::BalanceLeaf(int32_t iA)
+BVH::balanceLeaf(int32_t iA)
 {
 	assert(iA != BVH_NullIndex);
 
-	Node* A = mNodes + iA;
-	if (TestEnd(A) || A->height < 2) { return iA; }
+	Node* A = m_nodes + iA;
+	if (testEnd(A) || A->height < 2) { return iA; }
 
 	int32_t iB = A->child1;
 	int32_t iC = A->child2;
-	assert(0 <= iB && iB < mNodeCapacity);
-	assert(0 <= iC && iC < mNodeCapacity);
+	assert(0 <= iB && iB < m_nodeCapacity);
+	assert(0 <= iC && iC < m_nodeCapacity);
 
-	Node* B = mNodes + iB;
-	Node* C = mNodes + iC;
+	Node* B = m_nodes + iB;
+	Node* C = m_nodes + iC;
 
 	int32_t balance = C->height - B->height;
 
@@ -112,10 +112,10 @@ BVH::BalanceLeaf(int32_t iA)
 	{
 		int32_t iF = C->child1;
 		int32_t iG = C->child2;
-		Node* F = mNodes + iF;
-		Node* G = mNodes + iG;
-		assert(0 <= iF && iF < mNodeCapacity);
-		assert(0 <= iG && iG < mNodeCapacity);
+		Node* F = m_nodes + iF;
+		Node* G = m_nodes + iG;
+		assert(0 <= iF && iF < m_nodeCapacity);
+		assert(0 <= iG && iG < m_nodeCapacity);
 
 		// Swap A and C
 		C->child1 = iA;
@@ -125,14 +125,14 @@ BVH::BalanceLeaf(int32_t iA)
 		// A's old parent should point to C
 		if (C->parent != BVH_NullIndex)
 		{
-			if (mNodes[C->parent].child1 == iA) { mNodes[C->parent].child1 = iC; }
+			if (m_nodes[C->parent].child1 == iA) { m_nodes[C->parent].child1 = iC; }
 			else
 			{
-				assert(mNodes[C->parent].child2 == iA);
-				mNodes[C->parent].child2 = iC;
+				assert(m_nodes[C->parent].child2 == iA);
+				m_nodes[C->parent].child2 = iC;
 			}
 		}
-		else { mRoot = iC; }
+		else { m_root = iC; }
 
 		// Rotate
 		if (F->height > G->height)
@@ -140,8 +140,8 @@ BVH::BalanceLeaf(int32_t iA)
 			C->child2 = iF;
 			A->child2 = iG;
 			G->parent = iA;
-			A->aabb = B->aabb.Union(G->aabb);
-			C->aabb = A->aabb.Union(F->aabb);
+			A->aabb = B->aabb.combine(G->aabb);
+			C->aabb = A->aabb.combine(F->aabb);
 
 			A->categoryBits = B->categoryBits | G->categoryBits;
 			C->categoryBits = A->categoryBits | F->categoryBits;
@@ -154,8 +154,8 @@ BVH::BalanceLeaf(int32_t iA)
 			C->child2 = iG;
 			A->child2 = iF;
 			F->parent = iA;
-			A->aabb = B->aabb.Union(F->aabb);
-			C->aabb = A->aabb.Union(G->aabb);
+			A->aabb = B->aabb.combine(F->aabb);
+			C->aabb = A->aabb.combine(G->aabb);
 
 			A->categoryBits = B->categoryBits | F->categoryBits;
 			C->categoryBits = A->categoryBits | G->categoryBits;
@@ -172,10 +172,10 @@ BVH::BalanceLeaf(int32_t iA)
 	{
 		int32_t iD = B->child1;
 		int32_t iE = B->child2;
-		Node* D = mNodes + iD;
-		Node* E = mNodes + iE;
-		assert(0 <= iD && iD < mNodeCapacity);
-		assert(0 <= iE && iE < mNodeCapacity);
+		Node* D = m_nodes + iD;
+		Node* E = m_nodes + iE;
+		assert(0 <= iD && iD < m_nodeCapacity);
+		assert(0 <= iE && iE < m_nodeCapacity);
 
 		// Swap A and B
 		B->child1 = iA;
@@ -185,14 +185,14 @@ BVH::BalanceLeaf(int32_t iA)
 		// A's old parent should point to B
 		if (B->parent != BVH_NullIndex)
 		{
-			if (mNodes[B->parent].child1 == iA) { mNodes[B->parent].child1 = iB; }
+			if (m_nodes[B->parent].child1 == iA) { m_nodes[B->parent].child1 = iB; }
 			else
 			{
-				assert(mNodes[B->parent].child2 == iA);
-				mNodes[B->parent].child2 = iB;
+				assert(m_nodes[B->parent].child2 == iA);
+				m_nodes[B->parent].child2 = iB;
 			}
 		}
-		else { mRoot = iB; }
+		else { m_root = iB; }
 
 		// Rotate
 		if (D->height > E->height)
@@ -200,8 +200,8 @@ BVH::BalanceLeaf(int32_t iA)
 			B->child2 = iD;
 			A->child1 = iE;
 			E->parent = iA;
-			A->aabb = C->aabb.Union(E->aabb);
-			B->aabb = A->aabb.Union(D->aabb);
+			A->aabb = C->aabb.combine(E->aabb);
+			B->aabb = A->aabb.combine(D->aabb);
 
 			A->categoryBits = C->categoryBits | E->categoryBits;
 			B->categoryBits = A->categoryBits | D->categoryBits;
@@ -214,8 +214,8 @@ BVH::BalanceLeaf(int32_t iA)
 			B->child2 = iE;
 			A->child1 = iD;
 			D->parent = iA;
-			A->aabb = C->aabb.Union(D->aabb);
-			B->aabb = A->aabb.Union(E->aabb);
+			A->aabb = C->aabb.combine(D->aabb);
+			B->aabb = A->aabb.combine(E->aabb);
 
 			A->categoryBits = C->categoryBits | D->categoryBits;
 			B->categoryBits = A->categoryBits | E->categoryBits;
@@ -231,27 +231,27 @@ BVH::BalanceLeaf(int32_t iA)
 }
 
 void
-BVH::InsertLeaf(int32_t leaf)
+BVH::insertLeaf(int32_t leaf)
 {
-	if (mRoot == BVH_NullIndex)
+	if (m_root == BVH_NullIndex)
 	{
-		mRoot = leaf;
-		mNodes[mRoot].parent = BVH_NullIndex;
+		m_root = leaf;
+		m_nodes[m_root].parent = BVH_NullIndex;
 		return;
 	}
 
 	// Find the best sibling for this node
-	AABB leafAABB = mNodes[leaf].aabb;
-	int32_t index = mRoot;
-	while (!TestEnd(mNodes + index))
+	Box leafAABB = m_nodes[leaf].aabb;
+	int32_t index = m_root;
+	while (!testEnd(m_nodes + index))
 	{
-		int32_t child1 = mNodes[index].child1;
-		int32_t child2 = mNodes[index].child2;
+		int32_t child1 = m_nodes[index].child1;
+		int32_t child2 = m_nodes[index].child2;
 
-		float area = mNodes[index].aabb.Perimeter();
+		float area = m_nodes[index].aabb.perimeter();
 
-		AABB combinedAABB{mNodes[index].aabb.Union(leafAABB)};
-		float combinedArea = combinedAABB.Perimeter();
+		Box combinedAABB{m_nodes[index].aabb.combine(leafAABB)};
+		float combinedArea = combinedAABB.perimeter();
 
 		// Cost of creating a new parent for this node and the new leaf
 		float cost = 2.0f * combinedArea;
@@ -261,31 +261,31 @@ BVH::InsertLeaf(int32_t leaf)
 
 		// Cost of descending into child1
 		float cost1;
-		if (TestEnd(mNodes + child1))
+		if (testEnd(m_nodes + child1))
 		{
-			AABB aabb{leafAABB.Union(mNodes[child1].aabb)};
-			cost1 = aabb.Perimeter() + inheritanceCost;
+			Box aabb{leafAABB.combine(m_nodes[child1].aabb)};
+			cost1 = aabb.perimeter() + inheritanceCost;
 		}
 		else
 		{
-			AABB aabb{leafAABB.Union(mNodes[child1].aabb)};
-			float oldArea = mNodes[child1].aabb.Perimeter();
-			float newArea = aabb.Perimeter();
+			Box aabb{leafAABB.combine(m_nodes[child1].aabb)};
+			float oldArea = m_nodes[child1].aabb.perimeter();
+			float newArea = aabb.perimeter();
 			cost1 = (newArea - oldArea) + inheritanceCost;
 		}
 
 		// Cost of descending into child2
 		float cost2;
-		if (TestEnd(mNodes + child2))
+		if (testEnd(m_nodes + child2))
 		{
-			AABB aabb{leafAABB.Union(mNodes[child2].aabb)};
-			cost2 = aabb.Perimeter() + inheritanceCost;
+			Box aabb{leafAABB.combine(m_nodes[child2].aabb)};
+			cost2 = aabb.perimeter() + inheritanceCost;
 		}
 		else
 		{
-			AABB aabb{leafAABB.Union(mNodes[child2].aabb)};
-			float oldArea = mNodes[child2].aabb.Perimeter();
-			float newArea = aabb.Perimeter();
+			Box aabb{leafAABB.combine(m_nodes[child2].aabb)};
+			float oldArea = m_nodes[child2].aabb.perimeter();
+			float newArea = aabb.perimeter();
 			cost2 = newArea - oldArea + inheritanceCost;
 		}
 
@@ -300,120 +300,120 @@ BVH::InsertLeaf(int32_t leaf)
 	int32_t sibling = index;
 
 	// Create a new parent.
-	int32_t oldParent = mNodes[sibling].parent;
-	int32_t newParent = AllocLeaf();
-	mNodes[newParent].parent = oldParent;
-	mNodes[newParent].userData = nullptr;
-	mNodes[newParent].aabb = leafAABB.Union(mNodes[sibling].aabb);
-	mNodes[newParent].categoryBits = mNodes[leaf].categoryBits | mNodes[sibling].categoryBits;
-	mNodes[newParent].height = mNodes[sibling].height + 1;
+	int32_t oldParent = m_nodes[sibling].parent;
+	int32_t newParent = allocLeaf();
+	m_nodes[newParent].parent = oldParent;
+	m_nodes[newParent].userData = nullptr;
+	m_nodes[newParent].aabb = leafAABB.combine(m_nodes[sibling].aabb);
+	m_nodes[newParent].categoryBits = m_nodes[leaf].categoryBits | m_nodes[sibling].categoryBits;
+	m_nodes[newParent].height = m_nodes[sibling].height + 1;
 
 	if (oldParent != BVH_NullIndex)
 	{
 		// The sibling was not the root.
-		if (mNodes[oldParent].child1 == sibling) { mNodes[oldParent].child1 = newParent; }
-		else { mNodes[oldParent].child2 = newParent; }
+		if (m_nodes[oldParent].child1 == sibling) { m_nodes[oldParent].child1 = newParent; }
+		else { m_nodes[oldParent].child2 = newParent; }
 
-		mNodes[newParent].child1 = sibling;
-		mNodes[newParent].child2 = leaf;
-		mNodes[sibling].parent = newParent;
-		mNodes[leaf].parent = newParent;
+		m_nodes[newParent].child1 = sibling;
+		m_nodes[newParent].child2 = leaf;
+		m_nodes[sibling].parent = newParent;
+		m_nodes[leaf].parent = newParent;
 	}
 	else
 	{
 		// The sibling was the root.
-		mNodes[newParent].child1 = sibling;
-		mNodes[newParent].child2 = leaf;
-		mNodes[sibling].parent = newParent;
-		mNodes[leaf].parent = newParent;
-		mRoot = newParent;
+		m_nodes[newParent].child1 = sibling;
+		m_nodes[newParent].child2 = leaf;
+		m_nodes[sibling].parent = newParent;
+		m_nodes[leaf].parent = newParent;
+		m_root = newParent;
 	}
 
 	// Walk back up the tree fixing heights and AABBs
-	index = mNodes[leaf].parent;
+	index = m_nodes[leaf].parent;
 	while (index != BVH_NullIndex)
 	{
-		index = BalanceLeaf(index);
+		index = balanceLeaf(index);
 
-		int32_t child1 = mNodes[index].child1;
-		int32_t child2 = mNodes[index].child2;
+		int32_t child1 = m_nodes[index].child1;
+		int32_t child2 = m_nodes[index].child2;
 
 		assert(child1 != BVH_NullIndex);
 		assert(child2 != BVH_NullIndex);
 
-		mNodes[index].aabb = mNodes[child1].aabb.Union(mNodes[child2].aabb);
-		mNodes[index].categoryBits = mNodes[child1].categoryBits | mNodes[child2].categoryBits;
-		mNodes[index].height = 1 + std::max(mNodes[child1].height, mNodes[child2].height);
+		m_nodes[index].aabb = m_nodes[child1].aabb.combine(m_nodes[child2].aabb);
+		m_nodes[index].categoryBits = m_nodes[child1].categoryBits | m_nodes[child2].categoryBits;
+		m_nodes[index].height = 1 + std::max(m_nodes[child1].height, m_nodes[child2].height);
 
-		index = mNodes[index].parent;
+		index = m_nodes[index].parent;
 	}
 
-	// Validate();
+	// validate();
 }
 
 void
-BVH::RemoveLeaf(int32_t leaf)
+BVH::removeLeaf(int32_t leaf)
 {
-	if (leaf == mRoot)
+	if (leaf == m_root)
 	{
-		mRoot = BVH_NullIndex;
+		m_root = BVH_NullIndex;
 		return;
 	}
 
-	int32_t parent = mNodes[leaf].parent;
-	int32_t grandParent = mNodes[parent].parent;
+	int32_t parent = m_nodes[leaf].parent;
+	int32_t grandParent = m_nodes[parent].parent;
 	int32_t sibling;
-	if (mNodes[parent].child1 == leaf) { sibling = mNodes[parent].child2; }
-	else { sibling = mNodes[parent].child1; }
+	if (m_nodes[parent].child1 == leaf) { sibling = m_nodes[parent].child2; }
+	else { sibling = m_nodes[parent].child1; }
 
 	if (grandParent != BVH_NullIndex)
 	{
 		// Destroy parent and connect sibling to grandParent.
-		if (mNodes[grandParent].child1 == parent) { mNodes[grandParent].child1 = sibling; }
-		else { mNodes[grandParent].child2 = sibling; }
-		mNodes[sibling].parent = grandParent;
-		FreeLeaf(parent);
+		if (m_nodes[grandParent].child1 == parent) { m_nodes[grandParent].child1 = sibling; }
+		else { m_nodes[grandParent].child2 = sibling; }
+		m_nodes[sibling].parent = grandParent;
+		freeLeaf(parent);
 
 		// Adjust ancestor bounds.
 		int32_t index = grandParent;
 		while (index != BVH_NullIndex)
 		{
-			index = BalanceLeaf(index);
+			index = balanceLeaf(index);
 
-			int32_t child1 = mNodes[index].child1;
-			int32_t child2 = mNodes[index].child2;
+			int32_t child1 = m_nodes[index].child1;
+			int32_t child2 = m_nodes[index].child2;
 
-			mNodes[index].aabb = mNodes[child1].aabb.Union(mNodes[child2].aabb);
-			mNodes[index]
-			    .categoryBits = mNodes[child1].categoryBits | mNodes[child2].categoryBits;
-			mNodes[index].height = 1 + std::max(mNodes[child1].height, mNodes[child2].height);
+			m_nodes[index].aabb = m_nodes[child1].aabb.combine(m_nodes[child2].aabb);
+			m_nodes[index]
+			    .categoryBits = m_nodes[child1].categoryBits | m_nodes[child2].categoryBits;
+			m_nodes[index].height = 1 + std::max(m_nodes[child1].height, m_nodes[child2].height);
 
-			index = mNodes[index].parent;
+			index = m_nodes[index].parent;
 		}
 	}
 	else
 	{
-		mRoot = sibling;
-		mNodes[sibling].parent = BVH_NullIndex;
-		FreeLeaf(parent);
+		m_root = sibling;
+		m_nodes[sibling].parent = BVH_NullIndex;
+		freeLeaf(parent);
 	}
 
-	// Validate();
+	// validate();
 }
 
 // Create a proxy in the tree as a leaf node. We return the index
 // of the node instead of a pointer so that we can grow
 // the node pool.
 int32_t
-BVH::Add(AABB aabb, uint32_t categoryBits, void* userData)
+BVH::add(Box aabb, uint32_t categoryBits, void* userData)
 {
 	assert(-HUGE_NUMBER < aabb.l.x && aabb.l.x < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.l.y && aabb.l.y < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.u.x && aabb.u.x < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.u.y && aabb.u.y < HUGE_NUMBER);
 
-	int32_t proxyId = AllocLeaf();
-	Node* node = mNodes + proxyId;
+	int32_t proxyId = allocLeaf();
+	Node* node = m_nodes + proxyId;
 
 	// Fatten the aabb.
 	glm::vec2 r = {AABB_EXTENSION, AABB_EXTENSION};
@@ -424,71 +424,71 @@ BVH::Add(AABB aabb, uint32_t categoryBits, void* userData)
 	node->height = 0;
 	node->moved = true;
 
-	InsertLeaf(proxyId);
+	insertLeaf(proxyId);
 
-	mProxyCount += 1;
+	m_proxyCount += 1;
 
 	return proxyId;
 }
 
 void
-BVH::Remove(int32_t proxyId)
+BVH::remove(int32_t proxyId)
 {
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	assert(TestEnd(mNodes + proxyId));
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	assert(testEnd(m_nodes + proxyId));
 
-	RemoveLeaf(proxyId);
-	FreeLeaf(proxyId);
+	removeLeaf(proxyId);
+	freeLeaf(proxyId);
 
-	assert(mProxyCount > 0);
-	mProxyCount -= 1;
+	assert(m_proxyCount > 0);
+	m_proxyCount -= 1;
 }
 
 bool
-BVH::Move(int32_t proxyId, AABB aabb)
+BVH::move(int32_t proxyId, Box aabb)
 {
 	assert(-HUGE_NUMBER < aabb.l.x && aabb.l.x < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.l.y && aabb.l.y < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.u.x && aabb.u.x < HUGE_NUMBER);
 	assert(-HUGE_NUMBER < aabb.u.y && aabb.u.y < HUGE_NUMBER);
 
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	assert(TestEnd(mNodes + proxyId));
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	assert(testEnd(m_nodes + proxyId));
 
-	// Extend AABB
-	AABB fatAABB;
+	// Extend Box
+	Box fatAABB;
 	glm::vec2 r = {AABB_EXTENSION, AABB_EXTENSION};
 	fatAABB.l = SubV(aabb.l, r);
 	fatAABB.u = AddV(aabb.u, r);
 
-	AABB treeAABB = mNodes[proxyId].aabb;
-	if (treeAABB.Contains(aabb))
+	Box treeAABB = m_nodes[proxyId].aabb;
+	if (treeAABB.contains(aabb))
 	{
-		// The tree AABB still contains the object, but the tree AABB might be too large.
+		// The tree Box still contains the object, but the tree Box might be too large.
 		// Perhaps the object was moving fast but has since gone to sleep.
-		// The huge AABB is larger than the new fat AABB.
-		AABB hugeAABB;
+		// The huge Box is larger than the new fat Box.
+		Box hugeAABB;
 		hugeAABB.l = MulAddV(fatAABB.l, -4.0f, r);
 		hugeAABB.u = MulAddV(fatAABB.u, 4.0f, r);
 
-		if (hugeAABB.Contains(treeAABB))
+		if (hugeAABB.contains(treeAABB))
 		{
-			// The tree AABB contains the object AABB and the tree AABB is
+			// The tree Box contains the object Box and the tree Box is
 			// not too large. No tree update needed.
 			return false;
 		}
 
-		// Otherwise the tree AABB is huge and needs to be shrunk
+		// Otherwise the tree Box is huge and needs to be shrunk
 	}
 
-	RemoveLeaf(proxyId);
+	removeLeaf(proxyId);
 
-	mNodes[proxyId].aabb = fatAABB;
+	m_nodes[proxyId].aabb = fatAABB;
 
-	InsertLeaf(proxyId);
+	insertLeaf(proxyId);
 
-	bool alreadyMoved = mNodes[proxyId].moved;
-	mNodes[proxyId].moved = true;
+	bool alreadyMoved = m_nodes[proxyId].moved;
+	m_nodes[proxyId].moved = true;
 
 	if (alreadyMoved) { return false; }
 
@@ -496,32 +496,32 @@ BVH::Move(int32_t proxyId, AABB aabb)
 }
 
 int32_t
-BVH::GetHeight() const
+BVH::getHeight() const
 {
-	if (mRoot == BVH_NullIndex) { return 0; }
+	if (m_root == BVH_NullIndex) { return 0; }
 
-	return mNodes[mRoot].height;
+	return m_nodes[m_root].height;
 }
 
 float
-BVH::GetAreaRatio() const
+BVH::getAreaRatio() const
 {
-	if (mRoot == BVH_NullIndex) { return 0.0f; }
+	if (m_root == BVH_NullIndex) { return 0.0f; }
 
-	const Node* root = mNodes + mRoot;
-	float rootArea = root->aabb.Perimeter();
+	const Node* root = m_nodes + m_root;
+	float rootArea = root->aabb.perimeter();
 
 	float totalArea = 0.0f;
-	for (int32_t i = 0; i < mNodeCapacity; ++i)
+	for (int32_t i = 0; i < m_nodeCapacity; ++i)
 	{
-		const Node* node = mNodes + i;
-		if (node->height < 0 || TestEnd(node) || i == mRoot)
+		const Node* node = m_nodes + i;
+		if (node->height < 0 || testEnd(node) || i == m_root)
 		{
 			// Free node in pool
 			continue;
 		}
 
-		totalArea += node->aabb.Perimeter();
+		totalArea += node->aabb.perimeter();
 	}
 
 	return totalArea / rootArea;
@@ -529,38 +529,38 @@ BVH::GetAreaRatio() const
 
 // Compute the height of a sub-tree.
 int32_t
-BVH::ComputeSubTreeHeight(int32_t nodeId) const
+BVH::computeSubTreeHeight(int32_t nodeId) const
 {
-	assert(0 <= nodeId && nodeId < mNodeCapacity);
-	Node* node = mNodes + nodeId;
+	assert(0 <= nodeId && nodeId < m_nodeCapacity);
+	Node* node = m_nodes + nodeId;
 
-	if (TestEnd(node)) { return 0; }
+	if (testEnd(node)) { return 0; }
 
-	int32_t height1 = ComputeSubTreeHeight(node->child1);
-	int32_t height2 = ComputeSubTreeHeight(node->child2);
+	int32_t height1 = computeSubTreeHeight(node->child1);
+	int32_t height2 = computeSubTreeHeight(node->child2);
 	return 1 + std::max(height1, height2);
 }
 
 int32_t
-BVH::ComputeHeight() const
+BVH::computeHeight() const
 {
-	int32_t height = ComputeSubTreeHeight(mRoot);
+	int32_t height = computeSubTreeHeight(m_root);
 	return height;
 }
 
 void
-BVH::ValidateStructure(int32_t index) const
+BVH::validateStructure(int32_t index) const
 {
 	if (index == BVH_NullIndex) { return; }
 
-	if (index == mRoot) { assert(mNodes[index].parent == BVH_NullIndex); }
+	if (index == m_root) { assert(m_nodes[index].parent == BVH_NullIndex); }
 
-	const Node* node = mNodes + index;
+	const Node* node = m_nodes + index;
 
 	int32_t child1 = node->child1;
 	int32_t child2 = node->child2;
 
-	if (TestEnd(node))
+	if (testEnd(node))
 	{
 		assert(child1 == BVH_NullIndex);
 		assert(child2 == BVH_NullIndex);
@@ -568,27 +568,27 @@ BVH::ValidateStructure(int32_t index) const
 		return;
 	}
 
-	assert(0 <= child1 && child1 < mNodeCapacity);
-	assert(0 <= child2 && child2 < mNodeCapacity);
+	assert(0 <= child1 && child1 < m_nodeCapacity);
+	assert(0 <= child2 && child2 < m_nodeCapacity);
 
-	assert(mNodes[child1].parent == index);
-	assert(mNodes[child2].parent == index);
+	assert(m_nodes[child1].parent == index);
+	assert(m_nodes[child2].parent == index);
 
-	ValidateStructure(child1);
-	ValidateStructure(child2);
+	validateStructure(child1);
+	validateStructure(child2);
 }
 
 void
-BVH::ValidateMetrics(int32_t index) const
+BVH::validateMetrics(int32_t index) const
 {
 	if (index == BVH_NullIndex) { return; }
 
-	const Node* node = mNodes + index;
+	const Node* node = m_nodes + index;
 
 	int32_t child1 = node->child1;
 	int32_t child2 = node->child2;
 
-	if (TestEnd(node))
+	if (testEnd(node))
 	{
 		assert(child1 == BVH_NullIndex);
 		assert(child2 == BVH_NullIndex);
@@ -596,65 +596,65 @@ BVH::ValidateMetrics(int32_t index) const
 		return;
 	}
 
-	assert(0 <= child1 && child1 < mNodeCapacity);
-	assert(0 <= child2 && child2 < mNodeCapacity);
+	assert(0 <= child1 && child1 < m_nodeCapacity);
+	assert(0 <= child2 && child2 < m_nodeCapacity);
 
-	int32_t height1 = mNodes[child1].height;
-	int32_t height2 = mNodes[child2].height;
+	int32_t height1 = m_nodes[child1].height;
+	int32_t height2 = m_nodes[child2].height;
 	int32_t height;
 	height = 1 + std::max(height1, height2);
 	assert(node->height == height);
 
-	AABB aabb{mNodes[child1].aabb.Union(mNodes[child2].aabb)};
+	Box aabb{m_nodes[child1].aabb.combine(m_nodes[child2].aabb)};
 
 	assert(aabb.l.x == node->aabb.l.x);
 	assert(aabb.l.y == node->aabb.l.y);
 	assert(aabb.u.x == node->aabb.u.x);
 	assert(aabb.u.y == node->aabb.u.y);
 
-	uint32_t categoryBits = mNodes[child1].categoryBits | mNodes[child2].categoryBits;
+	uint32_t categoryBits = m_nodes[child1].categoryBits | m_nodes[child2].categoryBits;
 	assert(node->categoryBits == categoryBits);
 
-	ValidateMetrics(child1);
-	ValidateMetrics(child2);
+	validateMetrics(child1);
+	validateMetrics(child2);
 }
 
 void
-BVH::Validate()
+BVH::validate()
 {
-	ValidateStructure(mRoot);
-	ValidateMetrics(mRoot);
+	validateStructure(m_root);
+	validateMetrics(m_root);
 
 	int32_t freeCount = 0;
-	int32_t freeIndex = mFreeList;
+	int32_t freeIndex = m_freeList;
 	while (freeIndex != BVH_NullIndex)
 	{
-		assert(0 <= freeIndex && freeIndex < mNodeCapacity);
-		freeIndex = mNodes[freeIndex].next;
+		assert(0 <= freeIndex && freeIndex < m_nodeCapacity);
+		freeIndex = m_nodes[freeIndex].next;
 		++freeCount;
 	}
 
-	int32_t height = GetHeight();
-	int32_t computedHeight = ComputeHeight();
+	int32_t height = getHeight();
+	int32_t computedHeight = computeHeight();
 	assert(height == computedHeight);
 
-	assert(mNodeCount + freeCount == mNodeCapacity);
+	assert(m_nodeCount + freeCount == m_nodeCapacity);
 }
 
 int32_t
-BVH::GetMaxBalance() const
+BVH::getMaxBalance() const
 {
 	int32_t maxBalance = 0;
-	for (int32_t i = 0; i < mNodeCapacity; ++i)
+	for (int32_t i = 0; i < m_nodeCapacity; ++i)
 	{
-		const Node* node = mNodes + i;
+		const Node* node = m_nodes + i;
 		if (node->height <= 1) { continue; }
 
-		assert(TestEnd(node) == false);
+		assert(testEnd(node) == false);
 
 		int32_t child1 = node->child1;
 		int32_t child2 = node->child2;
-		int32_t balance = Abs(mNodes[child2].height - mNodes[child1].height);
+		int32_t balance = Abs(m_nodes[child2].height - m_nodes[child1].height);
 		maxBalance = std::max(maxBalance, balance);
 	}
 
@@ -662,27 +662,27 @@ BVH::GetMaxBalance() const
 }
 
 void
-BVH::RebuildBottomUp()
+BVH::rebuildBottomUp()
 {
-	auto* nodes = (int32_t*)_malloc(mNodeCount * sizeof(int32_t));
+	auto* nodes = (int32_t*)_malloc(m_nodeCount * sizeof(int32_t));
 	int32_t count = 0;
 
 	// Build array of leaves. Free the rest.
-	for (int32_t i = 0; i < mNodeCapacity; ++i)
+	for (int32_t i = 0; i < m_nodeCapacity; ++i)
 	{
-		if (mNodes[i].height < 0)
+		if (m_nodes[i].height < 0)
 		{
 			// free node in pool
 			continue;
 		}
 
-		if (TestEnd(mNodes + i))
+		if (testEnd(m_nodes + i))
 		{
-			mNodes[i].parent = BVH_NullIndex;
+			m_nodes[i].parent = BVH_NullIndex;
 			nodes[count] = i;
 			++count;
 		}
-		else { FreeLeaf(i); }
+		else { freeLeaf(i); }
 	}
 
 	while (count > 1)
@@ -691,13 +691,13 @@ BVH::RebuildBottomUp()
 		int32_t iMin = -1, jMin = -1;
 		for (int32_t i = 0; i < count; ++i)
 		{
-			AABB aabbi = mNodes[nodes[i]].aabb;
+			Box aabbi = m_nodes[nodes[i]].aabb;
 
 			for (int32_t j = i + 1; j < count; ++j)
 			{
-				AABB aabbj = mNodes[nodes[j]].aabb;
-				AABB b{aabbi.Union(aabbj)};
-				float cost = b.Perimeter();
+				Box aabbj = m_nodes[nodes[j]].aabb;
+				Box b{aabbi.combine(aabbj)};
+				float cost = b.perimeter();
 				if (cost < minCost)
 				{
 					iMin = i;
@@ -709,14 +709,14 @@ BVH::RebuildBottomUp()
 
 		int32_t index1 = nodes[iMin];
 		int32_t index2 = nodes[jMin];
-		Node* child1 = mNodes + index1;
-		Node* child2 = mNodes + index2;
+		Node* child1 = m_nodes + index1;
+		Node* child2 = m_nodes + index2;
 
-		int32_t parentIndex = AllocLeaf();
-		Node* parent = mNodes + parentIndex;
+		int32_t parentIndex = allocLeaf();
+		Node* parent = m_nodes + parentIndex;
 		parent->child1 = index1;
 		parent->child2 = index2;
-		parent->aabb = child1->aabb.Union(child2->aabb);
+		parent->aabb = child1->aabb.combine(child2->aabb);
 		parent->categoryBits = child1->categoryBits | child2->categoryBits;
 		parent->height = 1 + std::max(child1->height, child2->height);
 		parent->parent = BVH_NullIndex;
@@ -729,19 +729,19 @@ BVH::RebuildBottomUp()
 		--count;
 	}
 
-	mRoot = nodes[0];
-	_free(nodes); //, mNodeCount * sizeof(Node));
+	m_root = nodes[0];
+	_free(nodes); //, m_nodeCount * sizeof(Node));
 
-	Validate();
+	validate();
 }
 
 void
-BVH::ShiftOrigin(glm::vec2 newOrigin)
+BVH::shiftOrigin(glm::vec2 newOrigin)
 {
 	// Build array of leaves. Free the rest.
-	for (int32_t i = 0; i < mNodeCapacity; ++i)
+	for (int32_t i = 0; i < m_nodeCapacity; ++i)
 	{
-		Node* n = mNodes + i;
+		Node* n = m_nodes + i;
 		n->aabb.l.x -= newOrigin.x;
 		n->aabb.l.y -= newOrigin.y;
 		n->aabb.u.x -= newOrigin.x;
@@ -752,22 +752,22 @@ BVH::ShiftOrigin(glm::vec2 newOrigin)
 #define STACK_SIZE 256
 
 void
-BVH::QueryFiltered(AABB aabb, uint32_t maskBits, TreeQueryCallback callback, void* context)
+BVH::queryFiltered(Box aabb, uint32_t maskBits, TreeQueryCallback callback, void* context)
 {
 	int32_t stack[STACK_SIZE];
 	int32_t stackCount = 0;
-	stack[stackCount++] = mRoot;
+	stack[stackCount++] = m_root;
 
 	while (stackCount > 0)
 	{
 		int32_t nodeId = stack[--stackCount];
 		if (nodeId == BVH_NullIndex) { continue; }
 
-		const Node* node = mNodes + nodeId;
+		const Node* node = m_nodes + nodeId;
 
-		if (node->aabb.Overlaps(aabb) && (node->categoryBits & maskBits) != 0)
+		if (node->aabb.overlaps(aabb) && (node->categoryBits & maskBits) != 0)
 		{
-			if (TestEnd(node))
+			if (testEnd(node))
 			{
 				// callback to user code with proxy id
 				bool proceed = callback(nodeId, node->userData, context);
@@ -789,22 +789,22 @@ BVH::QueryFiltered(AABB aabb, uint32_t maskBits, TreeQueryCallback callback, voi
 }
 
 void
-BVH::Query(AABB aabb, TreeQueryCallback callback, void* context)
+BVH::query(Box aabb, TreeQueryCallback callback, void* context)
 {
 	int32_t stack[STACK_SIZE];
 	int32_t stackCount = 0;
-	stack[stackCount++] = mRoot;
+	stack[stackCount++] = m_root;
 
 	while (stackCount > 0)
 	{
 		int32_t nodeId = stack[--stackCount];
 		if (nodeId == BVH_NullIndex) { continue; }
 
-		const Node* node = mNodes + nodeId;
+		const Node* node = m_nodes + nodeId;
 
-		if (node->aabb.Overlaps(aabb))
+		if (node->aabb.overlaps(aabb))
 		{
-			if (TestEnd(node))
+			if (testEnd(node))
 			{
 				// callback to user code with proxy id
 				bool proceed = callback(nodeId, node->userData, context);
@@ -826,7 +826,7 @@ BVH::Query(AABB aabb, TreeQueryCallback callback, void* context)
 }
 
 void
-BVH::Raycast(
+BVH::raycast(
     const RayCast* input,
     uint32_t maskBits,
     TreeRaycastCallback callback,
@@ -848,7 +848,7 @@ BVH::Raycast(
 	float maxFraction = input->maxFraction;
 
 	// Build a bounding box for the segment.
-	AABB segmentAABB;
+	Box segmentAABB;
 	{
 		// t is the endpoint of the ray
 		glm::vec2 t = MulAddV(p1, maxFraction, SubV(p2, p1));
@@ -860,15 +860,15 @@ BVH::Raycast(
 
 	int32_t stack[STACK_SIZE];
 	int32_t stackCount = 0;
-	stack[stackCount++] = mRoot;
+	stack[stackCount++] = m_root;
 
 	while (stackCount > 0)
 	{
 		int32_t nodeId = stack[--stackCount];
 		if (nodeId == BVH_NullIndex) { continue; }
 
-		const Node* node = mNodes + nodeId;
-		if (!node->aabb.Overlaps(segmentAABB) || (node->categoryBits & maskBits) == 0)
+		const Node* node = m_nodes + nodeId;
+		if (!node->aabb.overlaps(segmentAABB) || (node->categoryBits & maskBits) == 0)
 		{
 			continue;
 		}
@@ -876,13 +876,13 @@ BVH::Raycast(
 		// Separating axis for segment (Gino, p80).
 		// |dot(v, p1 - c)| > dot(|v|, h)
 		// radius extension is added to the node in this case
-		glm::vec2 c = node->aabb.Center();
-		glm::vec2 h = AddV(node->aabb.Extents(), extension);
+		glm::vec2 c = node->aabb.center();
+		glm::vec2 h = AddV(node->aabb.extents(), extension);
 		float term1 = Abs(DotV(v, SubV(p1, c)));
 		float term2 = DotV(abs_v, h);
 		if (term2 < term1) { continue; }
 
-		if (TestEnd(node))
+		if (testEnd(node))
 		{
 			RayCast subInput;
 			subInput.p1 = input->p1;
@@ -927,7 +927,7 @@ BVH::Raycast(
 
 // "On Fast Construction of SAH-based Bounding Volume Hierarchies" by Ingo Wald
 int32_t
-BVH::BinSortBoxes(
+BVH::binSortBoxes(
     int32_t parentIndex,
     Node* leaves,
     int32_t count,
@@ -937,19 +937,19 @@ BVH::BinSortBoxes(
 	if (count == 1)
 	{
 		leaves[0].parent = parentIndex;
-		return (int32_t)(leaves - mNodes);
+		return (int32_t)(leaves - m_nodes);
 	}
 
-	Node* nodes = mNodes;
+	Node* nodes = m_nodes;
 
-	glm::vec2 center = leaves[0].aabb.Center();
-	AABB centroidAABB;
+	glm::vec2 center = leaves[0].aabb.center();
+	Box centroidAABB;
 	centroidAABB.l = center;
 	centroidAABB.u = center;
 
 	for (int32_t i = 1; i < count; ++i)
 	{
-		center = leaves[i].aabb.Center();
+		center = leaves[i].aabb.center();
 		centroidAABB.l = MinV(centroidAABB.l, center);
 		centroidAABB.u = MaxV(centroidAABB.u, center);
 	}
@@ -983,13 +983,13 @@ BVH::BinSortBoxes(
 	float minC = lArray[axisIndex];
 	for (int32_t i = 0; i < count; ++i)
 	{
-		glm::vec2 c = leaves[i].aabb.Center();
+		glm::vec2 c = leaves[i].aabb.center();
 		float cArray[2] = {c.x, c.y};
 		auto binIndex = (int32_t)(binCount * (cArray[axisIndex] - minC) * invD);
 		binIndex = Clamp(binIndex, 0, BIN_COUNT - 1);
 		leaves[i].next = binIndex;
 		bins[binIndex].count += 1;
-		bins[binIndex].aabb = bins[binIndex].aabb.Union(leaves[i].aabb);
+		bins[binIndex].aabb = bins[binIndex].aabb.combine(leaves[i].aabb);
 	}
 
 	int32_t planeCount = BIN_COUNT - 1;
@@ -999,7 +999,7 @@ BVH::BinSortBoxes(
 	for (int32_t i = 1; i < planeCount; ++i)
 	{
 		planes[i].leftCount = planes[i - 1].leftCount + bins[i].count;
-		planes[i].leftAABB = planes[i - 1].leftAABB.Union(bins[i].aabb);
+		planes[i].leftAABB = planes[i - 1].leftAABB.combine(bins[i].aabb);
 	}
 
 	planes[planeCount - 1].rightCount = bins[planeCount].count;
@@ -1007,15 +1007,15 @@ BVH::BinSortBoxes(
 	for (int32_t i = planeCount - 2; i >= 0; --i)
 	{
 		planes[i].rightCount = planes[i + 1].rightCount + bins[i + 1].count;
-		planes[i].rightAABB = planes[i + 1].rightAABB.Union(bins[i + 1].aabb);
+		planes[i].rightAABB = planes[i + 1].rightAABB.combine(bins[i + 1].aabb);
 	}
 
 	float minCost = FLT_MAX;
 	int32_t bestPlane = 0;
 	for (int32_t i = 0; i < planeCount; ++i)
 	{
-		float leftArea = planes[i].leftAABB.Perimeter();
-		float rightArea = planes[i].rightAABB.Perimeter();
+		float leftArea = planes[i].leftAABB.perimeter();
+		float rightArea = planes[i].rightAABB.perimeter();
 		int32_t leftCount = planes[i].leftCount;
 		int32_t rightCount = planes[i].rightCount;
 
@@ -1027,13 +1027,13 @@ BVH::BinSortBoxes(
 		}
 	}
 
-	assert(mNodeCount < mNodeCapacity);
-	int32_t nodeIndex = mNodeCount;
+	assert(m_nodeCount < m_nodeCapacity);
+	int32_t nodeIndex = m_nodeCount;
 	Node* node = nodes + nodeIndex;
-	node->SetDefault();
-	node->aabb = planes[bestPlane].leftAABB.Union(planes[bestPlane].rightAABB);
+	node->setDefault();
+	node->aabb = planes[bestPlane].leftAABB.combine(planes[bestPlane].rightAABB);
 	node->parent = parentIndex;
-	mNodeCount += 1;
+	m_nodeCount += 1;
 
 	int32_t i1 = -1;
 	for (int32_t i2 = 0; i2 < count; ++i2)
@@ -1063,8 +1063,8 @@ BVH::BinSortBoxes(
 	}
 
 	// Recurse
-	node->child1 = BinSortBoxes(nodeIndex, leaves, leftCount, bins, planes);
-	node->child2 = BinSortBoxes(nodeIndex, leaves + leftCount, rightCount, bins, planes);
+	node->child1 = binSortBoxes(nodeIndex, leaves, leftCount, bins, planes);
+	node->child2 = binSortBoxes(nodeIndex, leaves + leftCount, rightCount, bins, planes);
 
 	const Node* child1 = nodes + node->child1;
 	const Node* child2 = nodes + node->child2;
@@ -1076,38 +1076,38 @@ BVH::BinSortBoxes(
 }
 
 int32_t
-BVH::GetProxyCount()
+BVH::getProxyCount() const
 {
-	return mProxyCount;
+	return m_proxyCount;
 }
 
 void
-BVH::RebuildTopDownSAH(ProxyMap* mapArray, int32_t mapCount)
+BVH::rebuildTopDownSAH(ProxyMap* mapArray, int32_t mapCount)
 {
 	(void)mapCount;
-	assert(mapCount == mProxyCount);
+	assert(mapCount == m_proxyCount);
 
 	// need a way to map proxies
 
-	int32_t proxyCount = mProxyCount;
-	int32_t initialCapacity = mNodeCapacity;
+	int32_t proxyCount = m_proxyCount;
+	int32_t initialCapacity = m_nodeCapacity;
 
 	// Ensure sufficient capacity
 	int32_t requiredCapacity = 2 * proxyCount - 1;
 	if (initialCapacity < 2 * proxyCount - 1)
 	{
-		Node* oldNodes = mNodes;
+		Node* oldNodes = m_nodes;
 
 		// Additional capacity for next rebuild
-		mNodeCapacity = requiredCapacity + requiredCapacity / 2;
+		m_nodeCapacity = requiredCapacity + requiredCapacity / 2;
 
-		mNodes = (Node*)_malloc(mNodeCapacity * sizeof(Node));
-		memcpy(mNodes, oldNodes, mNodeCount * sizeof(Node));
+		m_nodes = (Node*)_malloc(m_nodeCapacity * sizeof(Node));
+		memcpy(m_nodes, oldNodes, m_nodeCount * sizeof(Node));
 		_free(oldNodes); //, oldCapcity * sizeof(Node));
 	}
 
 	// Copy all leaf nodes to the beginning of the array
-	Node* nodes = mNodes;
+	Node* nodes = m_nodes;
 	int32_t nodeCount = 0, k = 0;
 	while (nodeCount < proxyCount)
 	{
@@ -1125,13 +1125,13 @@ BVH::RebuildTopDownSAH(ProxyMap* mapArray, int32_t mapCount)
 	}
 
 	assert(nodeCount == proxyCount);
-	mNodeCount = nodeCount;
+	m_nodeCount = nodeCount;
 
 	TreeBin bins[BIN_COUNT];
 	TreePlane planes[BIN_COUNT - 1];
-	mRoot = BinSortBoxes(BVH_NullIndex, nodes, nodeCount, bins, planes);
+	m_root = binSortBoxes(BVH_NullIndex, nodes, nodeCount, bins, planes);
 
-	nodeCount = mNodeCount;
+	nodeCount = m_nodeCount;
 
 	// Create a map for proxy nodes so the uses can get the new index
 	for (int32_t i = 0; i < proxyCount; ++i)
@@ -1142,49 +1142,49 @@ BVH::RebuildTopDownSAH(ProxyMap* mapArray, int32_t mapCount)
 	}
 
 	// Fill free list
-	int32_t newCapacity = mNodeCapacity;
+	int32_t newCapacity = m_nodeCapacity;
 	if (nodeCount < newCapacity)
 	{
 		for (int32_t i = nodeCount; i < newCapacity - 1; ++i)
 		{
-			mNodes[i].next = i + 1;
-			mNodes[i].height = -1;
+			m_nodes[i].next = i + 1;
+			m_nodes[i].height = -1;
 		}
-		mNodes[mNodeCapacity - 1].next = BVH_NullIndex;
-		mNodes[mNodeCapacity - 1].height = -1;
-		mFreeList = mNodeCount;
+		m_nodes[m_nodeCapacity - 1].next = BVH_NullIndex;
+		m_nodes[m_nodeCapacity - 1].height = -1;
+		m_freeList = m_nodeCount;
 	}
-	else { mFreeList = BVH_NullIndex; }
+	else { m_freeList = BVH_NullIndex; }
 
-	Validate();
+	validate();
 }
 
 void*
-BVH::GetUserData(int32_t proxyId)
+BVH::getUserData(int32_t proxyId)
 {
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	return mNodes[proxyId].userData;
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	return m_nodes[proxyId].userData;
 }
 
 bool
-BVH::WasMoved(int32_t proxyId)
+BVH::wasMoved(int32_t proxyId)
 {
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	return mNodes[proxyId].moved;
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	return m_nodes[proxyId].moved;
 }
 
 void
-BVH::ClearMoved(int32_t proxyId)
+BVH::clearMoved(int32_t proxyId)
 {
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	mNodes[proxyId].moved = false;
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	m_nodes[proxyId].moved = false;
 }
 
-AABB
-BVH::GetFatAABB(int32_t proxyId)
+Box
+BVH::getFatAABB(int32_t proxyId)
 {
-	assert(0 <= proxyId && proxyId < mNodeCapacity);
-	return mNodes[proxyId].aabb;
+	assert(0 <= proxyId && proxyId < m_nodeCapacity);
+	return m_nodes[proxyId].aabb;
 }
 } // namespace ie
 
