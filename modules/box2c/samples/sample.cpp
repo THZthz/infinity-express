@@ -43,6 +43,7 @@ static void* EnqueueTask(b2TaskCallback* task, int32_t itemCount, int32_t minRan
 	}
 	else
 	{
+		// This is not fatal but the maxTasks should be increased
 		assert(false);
 		task(0, itemCount, 0, taskContext);
 		return nullptr;
@@ -51,9 +52,12 @@ static void* EnqueueTask(b2TaskCallback* task, int32_t itemCount, int32_t minRan
 
 static void FinishTask(void* taskPtr, void* userContext)
 {
-	SampleTask* sampleTask = static_cast<SampleTask*>(taskPtr);
-	Sample* sample = static_cast<Sample*>(userContext);
-	sample->m_scheduler.WaitforTask(sampleTask);
+	if (taskPtr != nullptr)
+	{
+		SampleTask* sampleTask = static_cast<SampleTask*>(taskPtr);
+		Sample* sample = static_cast<Sample*>(userContext);
+		sample->m_scheduler.WaitforTask(sampleTask);
+	}
 }
 
 static void FinishAllTasks(void* userContext)
@@ -67,12 +71,11 @@ Sample::Sample(const Settings& settings)
 {
 	b2Vec2 gravity = {0.0f, -10.0f};
 
-	uint32_t maxThreads = B2_MIN(8, enki::GetNumHardwareThreads());
-	m_scheduler.Initialize(maxThreads);
+	m_scheduler.Initialize(settings.m_workerCount);
 	m_taskCount = 0;
 
 	b2WorldDef worldDef = b2DefaultWorldDef();
-	worldDef.workerCount = maxThreads;
+	worldDef.workerCount = settings.m_workerCount;
 	worldDef.enqueueTask = &EnqueueTask;
 	worldDef.finishTask = &FinishTask;
 	worldDef.finishAllTasks = &FinishAllTasks;
@@ -275,14 +278,14 @@ void Sample::Step(Settings& settings)
 
 		int32_t totalCount = 0;
 		char buffer[256] = {0};
-		int32_t offset = sprintf_s(buffer, 256, "colors: ");
+		int32_t offset = snprintf(buffer, 256, "colors: ");
 		for (int32_t i = 0; i < b2_graphColorCount; ++i)
 		{
-			offset += sprintf_s(buffer + offset, 256 - offset, "%d/", s.colorCounts[i]);
+			offset += snprintf(buffer + offset, 256 - offset, "%d/", s.colorCounts[i]);
 			totalCount += s.colorCounts[i];
 		}
 		totalCount += s.colorCounts[b2_graphColorCount];
-		sprintf_s(buffer + offset, 256 - offset, "(%d)[%d]", s.colorCounts[b2_graphColorCount], totalCount);
+		snprintf(buffer + offset, 256 - offset, "(%d)[%d]", s.colorCounts[b2_graphColorCount], totalCount);
 		g_draw.DrawString(5, m_textLine, buffer);
 		m_textLine += m_textIncrement;
 
@@ -290,6 +293,9 @@ void Sample::Step(Settings& settings)
 		m_textLine += m_textIncrement;
 
 		g_draw.DrawString(5, m_textLine, "stack allocator capacity/used = %d/%d", s.stackCapacity, s.stackUsed);
+		m_textLine += m_textIncrement;
+
+		g_draw.DrawString(5, m_textLine, "task count = %d", s.taskCount);
 		m_textLine += m_textIncrement;
 
 		g_draw.DrawString(5, m_textLine, "total bytes allocated = %d", s.byteCount);

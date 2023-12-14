@@ -32,7 +32,7 @@
 #define B2_CPU_X64
 #elif defined(__aarch64__) || defined(_M_ARM64)
 #define B2_CPU_ARM
-#elif defined(JPH_PLATFORM_WASM)
+#elif defined(__EMSCRIPTEN__)
 #define B2_CPU_WASM
 #else
 #error Unsupported CPU
@@ -64,7 +64,7 @@
 #error Unknown platform
 #endif
 
-#if defined(_DEBUG) || defined(B2_ENABLE_ASSERT)
+#if !defined(NDEBUG) || defined(B2_ENABLE_ASSERT)
 #define B2_ASSERT(condition)                                                                                                               \
 	do                                                                                                                                     \
 	{                                                                                                                                      \
@@ -75,8 +75,8 @@
 #define B2_ASSERT(...) ((void)0)
 #endif
 
-#if defined(_DEBUG)
-#define B2_VALIDATE 1
-#else
+#if defined(NDEBUG)
 #define B2_VALIDATE 0
+#else
+#define B2_VALIDATE 1
 #endif

@@ -14,7 +14,7 @@ PenaltyBreakBeforeFirstCallParameter: 100
 PenaltyBreakComment: 300
 PenaltyBreakFirstLessLess: 120
 PenaltyBreakString: 1000
-PenaltyBreakTemplateDeclaration: 10
+PenaltyBreakTemplateDeclaration: 1000
 PenaltyExcessCharacter: 1000000
 PenaltyReturnTypeOnItsOwnLine: 500
 PenaltyBreakOpenParenthesis: 200
@@ -52,6 +52,7 @@ ForEachMacros:
   - foreach
   - Q_FOREACH
   - BOOST_FOREACH
+  - SHADER_TEXT
 AlignEscapedNewlines: Right
 
 # expression and declaration
@@ -63,7 +64,7 @@ AllowShortIfStatementsOnASingleLine: AllIfsAndElse
 AlignOperands: true
 AllowShortCaseLabelsOnASingleLine: true
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: Yes
+AlwaysBreakTemplateDeclarations: MultiLine
 
 #AlignConsecutiveBitFields: AcrossEmptyLinesAndComments
 

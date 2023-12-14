@@ -14,12 +14,12 @@
 // <http://creativecommons.org/publicdomain/zero/1.0/>.
 ///
 
-#ifndef TL_OPTIONAL_HPP
-#define TL_OPTIONAL_HPP
+#ifndef IE_OPTIONAL_HPP
+#define IE_OPTIONAL_HPP
 
-#define TL_OPTIONAL_VERSION_MAJOR 1
-#define TL_OPTIONAL_VERSION_MINOR 1
-#define TL_OPTIONAL_VERSION_PATCH 0
+#define IE_OPTIONAL_VERSION_MAJOR 1
+#define IE_OPTIONAL_VERSION_MINOR 1
+#define IE_OPTIONAL_VERSION_PATCH 0
 
 #include <exception>
 #include <functional>
@@ -27,40 +27,43 @@
 #include <type_traits>
 #include <utility>
 
+#include "utils/detail/in_place.hpp"
+#include "utils/detail/aliases.hpp"
+
 #if (defined(_MSC_VER) && _MSC_VER == 1900)
-#	define TL_OPTIONAL_MSVC2015
+#	define IE_OPTIONAL_MSVC2015
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ <= 9 && !defined(__clang__))
-#	define TL_OPTIONAL_GCC49
+#	define IE_OPTIONAL_GCC49
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ == 5 && __GNUC_MINOR__ <= 4 && !defined(__clang__))
-#	define TL_OPTIONAL_GCC54
+#	define IE_OPTIONAL_GCC54
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ == 5 && __GNUC_MINOR__ <= 5 && !defined(__clang__))
-#	define TL_OPTIONAL_GCC55
+#	define IE_OPTIONAL_GCC55
 #endif
 
 #if (defined(__GNUC__) && __GNUC__ == 4 && __GNUC_MINOR__ <= 9 && !defined(__clang__))
 // GCC < 5 doesn't support overloading on const&& for member functions
-#	define TL_OPTIONAL_NO_CONSTRR
+#	define IE_OPTIONAL_NO_CONSTRR
 
 // GCC < 5 doesn't support some standard C++11 type traits
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
 		std::has_trivial_copy_constructor<T>::value
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) std::has_trivial_copy_assign<T>::value
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) std::has_trivial_copy_assign<T>::value
 
 // This one will be different for GCC 5.7 if it's ever supported
-#	define TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
+#	define IE_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
 
 // GCC 5 < v < 8 has a bug in is_trivially_copy_constructible which breaks std::vector
 // for non-copyable types
 #elif (defined(__GNUC__) && __GNUC__ < 8 && !defined(__clang__))
-#	ifndef TL_GCC_LESS_8_TRIVIALLY_COPY_CONSTRUCTIBLE_MUTEX
-#		define TL_GCC_LESS_8_TRIVIALLY_COPY_CONSTRUCTIBLE_MUTEX
-namespace tl {
+#	ifndef IE_GCC_LESS_8_TRIVIALLY_COPY_CONSTRUCTIBLE_MUTEX
+#		define IE_GCC_LESS_8_TRIVIALLY_COPY_CONSTRUCTIBLE_MUTEX
+namespace ie {
 namespace detail {
 template <class T>
 struct is_trivially_copy_constructible : std::is_trivially_copy_constructible<T>
@@ -74,67 +77,42 @@ struct is_trivially_copy_constructible<std::vector<T, A>>
 };
 #		endif
 } // namespace detail
-} // namespace tl
+} // namespace ie
 #	endif
 
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
-		tl::detail::is_trivially_copy_constructible<T>::value
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T)                                       \
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
+		ie::detail::is_trivially_copy_constructible<T>::value
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T)                                       \
 		std::is_trivially_copy_assignable<T>::value
-#	define TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
+#	define IE_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
 #else
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)                                    \
 		std::is_trivially_copy_constructible<T>::value
-#	define TL_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T)                                       \
+#	define IE_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T)                                       \
 		std::is_trivially_copy_assignable<T>::value
-#	define TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
+#	define IE_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T) std::is_trivially_destructible<T>::value
 #endif
 
 #if __cplusplus > 201103L
-#	define TL_OPTIONAL_CXX14
+#	define IE_OPTIONAL_CXX14
 #endif
 
 // constexpr implies const in C++11, not C++14
-#if (__cplusplus == 201103L || defined(TL_OPTIONAL_MSVC2015) || defined(TL_OPTIONAL_GCC49))
-#	define TL_OPTIONAL_11_CONSTEXPR
+#if (__cplusplus == 201103L || defined(IE_OPTIONAL_MSVC2015) || defined(IE_OPTIONAL_GCC49))
+#	define IE_OPTIONAL_11_CONSTEXPR
 #else
-#	define TL_OPTIONAL_11_CONSTEXPR constexpr
+#	define IE_OPTIONAL_11_CONSTEXPR constexpr
 #endif
 
-namespace tl {
-#ifndef TL_MONOSTATE_INPLACE_MUTEX
-#	define TL_MONOSTATE_INPLACE_MUTEX
-/// Used to represent an optional with no data; essentially a bool
-class monostate
-{
-};
+namespace ie {
 
-///  A tag type to tell optional to construct its value in-place
-struct in_place_t
-{
-	explicit in_place_t() = default;
-};
-/// A tag to tell optional to construct its value in-place
-static constexpr in_place_t in_place{};
-#endif
 
 template <class T>
 class optional;
 
 namespace detail {
-#ifndef TL_TRAITS_MUTEX
-#	define TL_TRAITS_MUTEX
-// C++14-style aliases for brevity
-template <class T>
-using remove_const_t = typename std::remove_const<T>::type;
-template <class T>
-using remove_reference_t = typename std::remove_reference<T>::type;
-template <class T>
-using decay_t = typename std::decay<T>::type;
-template <bool E, class T = void>
-using enable_if_t = typename std::enable_if<E, T>::type;
-template <bool B, class T, class F>
-using conditional_t = typename std::conditional<B, T, F>::type;
+#ifndef IE_TRAITS_MUTEX
+#	define IE_TRAITS_MUTEX
 
 // std::conjunction from C++17
 template <class...>
@@ -151,13 +129,13 @@ struct conjunction<B, Bs...> : std::conditional<bool(B::value), conjunction<Bs..
 };
 
 #	if defined(_LIBCPP_VERSION) && __cplusplus == 201103L
-#		define TL_TRAITS_LIBCXX_MEM_FN_WORKAROUND
+#		define IE_TRAITS_LIBCXX_MEM_FN_WORKAROUND
 #	endif
 
 // In C++11 mode, there's an issue in libc++'s std::mem_fn
 // which results in a hard-error when using it in a noexcept expression
 // in some cases. This is a check to workaround the common failing case.
-#	ifdef TL_TRAITS_LIBCXX_MEM_FN_WORKAROUND
+#	ifdef IE_TRAITS_LIBCXX_MEM_FN_WORKAROUND
 template <class T>
 struct is_pointer_to_non_const_member_func : std::false_type
 {
@@ -206,7 +184,7 @@ struct is_const_or_const_ref<T const> : std::true_type
 template <
     typename Fn,
     typename... Args,
-#	ifdef TL_TRAITS_LIBCXX_MEM_FN_WORKAROUND
+#	ifdef IE_TRAITS_LIBCXX_MEM_FN_WORKAROUND
     typename = enable_if_t<!(
         is_pointer_to_non_const_member_func<Fn>::value &&
         is_const_or_const_ref<Args...>::value)>,
@@ -351,7 +329,7 @@ struct voider
 template <class... Ts>
 using void_t = typename voider<Ts...>::type;
 
-// Trait for checking if a type is a tl::optional
+// Trait for checking if a type is a ie::optional
 template <class T>
 struct is_optional_impl : std::false_type
 {
@@ -363,7 +341,7 @@ struct is_optional_impl<optional<T>> : std::true_type
 template <class T>
 using is_optional = is_optional_impl<decay_t<T>>;
 
-// Change void to tl::monostate
+// Change void to ie::monostate
 template <class U>
 using fixup_void = conditional_t<std::is_void<U>::value, monostate, U>;
 
@@ -390,7 +368,7 @@ using disable_if_ret_void = enable_if_t<!returns_void<T &&, U...>::value>;
 template <class T, class U>
 using enable_forward_value = detail::enable_if_t<
     std::is_constructible<T, U &&>::value &&
-    !std::is_same<detail::decay_t<U>, in_place_t>::value &&
+    !std::is_same<detail::decay_t<U>, in_place_t (&)(ie::detail::in_place_type_tag<T>)>::value &&
     !std::is_same<optional<T>, detail::decay_t<U>>::value>;
 
 template <class T, class U, class Other>
@@ -433,12 +411,12 @@ using enable_assign_from_other = detail::enable_if_t<
 template <class T, bool = ::std::is_trivially_destructible<T>::value>
 struct optional_storage_base
 {
-	TL_OPTIONAL_11_CONSTEXPR optional_storage_base() noexcept : m_dummy(), m_has_value(false)
+	IE_OPTIONAL_11_CONSTEXPR optional_storage_base() noexcept : m_dummy(), m_has_value(false)
 	{
 	}
 
 	template <class... U>
-	TL_OPTIONAL_11_CONSTEXPR optional_storage_base(in_place_t, U &&...u)
+	IE_OPTIONAL_11_CONSTEXPR optional_storage_base(in_place_t (&)(ie::detail::in_place_type_tag<T>), U &&...u)
 	    : m_value(std::forward<U>(u)...), m_has_value(true)
 	{
 	}
@@ -468,12 +446,12 @@ struct optional_storage_base
 template <class T>
 struct optional_storage_base<T, true>
 {
-	TL_OPTIONAL_11_CONSTEXPR optional_storage_base() noexcept : m_dummy(), m_has_value(false)
+	IE_OPTIONAL_11_CONSTEXPR optional_storage_base() noexcept : m_dummy(), m_has_value(false)
 	{
 	}
 
 	template <class... U>
-	TL_OPTIONAL_11_CONSTEXPR optional_storage_base(in_place_t, U &&...u)
+	IE_OPTIONAL_11_CONSTEXPR optional_storage_base(in_place_t (&)(ie::detail::in_place_type_tag<T>), U &&...u)
 	    : m_value(std::forward<U>(u)...), m_has_value(true)
 	{
 	}
@@ -530,17 +508,17 @@ struct optional_operations_base : optional_storage_base<T>
 
 	bool has_value() const { return this->m_has_value; }
 
-	TL_OPTIONAL_11_CONSTEXPR T &get() & { return this->m_value; }
-	TL_OPTIONAL_11_CONSTEXPR const T &get() const & { return this->m_value; }
-	TL_OPTIONAL_11_CONSTEXPR T &&get() && { return std::move(this->m_value); }
-#ifndef TL_OPTIONAL_NO_CONSTRR
+	IE_OPTIONAL_11_CONSTEXPR T &get() & { return this->m_value; }
+	IE_OPTIONAL_11_CONSTEXPR const T &get() const & { return this->m_value; }
+	IE_OPTIONAL_11_CONSTEXPR T &&get() && { return std::move(this->m_value); }
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr const T &&get() const && { return std::move(this->m_value); }
 #endif
 };
 
 // This class manages conditionally having a trivial copy constructor
 // This specialization is for when T is trivially copy constructible
-template <class T, bool = TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)>
+template <class T, bool = IE_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T)>
 struct optional_copy_base : optional_operations_base<T>
 {
 	using optional_operations_base<T>::optional_operations_base;
@@ -569,7 +547,7 @@ struct optional_copy_base<T, false> : optional_operations_base<T>
 // doesn't implement an analogue to std::is_trivially_move_constructible. We
 // have to make do with a non-trivial move constructor even if T is trivially
 // move constructible
-#ifndef TL_OPTIONAL_GCC49
+#ifndef IE_OPTIONAL_GCC49
 template <class T, bool = std::is_trivially_move_constructible<T>::value>
 struct optional_move_base : optional_copy_base<T>
 {
@@ -600,9 +578,9 @@ struct optional_move_base<T, false> : optional_copy_base<T>
 // This class manages conditionally having a trivial copy assignment operator
 template <
     class T,
-    bool = TL_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) &&
-           TL_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T) &&
-           TL_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T)>
+    bool = IE_OPTIONAL_IS_TRIVIALLY_COPY_ASSIGNABLE(T) &&
+           IE_OPTIONAL_IS_TRIVIALLY_COPY_CONSTRUCTIBLE(T) &&
+           IE_OPTIONAL_IS_TRIVIALLY_DESTRUCTIBLE(T)>
 struct optional_copy_assign_base : optional_move_base<T>
 {
 	using optional_move_base<T>::optional_move_base;
@@ -630,7 +608,7 @@ struct optional_copy_assign_base<T, false> : optional_move_base<T>
 // doesn't implement an analogue to std::is_trivially_move_assignable. We have
 // to make do with a non-trivial move assignment operator even if T is trivially
 // move assignable
-#ifndef TL_OPTIONAL_GCC49
+#ifndef IE_OPTIONAL_GCC49
 template <
     class T,
     bool = std::is_trivially_destructible<T>::value &&std::is_trivially_move_constructible<
@@ -792,7 +770,7 @@ class optional
 	using base = detail::optional_move_assign_base<T>;
 
 	static_assert(
-	    !std::is_same<T, in_place_t>::value,
+	    !std::is_same<T, in_place_t (&)(ie::detail::in_place_type_tag<T>)>::value,
 	    "instantiation of optional with in_place_t is ill-formed");
 	static_assert(
 	    !std::is_same<detail::decay_t<T>, nullopt_t>::value,
@@ -803,12 +781,12 @@ public:
 // types are not SFINAE-safe. This provides better support for things like
 // generic lambdas. C.f.
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0826r0.html
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 	/// Carries out some operation which returns an optional on the stored
 	/// object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -817,7 +795,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &&
 	{
 		using result = detail::invoke_result_t<F, T &&>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -835,7 +813,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : result(nullopt);
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr auto and_then(F &&f) const &&
 	{
@@ -850,7 +828,7 @@ public:
 	/// Carries out some operation which returns an optional on the stored
 	/// object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -859,7 +837,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &&> and_then(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &&> and_then(F &&f) &&
 	{
 		using result = detail::invoke_result_t<F, T &&>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -877,7 +855,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : result(nullopt);
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr detail::invoke_result_t<F, const T &&> and_then(F &&f) const &&
 	{
@@ -890,17 +868,17 @@ public:
 #	endif
 #endif
 
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto map(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto map(F &&f) &
 	{
 		return optional_map_impl(*this, std::forward<F>(f));
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto map(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto map(F &&f) &&
 	{
 		return optional_map_impl(std::move(*this), std::forward<F>(f));
 	}
@@ -919,7 +897,7 @@ public:
 #else
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
 	    std::declval<optional &>(),
 	    std::declval<F &&>()))
 	map(F &&f) &
@@ -928,7 +906,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
 	    std::declval<optional &&>(),
 	    std::declval<F &&>()))
 	map(F &&f) &&
@@ -945,7 +923,7 @@ public:
 		return optional_map_impl(*this, std::forward<F>(f));
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr decltype(optional_map_impl(
 	    std::declval<const optional &&>(),
@@ -957,17 +935,17 @@ public:
 #	endif
 #endif
 
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &
 	{
 		return optional_map_impl(*this, std::forward<F>(f));
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &&
 	{
 		return optional_map_impl(std::move(*this), std::forward<F>(f));
 	}
@@ -986,7 +964,7 @@ public:
 #else
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
 	    std::declval<optional &>(),
 	    std::declval<F &&>()))
 	transform(F &&f) &
@@ -995,7 +973,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(optional_map_impl(
 	    std::declval<optional &&>(),
 	    std::declval<F &&>()))
 	transform(F &&f) &&
@@ -1012,7 +990,7 @@ public:
 		return optional_map_impl(*this, std::forward<F>(f));
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr decltype(optional_map_impl(
 	    std::declval<const optional &&>(),
@@ -1026,7 +1004,7 @@ public:
 
 	/// Calls `f` if the optional is empty
 	template <class F, detail::enable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
 	{
 		if (has_value()) return *this;
 
@@ -1035,7 +1013,7 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
 	{
 		return has_value() ? *this : std::forward<F>(f)();
 	}
@@ -1050,7 +1028,7 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &&
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &&
 	{
 		return has_value() ? std::move(*this) : std::forward<F>(f)();
 	}
@@ -1065,12 +1043,12 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) const &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) const &
 	{
 		return has_value() ? *this : std::forward<F>(f)();
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, detail::enable_if_ret_void<F> * = nullptr>
 	optional<T> or_else(F &&f) const &&
 	{
@@ -1107,7 +1085,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : std::forward<U>(u);
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, class U>
 	U map_or(F &&f, U &&u) const &&
 	{
@@ -1137,7 +1115,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : std::forward<U>(u)();
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, class U>
 	detail::invoke_result_t<U> map_or_else(F &&f, U &&u) const &&
 	{
@@ -1155,7 +1133,7 @@ public:
 	}
 
 	/// Returns `rhs` if `*this` is empty, otherwise the current value.
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &
 	{
 		return has_value() ? *this : rhs;
 	}
@@ -1165,19 +1143,19 @@ public:
 		return has_value() ? *this : rhs;
 	}
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &&
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &&
 	{
 		return has_value() ? std::move(*this) : rhs;
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr optional disjunction(const optional &rhs) const &&
 	{
 		return has_value() ? std::move(*this) : rhs;
 	}
 #endif
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &
 	{
 		return has_value() ? *this : std::move(rhs);
 	}
@@ -1187,12 +1165,12 @@ public:
 		return has_value() ? *this : std::move(rhs);
 	}
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &&
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &&
 	{
 		return has_value() ? std::move(*this) : std::move(rhs);
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr optional disjunction(optional &&rhs) const &&
 	{
 		return has_value() ? std::move(*this) : std::move(rhs);
@@ -1218,28 +1196,28 @@ public:
 	///
 	/// If `rhs` contains a value, the stored value is direct-initialized with
 	/// it. Otherwise, the constructed optional is empty.
-	TL_OPTIONAL_11_CONSTEXPR optional(const optional &rhs) = default;
+	IE_OPTIONAL_11_CONSTEXPR optional(const optional &rhs) = default;
 
 	/// Move constructor
 	///
 	/// If `rhs` contains a value, the stored value is direct-initialized with
 	/// it. Otherwise, the constructed optional is empty.
-	TL_OPTIONAL_11_CONSTEXPR optional(optional &&rhs) = default;
+	IE_OPTIONAL_11_CONSTEXPR optional(optional &&rhs) = default;
 
 	/// Constructs the stored value in-place using the given arguments.
 	template <class... Args>
 	constexpr explicit optional(
-	    detail::enable_if_t<std::is_constructible<T, Args...>::value, in_place_t>,
+	    detail::enable_if_t<std::is_constructible<T, Args...>::value, in_place_t (&)(ie::detail::in_place_type_tag<T>)>,
 	    Args &&...args)
 	    : base(in_place, std::forward<Args>(args)...)
 	{
 	}
 
 	template <class U, class... Args>
-	TL_OPTIONAL_11_CONSTEXPR explicit optional(
+	IE_OPTIONAL_11_CONSTEXPR explicit optional(
 	    detail::enable_if_t<
 	        std::is_constructible<T, std::initializer_list<U> &, Args &&...>::value,
-	        in_place_t>,
+	        in_place_t (&)(ie::detail::in_place_type_tag<T>)>,
 	    std::initializer_list<U> il,
 	    Args &&...args)
 	{
@@ -1432,16 +1410,16 @@ public:
 	/// Returns a pointer to the stored value
 	constexpr const T *operator->() const { return std::addressof(this->m_value); }
 
-	TL_OPTIONAL_11_CONSTEXPR T *operator->() { return std::addressof(this->m_value); }
+	IE_OPTIONAL_11_CONSTEXPR T *operator->() { return std::addressof(this->m_value); }
 
 	/// Returns the stored value
-	TL_OPTIONAL_11_CONSTEXPR T &operator*() & { return this->m_value; }
+	IE_OPTIONAL_11_CONSTEXPR T &operator*() & { return this->m_value; }
 
 	constexpr const T &operator*() const & { return this->m_value; }
 
-	TL_OPTIONAL_11_CONSTEXPR T &&operator*() && { return std::move(this->m_value); }
+	IE_OPTIONAL_11_CONSTEXPR T &&operator*() && { return std::move(this->m_value); }
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr const T &&operator*() const && { return std::move(this->m_value); }
 #endif
 
@@ -1451,24 +1429,24 @@ public:
 	constexpr explicit operator bool() const noexcept { return this->m_has_value; }
 
 	/// Returns the contained value if there is one, otherwise throws bad_optional_access
-	TL_OPTIONAL_11_CONSTEXPR T &value() &
+	IE_OPTIONAL_11_CONSTEXPR T &value() &
 	{
 		if (has_value()) return this->m_value;
 		throw bad_optional_access();
 	}
-	TL_OPTIONAL_11_CONSTEXPR const T &value() const &
+	IE_OPTIONAL_11_CONSTEXPR const T &value() const &
 	{
 		if (has_value()) return this->m_value;
 		throw bad_optional_access();
 	}
-	TL_OPTIONAL_11_CONSTEXPR T &&value() &&
+	IE_OPTIONAL_11_CONSTEXPR T &&value() &&
 	{
 		if (has_value()) return std::move(this->m_value);
 		throw bad_optional_access();
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
-	TL_OPTIONAL_11_CONSTEXPR const T &&value() const &&
+#ifndef IE_OPTIONAL_NO_CONSTRR
+	IE_OPTIONAL_11_CONSTEXPR const T &&value() const &&
 	{
 		if (has_value()) return std::move(this->m_value);
 		throw bad_optional_access();
@@ -1486,7 +1464,7 @@ public:
 	}
 
 	template <class U>
-	TL_OPTIONAL_11_CONSTEXPR T value_or(U &&u) &&
+	IE_OPTIONAL_11_CONSTEXPR T value_or(U &&u) &&
 	{
 		static_assert(
 		    std::is_move_constructible<T>::value && std::is_convertible<U &&, T>::value,
@@ -1503,7 +1481,7 @@ public:
 			this->m_has_value = false;
 		}
 	}
-}; // namespace tl
+}; // namespace ie
 
 /// Compares two optional objects
 template <class T, class U>
@@ -1738,7 +1716,7 @@ optional(T) -> optional<T>;
 
 /// \exclude
 namespace detail {
-#ifdef TL_OPTIONAL_CXX14
+#ifdef IE_OPTIONAL_CXX14
 template <
     class Opt,
     class F,
@@ -1813,13 +1791,13 @@ public:
 // types are not SFINAE-safe. This provides better support for things like
 // generic lambdas. C.f.
 // http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2017/p0826r0.html
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 
 	/// Carries out some operation which returns an optional on the stored
 	/// object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -1828,7 +1806,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto and_then(F &&f) &&
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -1845,7 +1823,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : result(nullopt);
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr auto and_then(F &&f) const &&
 	{
@@ -1859,7 +1837,7 @@ public:
 	/// Carries out some operation which returns an optional on the stored
 	/// object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -1868,7 +1846,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR detail::invoke_result_t<F, T &> and_then(F &&f) &&
 	{
 		using result = detail::invoke_result_t<F, T &>;
 		static_assert(detail::is_optional<result>::value, "F must return an optional");
@@ -1885,7 +1863,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : result(nullopt);
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr detail::invoke_result_t<F, const T &> and_then(F &&f) const &&
 	{
@@ -1898,17 +1876,17 @@ public:
 #	endif
 #endif
 
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto map(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto map(F &&f) &
 	{
 		return detail::optional_map_impl(*this, std::forward<F>(f));
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto map(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto map(F &&f) &&
 	{
 		return detail::optional_map_impl(std::move(*this), std::forward<F>(f));
 	}
@@ -1927,7 +1905,7 @@ public:
 #else
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
 	    std::declval<optional &>(),
 	    std::declval<F &&>()))
 	map(F &&f) &
@@ -1936,7 +1914,7 @@ public:
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
 	    std::declval<optional &&>(),
 	    std::declval<F &&>()))
 	map(F &&f) &&
@@ -1953,7 +1931,7 @@ public:
 		return detail::optional_map_impl(*this, std::forward<F>(f));
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr decltype(detail::optional_map_impl(
 	    std::declval<const optional &&>(),
@@ -1965,17 +1943,17 @@ public:
 #	endif
 #endif
 
-#if defined(TL_OPTIONAL_CXX14) && !defined(TL_OPTIONAL_GCC49) &&                              \
-    !defined(TL_OPTIONAL_GCC54) && !defined(TL_OPTIONAL_GCC55)
+#if defined(IE_OPTIONAL_CXX14) && !defined(IE_OPTIONAL_GCC49) &&                              \
+    !defined(IE_OPTIONAL_GCC54) && !defined(IE_OPTIONAL_GCC55)
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &
+	IE_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &
 	{
 		return detail::optional_map_impl(*this, std::forward<F>(f));
 	}
 
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &&
+	IE_OPTIONAL_11_CONSTEXPR auto transform(F &&f) &&
 	{
 		return detail::optional_map_impl(std::move(*this), std::forward<F>(f));
 	}
@@ -1994,7 +1972,7 @@ public:
 #else
 	/// Carries out some operation on the stored object if there is one.
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
 	    std::declval<optional &>(),
 	    std::declval<F &&>()))
 	transform(F &&f) &
@@ -2005,7 +1983,7 @@ public:
 	/// \group map
 	/// \synopsis template <class F> auto transform(F &&f) &&;
 	template <class F>
-	TL_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
+	IE_OPTIONAL_11_CONSTEXPR decltype(detail::optional_map_impl(
 	    std::declval<optional &&>(),
 	    std::declval<F &&>()))
 	transform(F &&f) &&
@@ -2022,7 +2000,7 @@ public:
 		return detail::optional_map_impl(*this, std::forward<F>(f));
 	}
 
-#	ifndef TL_OPTIONAL_NO_CONSTRR
+#	ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F>
 	constexpr decltype(detail::optional_map_impl(
 	    std::declval<const optional &&>(),
@@ -2036,7 +2014,7 @@ public:
 
 	/// Calls `f` if the optional is empty
 	template <class F, detail::enable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
 	{
 		if (has_value()) return *this;
 
@@ -2045,7 +2023,7 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &
 	{
 		return has_value() ? *this : std::forward<F>(f)();
 	}
@@ -2060,7 +2038,7 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) &&
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) &&
 	{
 		return has_value() ? std::move(*this) : std::forward<F>(f)();
 	}
@@ -2075,12 +2053,12 @@ public:
 	}
 
 	template <class F, detail::disable_if_ret_void<F> * = nullptr>
-	optional<T> TL_OPTIONAL_11_CONSTEXPR or_else(F &&f) const &
+	optional<T> IE_OPTIONAL_11_CONSTEXPR or_else(F &&f) const &
 	{
 		return has_value() ? *this : std::forward<F>(f)();
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, detail::enable_if_ret_void<F> * = nullptr>
 	optional<T> or_else(F &&f) const &&
 	{
@@ -2117,7 +2095,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : std::forward<U>(u);
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, class U>
 	U map_or(F &&f, U &&u) const &&
 	{
@@ -2147,7 +2125,7 @@ public:
 		return has_value() ? detail::invoke(std::forward<F>(f), **this) : std::forward<U>(u)();
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	template <class F, class U>
 	detail::invoke_result_t<U> map_or_else(F &&f, U &&u) const &&
 	{
@@ -2165,7 +2143,7 @@ public:
 	}
 
 	/// Returns `rhs` if `*this` is empty, otherwise the current value.
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &
 	{
 		return has_value() ? *this : rhs;
 	}
@@ -2175,19 +2153,19 @@ public:
 		return has_value() ? *this : rhs;
 	}
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &&
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(const optional &rhs) &&
 	{
 		return has_value() ? std::move(*this) : rhs;
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr optional disjunction(const optional &rhs) const &&
 	{
 		return has_value() ? std::move(*this) : rhs;
 	}
 #endif
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &
 	{
 		return has_value() ? *this : std::move(rhs);
 	}
@@ -2197,12 +2175,12 @@ public:
 		return has_value() ? *this : std::move(rhs);
 	}
 
-	TL_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &&
+	IE_OPTIONAL_11_CONSTEXPR optional disjunction(optional &&rhs) &&
 	{
 		return has_value() ? std::move(*this) : std::move(rhs);
 	}
 
-#ifndef TL_OPTIONAL_NO_CONSTRR
+#ifndef IE_OPTIONAL_NO_CONSTRR
 	constexpr optional disjunction(optional &&rhs) const &&
 	{
 		return has_value() ? std::move(*this) : std::move(rhs);
@@ -2228,13 +2206,13 @@ public:
 	///
 	/// If `rhs` contains a value, the stored value is direct-initialized with
 	/// it. Otherwise, the constructed optional is empty.
-	TL_OPTIONAL_11_CONSTEXPR optional(const optional &rhs) noexcept = default;
+	IE_OPTIONAL_11_CONSTEXPR optional(const optional &rhs) noexcept = default;
 
 	/// Move constructor
 	///
 	/// If `rhs` contains a value, the stored value is direct-initialized with
 	/// it. Otherwise, the constructed optional is empty.
-	TL_OPTIONAL_11_CONSTEXPR optional(optional &&rhs) = default;
+	IE_OPTIONAL_11_CONSTEXPR optional(optional &&rhs) = default;
 
 	/// Constructs the stored value with `u`.
 	template <
@@ -2304,10 +2282,10 @@ public:
 	/// Returns a pointer to the stored value
 	constexpr const T *operator->() const noexcept { return m_value; }
 
-	TL_OPTIONAL_11_CONSTEXPR T *operator->() noexcept { return m_value; }
+	IE_OPTIONAL_11_CONSTEXPR T *operator->() noexcept { return m_value; }
 
 	/// Returns the stored value
-	TL_OPTIONAL_11_CONSTEXPR T &operator*() noexcept { return *m_value; }
+	IE_OPTIONAL_11_CONSTEXPR T &operator*() noexcept { return *m_value; }
 
 	constexpr const T &operator*() const noexcept { return *m_value; }
 
@@ -2316,12 +2294,12 @@ public:
 	constexpr explicit operator bool() const noexcept { return m_value != nullptr; }
 
 	/// Returns the contained value if there is one, otherwise throws bad_optional_access
-	TL_OPTIONAL_11_CONSTEXPR T &value()
+	IE_OPTIONAL_11_CONSTEXPR T &value()
 	{
 		if (has_value()) return *m_value;
 		throw bad_optional_access();
 	}
-	TL_OPTIONAL_11_CONSTEXPR const T &value() const
+	IE_OPTIONAL_11_CONSTEXPR const T &value() const
 	{
 		if (has_value()) return *m_value;
 		throw bad_optional_access();
@@ -2339,7 +2317,7 @@ public:
 
 	/// \group value_or
 	template <class U>
-	TL_OPTIONAL_11_CONSTEXPR T value_or(U &&u) && noexcept
+	IE_OPTIONAL_11_CONSTEXPR T value_or(U &&u) && noexcept
 	{
 		static_assert(
 		    std::is_move_constructible<T>::value && std::is_convertible<U &&, T>::value,
@@ -2352,22 +2330,22 @@ public:
 
 private:
 	T *m_value;
-}; // namespace tl
+}; // namespace ie
 
 
 
-} // namespace tl
+} // namespace ie
 
 namespace std {
 // TODO SFINAE
 template <class T>
-struct hash<tl::optional<T>>
+struct hash<ie::optional<T>>
 {
-	::std::size_t operator()(const tl::optional<T> &o) const
+	::std::size_t operator()(const ie::optional<T> &o) const
 	{
 		if (!o.has_value()) return 0;
 
-		return std::hash<tl::detail::remove_const_t<T>>()(*o);
+		return std::hash<ie::detail::remove_const_t<T>>()(*o);
 	}
 };
 } // namespace std

@@ -72,7 +72,7 @@ ie::gjk::MakeOffsetBox(float hx, float hy, vec2 center, float angle)
 {
 	Xf2d xf;
 	xf.p = center;
-	xf.q.Set(angle);
+	xf.q.set(angle);
 
 	Polygon shape;
 	shape.count = 4;
@@ -202,8 +202,8 @@ ie::gjk::SegmentIntersection(
     vec2 &out)
 {
 	// calculate un-normalized direction vectors
-	vec2 r = a.Direction(false);
-	vec2 s = b.Direction(false);
+	vec2 r = a.direction(false);
+	vec2 s = b.direction(false);
 
 	vec2 originDist = SubV(b.p1, a.p1);
 

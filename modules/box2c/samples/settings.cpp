@@ -23,7 +23,7 @@ static bool ReadFile(char*& data, int& size, const char* filename)
 	}
 
 	fseek(file, 0, SEEK_END);
-	size = ftell(file);
+	size = (int)ftell(file);
 	fseek(file, 0, SEEK_SET);
 
 	if (size == 0)
@@ -100,9 +100,9 @@ void Settings::Load()
 			int count = tokens[i + 1].end - tokens[i + 1].start;
 			assert(count < 32);
 			const char* s = data + tokens[i + 1].start;
-			strncpy_s(buffer, 32, s, count);
+			strncpy(buffer, s, count);
 			char* dummy;
-			m_sampleIndex = strtol(buffer, &dummy, 10);
+			m_sampleIndex = (int)strtol(buffer, &dummy, 10);
 		}
 		else if (jsoneq(data, &tokens[i], "drawShapes") == 0)
 		{

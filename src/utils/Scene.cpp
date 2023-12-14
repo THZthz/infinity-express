@@ -1,4 +1,6 @@
 #include "utils/Scene.hpp"
+#include <memory>
+#include "GLFW/glfw3.h"
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
@@ -156,6 +158,7 @@ Scene::Scene(const std::string &name, int width, int height)
 	glfwSetErrorCallback(errorListener);
 
 	// create a window
+//#define IE_SCENE_IMPL_OPENGL_ES2
 #if defined(IE_SCENE_IMPL_OPENGL_ES2) // Decide GL+GLSL versions  // TODO
 	// GL ES 2.0 + GLSL 100
 	const char *glsl_version = "#version 100";
@@ -174,8 +177,8 @@ Scene::Scene(const std::string &name, int width, int height)
 	const char *glsl_version = "#version 130";
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-	//glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
+//	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+//	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 	glfwWindowHint(GLFW_SAMPLES, 4);
@@ -209,11 +212,12 @@ Scene::Scene(const std::string &name, int width, int height)
 		throw std::runtime_error("Failed to load address of OpenGL functions");
 
 	// create nanovg context
-	m_vg = nvglCreate(NVG_SRGB | NVG_DEBUG);
+	m_vg = nvglCreate(/*NVG_SRGB | */ NVG_DEBUG);
 	if (!m_vg) throw std::runtime_error("Failed to create nanovg context");
 
 	// create framebuffer for blitting
-	m_framebuffer = nvgluCreateFramebuffer(m_vg, 0, 0, NVGLU_NO_NVG_IMAGE | NVG_SRGB);
+	m_framebuffer =
+	    std::make_unique<Framebuffer>(m_vg, 0, 0, Framebuffer::NO_NVG_IMAGE /* | NVG_SRGB*/);
 
 	// add callbacks to the window
 	glfwSetWindowUserPointer(m_window, this);
@@ -222,6 +226,7 @@ Scene::Scene(const std::string &name, int width, int height)
 	glfwSetMouseButtonCallback(m_window, mouseButtonListener);
 	glfwSetFramebufferSizeCallback(m_window, framebufferSizeListener);
 	glfwSetScrollCallback(m_window, scrollListener);
+	glfwSetCharCallback(m_window, charListener);
 
 	// initialize imgui
 	IMGUI_CHECKVERSION();
@@ -264,7 +269,6 @@ Scene::~Scene()
 
 
 	assert(!m_preloaded);
-	nvgluDeleteFramebuffer(m_framebuffer);
 	nvglDelete(m_vg);
 	glfwDestroyWindow(m_window);
 	glfwTerminate();
@@ -360,6 +364,8 @@ ie::Scene::errorListener(int code, const char *desc)
 void
 Scene::mouseButtonListener(GLFWwindow *window, int button, int action, int mods)
 {
+	ImGui_ImplGlfw_MouseButtonCallback(window, button, action, mods);
+	if (ImGui::GetIO().WantCaptureMouse) return;
 	auto *ctx = static_cast<Scene *>(glfwGetWindowUserPointer(window));
 	ctx->onMouseButton(button, action, mods);
 	for (const auto &cb : ctx->m_mouseButtonCallbacks) cb(window, button, action, mods);
@@ -368,6 +374,7 @@ Scene::mouseButtonListener(GLFWwindow *window, int button, int action, int mods)
 void
 Scene::cursorPosListener(GLFWwindow *window, double xpos, double ypos)
 {
+	ImGui_ImplGlfw_CursorPosCallback(window, xpos, ypos); // TODO divide window scale ?
 	auto *ctx = static_cast<Scene *>(glfwGetWindowUserPointer(window));
 	ctx->onCursorPos(xpos, ypos);
 	for (const auto &cb : ctx->m_cursorPosCallbacks) cb(window, xpos, ypos);
@@ -376,6 +383,8 @@ Scene::cursorPosListener(GLFWwindow *window, double xpos, double ypos)
 void
 Scene::scrollListener(GLFWwindow *window, double xoffset, double yoffset)
 {
+	ImGui_ImplGlfw_ScrollCallback(window, xoffset, yoffset);
+	if (ImGui::GetIO().WantCaptureMouse) return;
 	auto *ctx = static_cast<Scene *>(glfwGetWindowUserPointer(window));
 	ctx->onScroll(xoffset, yoffset);
 	for (const auto &cb : ctx->m_scrollCallbacks) cb(window, xoffset, yoffset);
@@ -384,6 +393,8 @@ Scene::scrollListener(GLFWwindow *window, double xoffset, double yoffset)
 void
 Scene::keyListener(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
+	ImGui_ImplGlfw_KeyCallback(window, key, scancode, action, mods);
+	if (ImGui::GetIO().WantCaptureKeyboard) return;
 	auto *ctx = static_cast<Scene *>(glfwGetWindowUserPointer(window));
 	ctx->onKey(key, scancode, action, mods);
 	for (const auto &cb : ctx->m_keyCallbacks) cb(window, key, scancode, action, mods);
@@ -398,6 +409,12 @@ Scene::framebufferSizeListener(GLFWwindow *window, int width, int height)
 }
 
 void
+Scene::charListener(GLFWwindow *window, unsigned int c)
+{
+	ImGui_ImplGlfw_CharCallback(window, c);
+}
+
+void
 Scene::mainLoop()
 {
 	double time1 = glfwGetTime(); // start time of current frame
@@ -408,50 +425,30 @@ Scene::mainLoop()
 	// Calculate pixel ration for hi-dpi devices.
 	m_devicePixelRatio = (float)m_frameWidth / (float)m_winWidth;
 
-	double mx = 0, my = 0;
-	glfwGetCursorPos(m_window, &mx, &my);
-	ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
-	ImGui_ImplOpenGL3_NewFrame();
-	ImGui_ImplGlfw_NewFrame();
-	ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
-
-	const float cameraWidth = float(m_winWidth) / m_windowScale;
-	const float cameraHeight = float(m_winHeight) / m_windowScale;
-	ImGuiIO &io = ImGui::GetIO();
-	io.DisplaySize.x = cameraWidth;
-	io.DisplaySize.y = cameraHeight;
-	io.DisplayFramebufferScale.x = float(m_frameWidth) / cameraWidth;
-	io.DisplayFramebufferScale.y = float(m_frameHeight) / cameraHeight;
-
-	ImGui::NewFrame();
-
-	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
-	ImGui::SetNextWindowSize(ImVec2(cameraWidth, cameraHeight));
-	ImGui::SetNextWindowBgAlpha(0.0f);
-	ImGui::Begin(
-	    "Overlay", nullptr,
-	    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs |
-	        ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar);
-	ImGui::End();
-
-	char buffer[128];
-	sprintf(buffer, "fps %.1f", 1.f / m_frameTime);
-	ImGui::Begin(
-	    "Overlay", nullptr,
-	    ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs |
-	        ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar);
-	ImGui::SetCursorPos(ImVec2(5.0f, cameraHeight - 20.0f));
-	ImGui::TextColored(ImColor(153, 230, 153, 255), "%s", buffer);
-	ImGui::End();
-
-	ImGui::Render();
-
-	glViewport(0, 0, m_frameWidth, m_frameHeight);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	update(m_frameTime);
 	render();
 
-	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	if (m_showUI)
+	{
+		double mx = 0, my = 0;
+		glfwGetCursorPos(m_window, &mx, &my);
+		ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplGlfw_CursorPosCallback(m_window, mx / m_windowScale, my / m_windowScale);
+
+		const float cameraWidth = float(m_winWidth) / m_windowScale;
+		const float cameraHeight = float(m_winHeight) / m_windowScale;
+		ImGuiIO &io = ImGui::GetIO();
+		io.DisplaySize.x = cameraWidth;
+		io.DisplaySize.y = cameraHeight;
+		io.DisplayFramebufferScale.x = float(m_frameWidth) / cameraWidth;
+		io.DisplayFramebufferScale.y = float(m_frameHeight) / cameraHeight;
+
+		renderUI();
+
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+	}
 
 	glfwSwapBuffers(m_window);
 	glfwPollEvents();

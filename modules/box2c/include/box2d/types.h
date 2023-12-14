@@ -13,8 +13,16 @@
 
 #ifdef __cplusplus
 #define B2_LITERAL(T) T
+#define B2_ZERO_INIT {}
 #else
 #define B2_LITERAL(T) (T)
+#define B2_ZERO_INIT {0}
+#endif
+
+#ifdef NDEBUG
+#define B2_DEBUG 0
+#else
+#define B2_DEBUG 1
 #endif
 
 #define B2_ARRAY_COUNT(A) (int)(sizeof(A) / sizeof(A[0]))
@@ -71,8 +79,7 @@ typedef struct b2AABB
 /// Ray-cast input data. The ray extends from p1 to p1 + maxFraction * (p2 - p1).
 typedef struct b2RayCastInput
 {
-	b2Vec2 p1, p2;
-	float radius;
+	b2Vec2 origin, translation;
 	float maxFraction;
 } b2RayCastInput;
 
@@ -85,6 +92,15 @@ typedef struct b2RayCastOutput
 	int32_t iterations;
 	bool hit;
 } b2RayCastOutput;
+
+typedef struct b2ShapeCastInput
+{
+	b2Vec2 points[b2_maxPolygonVertices];
+	int32_t count;
+	float radius;
+	b2Vec2 translation;
+	float maxFraction;
+} b2ShapeCastInput;
 
 /// Task interface
 /// This is prototype for a Box2D task. Your task system is expected to invoke the Box2D task with these arguments.
@@ -101,7 +117,7 @@ typedef void* b2EnqueueTaskCallback(b2TaskCallback* task, int32_t itemCount, int
 /// Finishes a user task object that wraps a Box2D task.
 typedef void b2FinishTaskCallback(void* userTask, void* userContext);
 
-/// Finishes all tasks.
+/// Finishes all tasks. TODO_ERIN this must because the user may have other tasks running
 typedef void b2FinishAllTasksCallback(void* userContext);
 
 typedef struct b2WorldDef
@@ -169,7 +185,7 @@ typedef struct b2BodyDef
 {
 	/// The body type: static, kinematic, or dynamic.
 	/// Note: if a dynamic body would have zero mass, the mass is set to one.
-	enum b2BodyType type;
+	b2BodyType type;
 
 	/// The world position of the body. Avoid creating bodies at the origin
 	/// since this can lead to many overlapping shapes.
@@ -334,7 +350,7 @@ static inline b2WorldDef b2DefaultWorldDef(void)
 /// Make a body definition with default values.
 static inline b2BodyDef b2DefaultBodyDef(void)
 {
-	b2BodyDef def;
+	b2BodyDef def = B2_ZERO_INIT;
 	def.type = b2_staticBody;
 	def.position = B2_LITERAL(b2Vec2){0.0f, 0.0f};
 	def.angle = 0.0f;
@@ -353,14 +369,13 @@ static inline b2BodyDef b2DefaultBodyDef(void)
 
 static inline struct b2ShapeDef b2DefaultShapeDef(void)
 {
-	b2ShapeDef def;
+	b2ShapeDef def = {0};
 	def.friction = 0.6f;
 	def.restitution = 0.0f;
 	def.density = 0.0f;
 	def.filter = b2_defaultFilter;
 	def.isSensor = false;
-    def.userData = NULL;
-    return def;
+	return def;
 }
 
 static inline struct b2ChainDef b2DefaultChainDef(void)

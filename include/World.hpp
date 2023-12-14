@@ -1,7 +1,7 @@
 #ifndef IE_WORLD_HPP
 #define IE_WORLD_HPP
 
-#include "nanovg.h"
+#include "utils/VG.hpp"
 #include "utils/TaskScheduler.hpp"
 #include "utils/Scene.hpp"
 #include "DebugDraw.hpp"

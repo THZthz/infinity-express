@@ -77,13 +77,13 @@ Color::SRGBtoLinear(unsigned char c)
 }
 
 Color
-ie::RGBA(Color::uchar r_, Color::uchar g_, Color::uchar b_, Color::uchar a_)
+ie::RGBA(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_)
 {
 	return {r_, g_, b_, a_};
 }
 
 Color
-ie::RGB_uc(Color::uchar r_, Color::uchar g_, Color::uchar b_)
+ie::RGB_uc(unsigned char r_, unsigned char g_, unsigned char b_)
 {
 	return {r_, g_, b_};
 }
@@ -91,8 +91,8 @@ ie::RGB_uc(Color::uchar r_, Color::uchar g_, Color::uchar b_)
 void
 Color::ToHSL(float &h, float &s, float &l) const
 {
-	uchar max = std::max(std::max(r, g), b);
-	uchar min = std::min(std::min(r, g), b);
+	unsigned char max = std::max(std::max(r, g), b);
+	unsigned char min = std::min(std::min(r, g), b);
 	auto max_f = (float)max / 255.f;
 	auto min_f = (float)min / 255.f;
 	l = (max_f + min_f) / 2;
@@ -132,9 +132,9 @@ Color::Brighten(int amount)
 {
 	assert(amount >= 0 && amount <= 100);
 
-	r = Max(0, Min(255, r - (uchar)std::round(255 * -(amount / 100))));
-	g = Max(0, Min(255, g - (uchar)std::round(255 * -(amount / 100))));
-	b = Max(0, Min(255, b - (uchar)std::round(255 * -(amount / 100))));
+	r = Max(0, Min(255, r - (unsigned char)std::round(255 * -(amount / 100))));
+	g = Max(0, Min(255, g - (unsigned char)std::round(255 * -(amount / 100))));
+	b = Max(0, Min(255, b - (unsigned char)std::round(255 * -(amount / 100))));
 	return *this;
 }
 
@@ -142,9 +142,9 @@ const Color &
 Color::Darken(int amount)
 {
 	assert(amount >= 0 && amount <= 100);
-	r = (uchar)(((float)r * 255 / 100.f) * (float)amount / 255.f);
-	g = (uchar)(((float)g * 255 / 100.f) * (float)amount / 255.f);
-	b = (uchar)(((float)b * 255 / 100.f) * (float)amount / 255.f);
+	r = (unsigned char)(((float)r * 255 / 100.f) * (float)amount / 255.f);
+	g = (unsigned char)(((float)g * 255 / 100.f) * (float)amount / 255.f);
+	b = (unsigned char)(((float)b * 255 / 100.f) * (float)amount / 255.f);
 	return *this;
 }
 
@@ -236,7 +236,7 @@ Color::Lerp(Color c0, Color c1, float u)
 
 Color::Color(const char *name)
 {
-	const ColorIndex *index = LookUpColorIndex(name, strlen(name));
+	const ColorIndex *index = LookUpColorIndex(name, (unsigned int)strlen(name));
 	if (index == nullptr)
 	{
 		r = 0;
@@ -262,13 +262,7 @@ Color::Color(float r_, float g_, float b_, float a_)
 	a = (unsigned char)Round(a_ * 255.0f);
 }
 
-Color::Color(Colors color)
-{
-	r = ((uint32_t)color & 0xff0000) >> 16;
-	g = ((uint32_t)color & 0x00ff00) >> 8;
-	b = (uint32_t)color & 0x0000ff;
-	a = 255;
-}
+Color::Color(Colors color) { operator=(color); }
 
 Color::Color(float r_, float g_, float b_)
 {

@@ -5,7 +5,6 @@
 
 namespace ie {
 
-/// Helper class copied from SkTLazy.h from skia
 template <typename T>
 class Lazy
 {
@@ -17,56 +16,56 @@ public:
 	    : ptr_(that.ptr_ ? new(&storage) T(std::move(*that.ptr_)) : nullptr)
 	{
 	}
-	~Lazy() { this->Reset(); }
+	~Lazy() { this->reset(); }
 
-	Lazy &operator=(const Lazy &that)
+	Lazy &operator=(const Lazy &rhs)
 	{
-		if (NVG_UNLIKELY(&that == this)) return *this; // Self assignment.
-		else if (that.IsValid()) this->Set(*that);
-		else this->Reset();
+		if (&rhs == this) return *this; // self assignment
+		else if (rhs.isValid()) this->set(*rhs);
+		else this->reset();
 		return *this;
 	}
 
-	Lazy &operator=(Lazy &&that) noexcept
+	Lazy &operator=(Lazy &&rhs) noexcept
 	{
-		if (that.IsValid()) this->Set(std::move(*that));
-		else this->Reset();
+		if (rhs.isValid()) set(std::move(*rhs));
+		else reset();
 		return *this;
 	}
 
-	void Reset()
+	void reset()
 	{
-		if (!this->IsValid()) return;
+		if (!isValid()) return;
 		ptr_->~T();
 		ptr_ = nullptr;
 	}
 
 	// Return true if pointer is null.
-	bool IsValid() const { return ptr_ != nullptr; }
+	bool isValid() const { return ptr_ != nullptr; }
 
-	T *Set(const T &src)
+	T *set(const T &src)
 	{
-		if (this->IsValid()) *ptr_ = src;
+		if (isValid()) *ptr_ = src;
 		else ptr_ = new (&storage) T(src);
 		return ptr_;
 	}
 
 	template <typename... Args>
-	T *Init(Args &&...args)
+	T *init(Args &&...args)
 	{
-		this->Reset();
+		reset();
 		ptr_ = new (&storage) T(std::forward<Args>(args)...);
 		return ptr_;
 	}
 
-	T *Set(T &&src) // rvalue reference.
+	T *set(T &&src) // rvalue reference.
 	{
-		if (this->IsValid()) *ptr_ = std::move(src);
+		if (isValid()) *ptr_ = std::move(src);
 		else ptr_ = new (&storage) T(std::move(src));
 		return ptr_;
 	}
 
-	T *Get() const { return ptr_; }
+	T *get() const { return ptr_; }
 
 private:
 	alignas(T) char storage[sizeof(T)] = {};

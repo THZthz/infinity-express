@@ -12,7 +12,7 @@ ie::gjk::GetSweepTransform(const Sweep* sweep, float time)
 	Xf2d xf;
 	xf.p = AddV(MulSV(1.0f - time, sweep->c1), MulSV(time, sweep->c2));
 	float angle = (1.0f - time) * sweep->a1 + time * sweep->a2;
-	xf.q.Set(angle);
+	xf.q.set(angle);
 
 	// Shift to origin
 	xf.p = SubV(xf.p, RotateVector(xf.q, sweep->localCenter));
@@ -1185,8 +1185,8 @@ ie::gjk::PointInPolygon(vec2 point, const Polygon* shape)
 	DistanceInput input{};
 	input.proxyA = MakeProxy(shape->vertices, shape->count, 0.0f);
 	input.proxyB = MakeProxy(&point, 1, 0.0f);
-	input.transformA.SetIdentity();
-	input.transformB.SetIdentity();
+	input.transformA.setIdentity();
+	input.transformB.setIdentity();
 	input.useRadii = false;
 
 	DistanceCache cache{};

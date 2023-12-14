@@ -105,7 +105,7 @@ static void SortTests()
 	qsort(g_sampleEntries, g_sampleCount, sizeof(SampleEntry), CompareSamples);
 }
 
-static void RestartTest()
+static void RestartSample()
 {
 	delete s_sample;
 	s_settings.m_restart = true;
@@ -248,7 +248,7 @@ static void KeyCallback(GLFWwindow* window, int key, int scancode, int action, i
 				break;
 
 			case GLFW_KEY_R:
-				RestartTest();
+				RestartSample();
 				break;
 
 			case GLFW_KEY_O:
@@ -381,6 +381,8 @@ BOX2D_API bool b2_parallel;
 
 static void UpdateUI()
 {
+	int maxWorkers = enki::GetNumHardwareThreads();
+
 	float menuWidth = 180.0f;
 	if (g_draw.m_showUI)
 	{
@@ -396,6 +398,12 @@ static void UpdateUI()
 				ImGui::SliderInt("Vel Iters", &s_settings.m_velocityIterations, 0, 50);
 				ImGui::SliderInt("Relax Iters", &s_settings.m_relaxIterations, 0, 50);
 				ImGui::SliderFloat("Hertz", &s_settings.m_hertz, 5.0f, 120.0f, "%.0f hz");
+				
+				if (ImGui::SliderInt("Workers", &s_settings.m_workerCount, 1, maxWorkers))
+				{
+					s_settings.m_workerCount = B2_CLAMP(s_settings.m_workerCount, 1, maxWorkers);
+					RestartSample();
+				}
 
 				ImGui::Separator();
 
@@ -436,7 +444,7 @@ static void UpdateUI()
 
 				if (ImGui::Button("Restart (R)", button_sz))
 				{
-					RestartTest();
+					RestartSample();
 				}
 
 				if (ImGui::Button("Quit", button_sz))
@@ -523,6 +531,7 @@ int main(int, char**)
 	char buffer[128];
 
 	s_settings.Load();
+	s_settings.m_workerCount = 	B2_MIN(8, (int)enki::GetNumHardwareThreads() / 2);
 	SortTests();
 
 	glfwSetErrorCallback(glfwErrorCallback);
@@ -550,7 +559,7 @@ int main(int, char**)
 	// MSAA
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	sprintf(buffer, "Box2D Version %d.%d.%d Smooth", b2_version.major, b2_version.minor, b2_version.revision);
+	snprintf(buffer, 128, "Box2D Version %d.%d.%d Smooth", b2_version.major, b2_version.minor, b2_version.revision);
 
 	if (GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor())
 	{
@@ -605,6 +614,7 @@ int main(int, char**)
 	glfwSetCursorPosCallback(g_mainWindow, MouseMotionCallback);
 	glfwSetScrollCallback(g_mainWindow, ScrollCallback);
 
+	// todo put this in s_settings
 	g_draw.Create();
 	CreateUI(g_mainWindow, glslVersion);
 
@@ -669,7 +679,7 @@ int main(int, char**)
 		if (g_draw.m_showUI)
 		{
 			const SampleEntry& entry = g_sampleEntries[s_settings.m_sampleIndex];
-			sprintf(buffer, "%s : %s", entry.category, entry.name);
+			snprintf(buffer, 128, "%s : %s", entry.category, entry.name);
 			s_sample->DrawTitle(buffer);
 		}
 
@@ -683,13 +693,13 @@ int main(int, char**)
 
 		// if (g_draw.m_showUI)
 		{
-			sprintf(buffer, "%.1f ms", 1000.0f * frameTime);
+			snprintf(buffer, 128, "%.1f ms", 1000.0f * frameTime);
 
 			ImGui::Begin("Overlay", nullptr,
 						ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_AlwaysAutoResize |
 							ImGuiWindowFlags_NoScrollbar);
 			ImGui::SetCursorPos(ImVec2(5.0f, g_camera.m_height - 20.0f));
-			ImGui::TextColored(ImColor(153, 230, 153, 255), buffer);
+			ImGui::TextColored(ImColor(153, 230, 153, 255), "%s", buffer);
 			ImGui::End();
 		}
 

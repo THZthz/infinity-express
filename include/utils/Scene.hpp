@@ -2,6 +2,7 @@
 #define IE_SCENE_HPP
 
 #include <functional> // since c++11
+#include <memory>
 #include <string>
 #include <stdexcept>
 #include <vector>
@@ -10,9 +11,9 @@
 #ifndef NANOVG_GL3
 #	define NANOVG_GL3 1
 #endif
-#include "nanovg.h"
-#include "nanovg_gl.h"
-#include "nanovg_gl_utils.h"
+#include "utils/VG.hpp"
+#include "VG_gl.hpp"
+#include "VG_gl_utils.hpp"
 
 #include <glm/vec2.hpp>
 #include <glm/vec4.hpp>
@@ -91,8 +92,9 @@ public:
 		nvgluSetFramebufferSize(m_framebuffer, m_frameWidth, m_frameHeight, 0);
 
 		// Update and render
-		nvgluSetViewport(0, 0, m_frameWidth, m_frameHeight);
-		nvgluClear(nvgRGBAf(0.3f, 0.3f, 0.32f, 1.0f));
+		glViewport(0, 0, m_frameWidth, m_frameHeight);
+		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT);
 
 		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
 
@@ -102,6 +104,10 @@ public:
 
 		nvgluBlitFramebuffer(m_framebuffer, prevFBO); // blit to prev FBO and rebind it
 #endif
+	}
+
+	virtual void renderUI() {
+
 	}
 
 	/*----------------------------------------------------------------------------*/
@@ -143,6 +149,7 @@ private:
 	static void scrollListener(GLFWwindow *window, double xoffset, double yoffset);
 	static void keyListener(GLFWwindow *window, int key, int scancode, int action, int mods);
 	static void framebufferSizeListener(GLFWwindow *window, int width, int height);
+	static void charListener(GLFWwindow *window, unsigned int c);
 
 	/*----------------------------------------------------------------------------*/
 private:
@@ -152,6 +159,8 @@ private:
 	/*----------------------------------------------------------------------------*/
 protected:
 	std::string m_name;
+
+	bool m_showUI = true;
 
 	Camera m_camera;
 
@@ -168,7 +177,7 @@ protected:
 
 	NVGcontext *m_vg = nullptr;
 	GLFWwindow *m_window;
-	NVGLUframebuffer *m_framebuffer = nullptr;
+	std::unique_ptr<Framebuffer> m_framebuffer;
 
 	float m_windowScale = 1.f;
 	float m_framebufferScale = 1.f;

@@ -14,7 +14,7 @@ const int MAX_POLY_VERTS = 8;
 /// chosen to be numerically significant, but visually insignificant. In meters.
 const float LINEAR_SLOP = 0.005f;
 
-const float HUGE = 100000.f;
+const float HUGE_NUMBER = 100000.f;
 
 // ██████╗      ██╗██╗  ██╗
 //██╔════╝      ██║██║ ██╔╝
@@ -33,7 +33,7 @@ struct RayCast
 	float maxFraction;
 	float radius;
 
-	RayCast(vec2 start, vec2 end, float maxDist = HUGE, float r = 0.f);
+	RayCast(vec2 start, vec2 end, float maxDist = HUGE_NUMBER, float r = 0.f);
 };
 
 /// Ray-cast output data.
@@ -55,26 +55,25 @@ struct Rot2d
 
 	Rot2d() = default;
 	constexpr Rot2d(float sv, float cv) : s(sv), c(cv) { }
-
 	explicit Rot2d(float angle)
 	{
 		s = Sin(angle);
 		c = Cos(angle);
 	}
 
-	void Set(float angle)
+	void set(float angle)
 	{
 		s = Sin(angle);
 		c = Cos(angle);
 	}
 
-	void SetIdentity()
+	void setIdentity()
 	{
 		s = 0.0f;
 		c = 1.0f;
 	}
 
-	float GetAngle() const { return Atan2(s, c); }
+	float getAngle() const { return Atan2(s, c); }
 };
 
 static constexpr Rot2d rot2d_identity = {0.f, 1.f};
@@ -88,10 +87,10 @@ struct Xf2d
 	Xf2d() = default;
 	constexpr Xf2d(const vec2& v, const Rot2d& r) : p(v), q(r) { }
 
-	void SetIdentity()
+	void setIdentity()
 	{
 		p = {0.f, 0.f};
-		q.SetIdentity();
+		q.setIdentity();
 	}
 };
 
@@ -248,16 +247,16 @@ struct Segment
 		return {SubV(p1, rhs.p1), SubV(p2, rhs.p2)};
 	}
 
-	vec2 Direction(bool normalize = true) const
+	vec2 direction(bool normalize = true) const
 	{
 		vec2 d = SubV(p2, p1);
 		if (normalize) { return NormV(d); }
 		else { return d; }
 	}
 
-	vec2 Normal() const
+	vec2 normal() const
 	{
-		const vec2 d = Direction();
+		const vec2 d = direction();
 		// return the direction vector
 		// rotated by 90 degrees counter-clockwise
 		return {-d.y, d.x};

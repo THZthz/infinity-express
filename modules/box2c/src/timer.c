@@ -87,7 +87,7 @@ float b2GetMilliseconds(const b2Timer* timer)
 	struct timeval t;
 	gettimeofday(&t, 0);
 	time_t start_sec = timer->start_sec;
-	suseconds_t start_usec = timer->start_usec;
+	suseconds_t start_usec = (suseconds_t)timer->start_usec;
 	
 	// http://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
 	if (t.tv_usec < start_usec)
@@ -111,7 +111,7 @@ float b2GetMillisecondsAndReset(b2Timer* timer)
 	struct timeval t;
 	gettimeofday(&t, 0);
 	time_t start_sec = timer->start_sec;
-	suseconds_t start_usec = timer->start_usec;
+	suseconds_t start_usec = (suseconds_t)timer->start_usec;
 
 	// http://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
 	if (t.tv_usec < start_usec)
@@ -148,18 +148,21 @@ b2Timer b2CreateTimer(void)
 	return b2Timer;
 }
 
-float b2GetMilliseconds(const b2Timer*)
+float b2GetMilliseconds(const b2Timer* timer)
 {
+	B2_MAYBE_UNUSED(timer);
 	return 0.0f;
 }
 
-float b2GetMillisecondsAndReset(b2Timer*)
+float b2GetMillisecondsAndReset(b2Timer* timer)
 {
+	B2_MAYBE_UNUSED(timer);
 	return 0.0f;
 }
 
-void b2SleepMilliseconds(float)
+void b2SleepMilliseconds(float milliseconds)
 {
+	B2_MAYBE_UNUSED(milliseconds);
 }
 
 #endif

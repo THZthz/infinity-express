@@ -4,6 +4,11 @@
 #include <string>
 #include <cstdint>
 
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 4201) // nonstandard extension used : nameless struct/union
+#endif
+
 namespace ie {
 
 // ██████╗ ██████╗ ██╗      ██████╗ ██████╗
@@ -711,20 +716,32 @@ struct ColorIndex
 class Color
 {
 public:
-	typedef unsigned char uchar;
-	uchar r, g, b, a;
+	union
+	{
+		unsigned int c;
+		unsigned char rgba[4];
+		struct
+		{
+			unsigned char r, g, b, a;
+		};
+	};
 
 	Color() : r(0), g(0), b(0), a(0) { }
 
 	/// Return color by using 24bits RGB value. Alpha is set to 255.
-	/*Implicit*/ Color(Colors color);
+	explicit Color(Colors color);
 
 	/// Returns a color value from red, green, blue values.
 	/// Alpha will be set to 255.
-	Color(uchar r_, uchar g_, uchar b_) : r(r_), g(g_), b(b_), a(255) { }
+	Color(unsigned char r_, unsigned char g_, unsigned char b_) : r(r_), g(g_), b(b_), a(255)
+	{
+	}
 
 	/// Returns a color value from red, green, blue and alpha values.
-	Color(uchar r_, uchar g_, uchar b_, uchar a_) : r(r_), g(g_), b(b_), a(a_) { }
+	Color(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_)
+	    : r(r_), g(g_), b(b_), a(a_)
+	{
+	}
 
 	/// Returns a color value from red, green, blue values. Alpha will be set to 1.0f.
 	Color(float r_, float g_, float b_);
@@ -740,6 +757,8 @@ public:
 	/*----------------------------------------------------------------------------*/
 
 	bool operator==(const Color &c) const;
+
+	Color &operator=(const Colors &rhs);
 
 	bool Equal(const Color &c) const;
 
@@ -798,9 +817,9 @@ Color HSL(float h, float s, float l);
 /// See http://marcocorvi.altervista.org/games/imgpr/rgb-hsl.htm.
 Color HSLA(float h, float s, float l, float a);
 
-Color RGB_uc(Color::uchar r_, Color::uchar g_, Color::uchar b_);
+Color RGB_uc(unsigned char r_, unsigned char g_, unsigned char b_);
 
-Color RGBA(Color::uchar r_, Color::uchar g_, Color::uchar b_, Color::uchar a_);
+Color RGBA(unsigned char r_, unsigned char g_, unsigned char b_, unsigned char a_);
 
 inline bool
 Color::Equal(const Color &c) const
@@ -812,6 +831,16 @@ inline bool
 Color::operator==(const Color &c) const
 {
 	return Equal(c);
+}
+
+inline Color &
+Color::operator=(const Colors &rhs)
+{
+	r = ((uint32_t)rhs & 0xff0000) >> 16;
+	g = ((uint32_t)rhs & 0x00ff00) >> 8;
+	b = (uint32_t)rhs & 0x0000ff;
+	a = 255;
+	return *this;
 }
 
 inline float
@@ -841,5 +870,9 @@ Color::Black() const
 //! @}
 
 } // namespace ie
+
+#ifdef _MSC_VER
+#	pragma warning(pop)
+#endif
 
 #endif // IE_COLOR_HPP

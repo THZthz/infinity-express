@@ -12,10 +12,10 @@ add_library(
 target_include_directories(glad PUBLIC ${GLAD_DIR}/include)
 
 # glfw for windowing and input
-SET(GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW Docs")
-SET(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW Examples")
-SET(GLFW_BUILD_TESTS OFF CACHE BOOL "GLFW Tests")
-SET(GLFW_INSTALL OFF CACHE BOOL "GLFW Install")
+set(GLFW_BUILD_DOCS OFF CACHE BOOL "GLFW Docs")
+set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "GLFW Examples")
+set(GLFW_BUILD_TESTS OFF CACHE BOOL "GLFW Tests")
+set(GLFW_INSTALL OFF CACHE BOOL "GLFW Install")
 
 FetchContent_Declare(
 	glfw
@@ -26,14 +26,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(glfw)
 
-# imgui and glfw backend for GUI
-# https://gist.github.com/jeffamstutz/992723dfabac4e3ffff265eb71a24cd9
-FetchContent_Populate(imgui
-  URL https://github.com/ocornut/imgui/archive/docking.zip
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/build/imgui
-)
-
-set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/build/imgui)
+set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/modules/imgui)
 
 add_library(imgui STATIC
 	${IMGUI_DIR}/imgui.cpp
@@ -94,6 +87,7 @@ set_target_properties(samples PROPERTIES
 target_include_directories(samples PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${JSMN_DIR})
 target_link_libraries(samples PUBLIC box2d imgui glfw glad enkiTS)
 
+# target_compile_definitions(samples PRIVATE "$<$<CONFIG:DEBUG>:SAMPLES_DEBUG>")
 # message(STATUS "runtime = ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
 # message(STATUS "binary = ${CMAKE_CURRENT_BINARY_DIR}")
 

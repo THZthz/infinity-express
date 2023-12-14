@@ -218,7 +218,7 @@ class DynamicTree : public Sample
 				m_startPoint = p;
 				m_endPoint = p;
 			}
-			else if (mods = GLFW_MOD_SHIFT && m_rayDrag == false)
+			else if (mods == GLFW_MOD_SHIFT && m_rayDrag == false)
 			{
 				m_queryDrag = true;
 				m_startPoint = p;
@@ -256,7 +256,7 @@ class DynamicTree : public Sample
 
 		if (m_rayDrag)
 		{
-			b2RayCastInput input = {m_startPoint, m_endPoint, 0.0f, 1.0f};
+			b2RayCastInput input = {m_startPoint, b2Sub(m_endPoint, m_startPoint), 1.0f};
 			b2DynamicTree_RayCast(&m_tree, &input, b2_defaultMaskBits, RayCallback, this);
 
 			g_draw.DrawSegment(m_startPoint, m_endPoint, {1.0f, 1.0f, 1.0f, 1.0f});
@@ -265,7 +265,7 @@ class DynamicTree : public Sample
 		}
 
 		b2Color c = {0.3f, 0.3f, 0.8f, 0.7f};
-		b2Color qc = {0.3, 0.8f, 0.3f, 1.0f};
+		b2Color qc = {0.3f, 0.8f, 0.3f, 1.0f};
 
 		const b2Vec2 aabbMargin = {b2_aabbMargin, b2_aabbMargin};
 

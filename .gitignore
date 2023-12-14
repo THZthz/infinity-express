@@ -1,3 +1,24 @@
 .vs/
 .idea/
 build/
+node_modules/
+
+# git sub-modules
+modules/boost/
+modules/box2c
+modules/clipper2_1.3.0
+modules/entt
+modules/glbinding
+modules/glm
+modules/globjects
+modules/imgui
+modules/libtess2
+modules/stb
+modules/tracy
+
+# tools
+tools/CORPSE-master (1)
+tools/CrowdPathfinding-main
+tools/pico_headers-main
+tools/rts-path-finding-master
+tools/SFML-master

@@ -9,7 +9,7 @@
 #define ITEM_COUNT ((SET_SPAN * SET_SPAN - SET_SPAN) / 2)
 
 
-int TableTest()
+int TableTest(void)
 {
 	const int32_t N = SET_SPAN;
 	const uint32_t itemCount = ITEM_COUNT;
@@ -54,7 +54,7 @@ int TableTest()
 
 		ENSURE(set.count == (itemCount - removeCount));
 
-#ifdef _DEBUG
+#if B2_DEBUG
 		extern int32_t g_probeCount;
 		g_probeCount = 0;
 #endif
@@ -80,7 +80,7 @@ int TableTest()
 		float ms = b2GetMilliseconds(&timer);
 		printf("set: count = %d, b2ContainsKey = %.5f ms, ave = %.5f us\n", itemCount, ms, 1000.0f * ms / itemCount);
 
-#ifdef _DEBUG
+#if B2_DEBUG
 		float aveProbeCount = (float)g_probeCount / (float)itemCount;
 		printf("item count = %d, probe count = %d, ave probe count %.2f\n", itemCount, g_probeCount, aveProbeCount);
 #endif

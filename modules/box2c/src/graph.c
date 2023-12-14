@@ -17,10 +17,16 @@
 
 #include "box2d/aabb.h"
 
+#include "x86/sse2.h"
+
 #include <limits.h>
 #include <stdatomic.h>
 #include <stdbool.h>
 #include <string.h>
+
+// Solver using graph coloring. Islands are only used for sleep.
+// High-Performance Physical Simulations on Next-Generation Architecture with Many Cores
+// http://web.eecs.umich.edu/~msmelyan/papers/physsim_onmanycore_itj.pdf
 
 // Kinematic bodies have to be treated like dynamic bodies in graph coloring. Unlike static bodies, we cannot use a dummy solver body for
 // kinematic bodies. We cannot access a kinematic body from multiple threads efficiently because the SIMD solver body scatter would write to
@@ -914,7 +920,7 @@ static void b2ExecuteMainStage(b2SolverStage* stage, b2SolverTaskContext* contex
 
 		while (atomic_load(&stage->completionCount) != blockCount)
 		{
-			_mm_pause();
+			simde_mm_pause();
 		}
 
 		atomic_store(&stage->completionCount, 0);
@@ -969,7 +975,7 @@ void b2SolverTask(int32_t startIndex, int32_t endIndex, uint32_t threadIndexDont
 		B2_ASSERT(stages[stageIndex].type == b2_stagePrepareJoints);
 		b2ExecuteMainStage(stages + stageIndex, context, syncBits);
 		stageIndex += 1;
-		jointSyncIndex += 1;
+		// jointSyncIndex += 1;
 
 		uint32_t constraintSyncIndex = 1;
 		syncBits = (constraintSyncIndex << 16) | stageIndex;
@@ -1048,7 +1054,7 @@ void b2SolverTask(int32_t startIndex, int32_t endIndex, uint32_t threadIndexDont
 				b2ExecuteMainStage(stages + iterStageIndex, context, syncBits);
 				iterStageIndex += 1;
 			}
-			graphSyncIndex += 1;
+			// graphSyncIndex += 1;
 
 			b2ApplyOverflowRestitution(context);
 		}
@@ -1077,7 +1083,7 @@ void b2SolverTask(int32_t startIndex, int32_t endIndex, uint32_t threadIndexDont
 		uint32_t syncBits = atomic_load(&context->syncBits);
 		while (syncBits == lastSyncBits)
 		{
-			_mm_pause();
+			simde_mm_pause();
 			syncBits = atomic_load(&context->syncBits);
 		}
 
@@ -1410,6 +1416,8 @@ static void b2SolveGraph(b2World* world, b2StepContext* stepContext)
 		if (b2_parallel)
 		{
 			splitIslandTask = world->enqueueTaskFcn(&b2SplitIslandTask, 1, 1, world, world->userTaskContext);
+			world->taskCount += 1;
+			B2_ASSERT(splitIslandTask != NULL);
 		}
 		else
 		{
@@ -1635,6 +1643,7 @@ static void b2SolveGraph(b2World* world, b2StepContext* stepContext)
 			workerContext[i].context = &context;
 			workerContext[i].workerIndex = i;
 			workerContext[i].userTask = world->enqueueTaskFcn(b2SolverTask, 1, 1, workerContext + i, world->userTaskContext);
+			world->taskCount += 1;
 		}
 	}
 	else
@@ -1681,6 +1690,7 @@ static void b2SolveGraph(b2World* world, b2StepContext* stepContext)
 	if (b2_parallel)
 	{
 		finalizeBodiesTask = world->enqueueTaskFcn(b2FinalizeBodiesTask, awakeBodyCount, 16, &context, world->userTaskContext);
+		world->taskCount += 1;
 		world->finishTaskFcn(finalizeBodiesTask, world->userTaskContext);
 	}
 	else
@@ -2182,6 +2192,7 @@ void b2Solve(b2World* world, b2StepContext* context)
 		int32_t minRange = 8;
 		void* userContinuousTask =
 			world->enqueueTaskFcn(&b2ContinuousParallelForTask, world->fastBodyCount, minRange, world, world->userTaskContext);
+		world->taskCount += 1;
 		world->finishTaskFcn(userContinuousTask, world->userTaskContext);
 	}
 	else

@@ -17,10 +17,10 @@
 
 struct Settings;
 
-#ifdef _DEBUG
-constexpr bool g_sampleDebug = true;
-#else
+#ifdef NDEBUG
 constexpr bool g_sampleDebug = false;
+#else
+constexpr bool g_sampleDebug = true;
 #endif
 
 #define RAND_LIMIT 32767
@@ -73,7 +73,7 @@ class SampleTask : public enki::ITaskSet
 	void* m_taskContext = nullptr;
 };
 
-constexpr int32_t maxTasks = 1024;
+constexpr int32_t maxTasks = 64;
 
 class Sample
 {
