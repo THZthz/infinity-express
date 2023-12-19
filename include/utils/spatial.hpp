@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <vector>
 #include <queue>
+#include <algorithm>
 #include "utils/AABB.hpp"
 
 namespace ie {

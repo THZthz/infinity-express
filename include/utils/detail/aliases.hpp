@@ -10,7 +10,6 @@ class monostate
 {
 };
 
-
 namespace detail {
 
 // C++14-style aliases for brevity

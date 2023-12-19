@@ -16,13 +16,6 @@
 #include "CellAutomata.hpp"
 #include "./vg_test/demo.hpp"
 
-#include "utils/tests/tests_vector.hpp"
-#include "utils/tests/tests_Memory.hpp"
-#include "utils/tests/tests_BitwiseEnum.hpp"
-#include "utils/tests/tests_value_ptr.hpp"
-#include "utils/tests/tests_optional.hpp"
-#include "utils/tests/tests_spatial.hpp"
-
 // implements nanovg
 #include "utils/VG.hpp"
 //#define NANOVG_GLES2 1
@@ -42,53 +35,10 @@
 int
 main()
 {
-	test_vector();
-	test_Memory();
-	test_BitwiseEnum();
-	test_value_ptr();
-	test_optional();
-	test_spatial();
-
-
 	//			VgApp app;
 //	App app;
 //	app.start();
 
-	class A {
-	public:
-		A() {}
-		A(const A& _X) : b(_X.b) {}
-		virtual ~A() {
-			int q = 3; /* just so you can place a breakpoint if you want */
-		}
-		A& operator=(const A& _X) { b = _X.b; return (*this); }
-
-		int b = 3;
-	};
-	typedef std::vector<ie::fixed_ref_ptr<A>> CRCFPVector;
-	class B {
-	public:
-		static int foo1(ie::ref_ptr<A> A_refcounting_ptr, CRCFPVector& rcfpvector_ref) {
-			rcfpvector_ref.clear();
-			int retval = A_refcounting_ptr->b;
-			A_refcounting_ptr = nullptr; /* Target object is destroyed here. */
-			return retval;
-		}
-	protected:
-		~B() {}
-	};
-
-	{
-		CRCFPVector rcfpvector;
-		{
-			ie::fixed_ref_ptr<A> A_refcountingfixed_ptr1 = ie::make_refcounting<A>();
-			rcfpvector.push_back(A_refcountingfixed_ptr1);
-
-			/* Just to demonstrate conversion between refcounting pointer types. */
-			ie::const_ref_ptr<A> A_refcountingconst_ptr1 = A_refcountingfixed_ptr1;
-		}
-		B::foo1(rcfpvector.front(), rcfpvector);
-	}
 	//	CellAutomata gen;
 	//	gen.generate();
 

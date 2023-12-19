@@ -216,8 +216,7 @@ Scene::Scene(const std::string &name, int width, int height)
 	if (!m_vg) throw std::runtime_error("Failed to create nanovg context");
 
 	// create framebuffer for blitting
-	m_framebuffer =
-	    std::make_unique<Framebuffer>(m_vg, 0, 0, Framebuffer::NO_NVG_IMAGE /* | NVG_SRGB*/);
+	m_framebuffer.reset(new Framebuffer(m_vg, 0, 0, Framebuffer::NO_NVG_IMAGE /* | NVG_SRGB*/));
 
 	// add callbacks to the window
 	glfwSetWindowUserPointer(m_window, this);

@@ -153,9 +153,9 @@ set(IE_SOURCES
         modules/libtess2/Source/tess.c
 
         # clipper2
-        modules/clipper2_1.3.0/src/clipper.engine.cpp
-        modules/clipper2_1.3.0/src/clipper.offset.cpp
-        modules/clipper2_1.3.0/src/clipper.rectclip.cpp
+        #        modules/clipper2_1.3.0/src/clipper.engine.cpp
+        #        modules/clipper2_1.3.0/src/clipper.offset.cpp
+        #        modules/clipper2_1.3.0/src/clipper.rectclip.cpp
 
         # glad
         modules/glad/glad.h
@@ -166,7 +166,7 @@ target_include_directories(${IE_EXE} PRIVATE include modules)
 target_include_directories(${IE_EXE} PRIVATE
         modules/stb
         modules/nanovgxc/src/
-        modules/clipper2_1.3.0/include
+        #        modules/clipper2_1.3.0/include
         modules/imgui/
         modules/libtess2/Include)
 target_link_libraries(${IE_EXE} PUBLIC glm predicates) # math
@@ -176,6 +176,7 @@ target_link_libraries(${IE_EXE} PUBLIC # graphics
         glfw
         )
 target_link_libraries(${IE_EXE} PUBLIC enkiTS)
+#target_link_libraries(${IE_EXE} PRIVATE boost)
 
 target_compile_definitions(${IE_EXE} PRIVATE -DINFINITY_EXPRESS_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
 message(NOTICE "Defined INFINITY_EXPRESS_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
@@ -248,3 +249,6 @@ else ()
     message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/VERSION not found")
 endif ()
 
+# testing
+add_subdirectory(modules/catch2)
+add_subdirectory(tests)
