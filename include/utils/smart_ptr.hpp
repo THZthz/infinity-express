@@ -88,7 +88,7 @@ namespace boost {
 namespace movelib {
 template <class T, class D> class unique_ptr;
 } // namespace movelib
-}
+} // namespace boost
 
 namespace boost {
 using std::is_arithmetic;
@@ -431,7 +431,7 @@ to_address(T *v) noexcept
 //	    return boost::to_address(v.operator->());
 //  }
 
- #if 0
+#if 0
 namespace detail {
 
 template <class T>
@@ -463,14 +463,14 @@ to_address(const T &v) noexcept
 {
 	return boost::detail::ptr_address(v, 0);
 }
- #else 
-template<class T>
-inline typename pointer_traits<T>::element_type*
-to_address(const T& v) noexcept
+#else
+template <class T>
+inline typename pointer_traits<T>::element_type *
+to_address(const T &v) noexcept
 {
-    return boost::to_address(v.operator->());
+	return boost::to_address(v.operator->());
 }
-  #endif
+#endif
 } // namespace boost
 
 /* @file_end boost/core/pointer_traits.hpp */
@@ -8699,7 +8699,6 @@ public:
 	}
 
 	constexpr const T &get() const noexcept { return *this; }
-
 };
 } // namespace empty_
 
@@ -9104,46 +9103,1721 @@ namespace alignment {
 
 namespace detail {
 
-template<class T, class U>
-struct not_pointer {
-    typedef U type;
+template <class T, class U> struct not_pointer
+{
+	typedef U type;
 };
 
-template<class T, class U>
-struct not_pointer<T*, U> { };
+template <class T, class U> struct not_pointer<T *, U>
+{
+};
 
 constexpr inline bool
 is_alignment(std::size_t value) noexcept
 {
 	return (value > 0) && ((value & (value - 1)) == 0);
 }
+} // namespace detail
+
+inline bool
+is_aligned(const volatile void *ptr, std::size_t alignment) noexcept
+{
+	assert(detail::is_alignment(alignment));
+	return (reinterpret_cast<std::size_t>(ptr) & (alignment - 1)) == 0;
 }
 
 inline bool
-is_aligned(const volatile void* ptr, std::size_t alignment) noexcept
+is_aligned(std::size_t alignment, const volatile void *ptr) noexcept
 {
-    assert(detail::is_alignment(alignment));
-    return (reinterpret_cast<std::size_t>(ptr) & (alignment - 1)) == 0;
+	assert(detail::is_alignment(alignment));
+	return (reinterpret_cast<std::size_t>(ptr) & (alignment - 1)) == 0;
 }
 
-inline bool
-is_aligned(std::size_t alignment, const volatile void* ptr) noexcept
-{
-    assert(detail::is_alignment(alignment));
-    return (reinterpret_cast<std::size_t>(ptr) & (alignment - 1)) == 0;
-}
-
-template<class T>
+template <class T>
 constexpr inline typename detail::not_pointer<T, bool>::type
 is_aligned(T value, std::size_t alignment) noexcept
 {
-    return (value & (T(alignment) - 1)) == 0;
+	return (value & (T(alignment) - 1)) == 0;
 }
 
 
 
-} /* alignment */
-} /* boost */
+} // namespace alignment
+} // namespace boost
+
+
+
+#ifdef _MSC_VER
+#	pragma warning(push)
+#	pragma warning(disable : 4619) // there is no warning number 'XXXX'
+#	pragma warning(disable : 4324) // structure was padded due to __declspec(align())
+#	pragma warning(                                                                          \
+	        disable : 4675) // "function":  resolved overload was found by argument-dependent lookup
+#	pragma warning(                                                                          \
+	        disable : 4996) // "function": was declared deprecated (_CRT_SECURE_NO_DEPRECATE/_SCL_SECURE_NO_WARNINGS)
+#	pragma warning(disable : 4714) // "function": marked as __forceinline not inlined
+#	pragma warning(disable : 4127) // conditional expression is constant
+#endif
+
+
+#include <cassert>
+#include <cstddef> //For std::nullptr_t and std::size_t
+
+
+//Small meta-typetraits to support move
+
+namespace boost {
+
+namespace movelib {
+
+template <class T> struct default_delete;
+
+} // namespace movelib
+
+
+namespace move_upmu {
+
+//////////////////////////////////////
+//              nat
+//////////////////////////////////////
+struct nat
+{
+};
+
+//////////////////////////////////////
+//            natify
+//////////////////////////////////////
+template <class T> struct natify
+{
+};
+
+//////////////////////////////////////
+//             if_c
+//////////////////////////////////////
+template <bool C, typename T1, typename T2> struct if_c
+{
+	typedef T1 type;
+};
+
+template <typename T1, typename T2> struct if_c<false, T1, T2>
+{
+	typedef T2 type;
+};
+
+//////////////////////////////////////
+//             if_
+//////////////////////////////////////
+template <typename T1, typename T2, typename T3> struct if_ : if_c<0 != T1::value, T2, T3>
+{
+};
+
+//enable_if_
+template <bool B, class T = nat> struct enable_if_c
+{
+	typedef T type;
+};
+
+//////////////////////////////////////
+//          enable_if_c
+//////////////////////////////////////
+template <class T> struct enable_if_c<false, T>
+{
+};
+
+//////////////////////////////////////
+//           enable_if
+//////////////////////////////////////
+template <class Cond, class T = nat> struct enable_if : public enable_if_c<Cond::value, T>
+{
+};
+
+//////////////////////////////////////
+//          remove_reference
+//////////////////////////////////////
+template <class T> struct remove_reference
+{
+	typedef T type;
+};
+
+template <class T> struct remove_reference<T &>
+{
+	typedef T type;
+};
+
+template <class T> struct remove_reference<T &&>
+{
+	typedef T type;
+};
+
+//////////////////////////////////////
+//             remove_const
+//////////////////////////////////////
+template <class T> struct remove_const
+{
+	typedef T type;
+};
+
+template <class T> struct remove_const<const T>
+{
+	typedef T type;
+};
+
+//////////////////////////////////////
+//             remove_volatile
+//////////////////////////////////////
+template <class T> struct remove_volatile
+{
+	typedef T type;
+};
+
+template <class T> struct remove_volatile<volatile T>
+{
+	typedef T type;
+};
+
+//////////////////////////////////////
+//             remove_cv
+//////////////////////////////////////
+template <class T> struct remove_cv
+{
+	typedef typename remove_volatile<typename remove_const<T>::type>::type type;
+};
+
+//////////////////////////////////////
+//          remove_extent
+//////////////////////////////////////
+template <class T> struct remove_extent
+{
+	typedef T type;
+};
+
+template <class T> struct remove_extent<T[]>
+{
+	typedef T type;
+};
+
+template <class T, std::size_t N> struct remove_extent<T[N]>
+{
+	typedef T type;
+};
+
+//////////////////////////////////////
+//             extent
+//////////////////////////////////////
+
+template <class T, unsigned N = 0> struct extent
+{
+	static const std::size_t value = 0;
+};
+
+template <class T> struct extent<T[], 0>
+{
+	static const std::size_t value = 0;
+};
+
+template <class T, unsigned N> struct extent<T[], N>
+{
+	static const std::size_t value = extent<T, N - 1>::value;
+};
+
+template <class T, std::size_t N> struct extent<T[N], 0>
+{
+	static const std::size_t value = N;
+};
+
+template <class T, std::size_t I, unsigned N> struct extent<T[I], N>
+{
+	static const std::size_t value = extent<T, N - 1>::value;
+};
+
+//////////////////////////////////////
+//      add_lvalue_reference
+//////////////////////////////////////
+template <class T> struct add_lvalue_reference
+{
+	typedef T &type;
+};
+
+template <class T> struct add_lvalue_reference<T &>
+{
+	typedef T &type;
+};
+
+template <> struct add_lvalue_reference<void>
+{
+	typedef void type;
+};
+
+template <> struct add_lvalue_reference<const void>
+{
+	typedef const void type;
+};
+
+template <> struct add_lvalue_reference<volatile void>
+{
+	typedef volatile void type;
+};
+
+template <> struct add_lvalue_reference<const volatile void>
+{
+	typedef const volatile void type;
+};
+
+template <class T> struct add_const_lvalue_reference
+{
+	typedef typename remove_reference<T>::type t_unreferenced;
+	typedef const t_unreferenced t_unreferenced_const;
+	typedef typename add_lvalue_reference<t_unreferenced_const>::type type;
+};
+
+//////////////////////////////////////
+//             is_same
+//////////////////////////////////////
+template <class T, class U> struct is_same
+{
+	static const bool value = false;
+};
+
+template <class T> struct is_same<T, T>
+{
+	static const bool value = true;
+};
+
+//////////////////////////////////////
+//             is_pointer
+//////////////////////////////////////
+template <class T> struct is_pointer
+{
+	static const bool value = false;
+};
+
+template <class T> struct is_pointer<T *>
+{
+	static const bool value = true;
+};
+
+//////////////////////////////////////
+//             is_reference
+//////////////////////////////////////
+template <class T> struct is_reference
+{
+	static const bool value = false;
+};
+
+template <class T> struct is_reference<T &>
+{
+	static const bool value = true;
+};
+
+template <class T> struct is_reference<T &&>
+{
+	static const bool value = true;
+};
+
+//////////////////////////////////////
+//             is_lvalue_reference
+//////////////////////////////////////
+template <class T> struct is_lvalue_reference
+{
+	static const bool value = false;
+};
+
+template <class T> struct is_lvalue_reference<T &>
+{
+	static const bool value = true;
+};
+
+//////////////////////////////////////
+//          is_array
+//////////////////////////////////////
+template <class T> struct is_array
+{
+	static const bool value = false;
+};
+
+template <class T> struct is_array<T[]>
+{
+	static const bool value = true;
+};
+
+template <class T, std::size_t N> struct is_array<T[N]>
+{
+	static const bool value = true;
+};
+
+//////////////////////////////////////
+//          has_pointer_type
+//////////////////////////////////////
+template <class T> struct has_pointer_type
+{
+	struct two
+	{
+		char c[2];
+	};
+	template <class U> static two test(...);
+	template <class U> static char test(typename U::pointer * = 0);
+	static const bool value = sizeof(test<T>(0)) == 1;
+};
+
+//////////////////////////////////////
+//             pointer_type
+//////////////////////////////////////
+template <class T, class D, bool = has_pointer_type<D>::value> struct pointer_type_imp
+{
+	typedef typename D::pointer type;
+};
+
+template <class T, class D> struct pointer_type_imp<T, D, false>
+{
+	typedef T *type;
+};
+
+template <class T, class D> struct pointer_type
+{
+	typedef typename pointer_type_imp<
+	    typename remove_extent<T>::type,
+	    typename remove_reference<D>::type>::type type;
+};
+
+//////////////////////////////////////
+//           is_convertible
+//////////////////////////////////////
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+
+//use intrinsic since in MSVC
+//overaligned types can't go through ellipsis
+template <class T, class U> struct is_convertible
+{
+	static const bool value = __is_convertible_to(T, U);
+};
+
+#else
+
+template <class T, class U> class is_convertible
+{
+	typedef typename add_lvalue_reference<T>::type t_reference;
+	typedef char true_t;
+	class false_t
+	{
+		char dummy[2];
+	};
+	static false_t dispatch(...);
+	static true_t dispatch(U);
+	static t_reference trigger();
+
+public:
+	static const bool value = sizeof(dispatch(trigger())) == sizeof(true_t);
+};
+
+#endif
+
+} // namespace move_upmu
+} //namespace boost
+
+//!\file
+//! Describes the default deleter (destruction policy) of <tt>unique_ptr</tt>: <tt>default_delete</tt>.
+
+namespace boost {
+// @cond
+namespace move_upd {
+
+namespace bmupmu = ::boost::move_upmu;
+
+////////////////////////////////////////
+////        enable_def_del
+////////////////////////////////////////
+
+//compatible with a pointer type T*:
+//When either Y* is convertible to T*
+//Y is U[N] and T is U cv []
+template <class U, class T> struct def_del_compatible_cond : bmupmu::is_convertible<U *, T *>
+{
+};
+
+template <class U, class T, std::size_t N>
+struct def_del_compatible_cond<U[N], T[]> : def_del_compatible_cond<U[], T[]>
+{
+};
+
+template <class U, class T, class Type = bmupmu::nat>
+struct enable_def_del : bmupmu::enable_if_c<def_del_compatible_cond<U, T>::value, Type>
+{
+};
+
+////////////////////////////////////////
+////        enable_defdel_call
+////////////////////////////////////////
+
+//When 2nd is T[N], 1st(*)[N] shall be convertible to T(*)[N];
+//When 2nd is T[],  1st(*)[] shall be convertible to T(*)[];
+//Otherwise, 1st* shall be convertible to 2nd*.
+
+template <class U, class T, class Type = bmupmu::nat>
+struct enable_defdel_call : public enable_def_del<U, T, Type>
+{
+};
+
+template <class U, class T, class Type>
+struct enable_defdel_call<U, T[], Type> : public enable_def_del<U[], T[], Type>
+{
+};
+
+template <class U, class T, class Type, std::size_t N>
+struct enable_defdel_call<U, T[N], Type> : public enable_def_del<U[N], T[N], Type>
+{
+};
+
+////////////////////////////////////////
+////     Some bool literal zero conversion utilities
+////////////////////////////////////////
+
+struct bool_conversion
+{
+	int for_bool;
+	int for_arg();
+};
+typedef int bool_conversion::*explicit_bool_arg;
+
+typedef decltype(nullptr) nullptr_type;
+
+template <bool B> struct is_array_del
+{
+};
+
+template <class T>
+void
+call_delete(T *p, is_array_del<true>)
+{
+	delete[] p;
+}
+
+template <class T>
+void
+call_delete(T *p, is_array_del<false>)
+{
+	delete p;
+}
+
+template <
+    class T,
+    class U,
+    bool enable =
+        def_del_compatible_cond<U, T>::value && !move_upmu::is_array<T>::value &&
+        !move_upmu::is_same<typename move_upmu::remove_cv<T>::type, void>::value &&
+        !move_upmu::is_same<
+            typename move_upmu::remove_cv<U>::type,
+            typename move_upmu::remove_cv<T>::type>::value>
+struct missing_virtual_destructor_default_delete
+{
+	static const bool value = !std::has_virtual_destructor<T>::value;
+};
+
+template <class T, class U> struct missing_virtual_destructor_default_delete<T, U, false>
+{
+	static const bool value = false;
+};
+
+//////////////////////////////////////
+//       missing_virtual_destructor
+//////////////////////////////////////
+
+template <class Deleter, class U> struct missing_virtual_destructor
+{
+	static const bool value = false;
+};
+
+template <class T, class U>
+struct missing_virtual_destructor<::boost::movelib::default_delete<T>, U>
+    : missing_virtual_destructor_default_delete<T, U>
+{
+};
+
+
+//////////////////////////////////////
+//       is_unary_function
+//////////////////////////////////////
+#if defined(_MSC_VER) || defined(__BORLANDC_)
+#	define BOOST_MOVE_TT_DECL __cdecl
+#else
+#	define BOOST_MOVE_TT_DECL
+#endif
+
+#if defined(_MSC_EXTENSIONS) && !defined(__BORLAND__) && !defined(_WIN64) &&                  \
+    !defined(_M_ARM) && !defined(_M_ARM64) && !defined(UNDER_CE)
+#	define BOOST_MOVE_TT_TEST_MSC_FUNC_SIGS
+#endif
+
+template <typename T> struct is_unary_function_impl
+{
+	static const bool value = false;
+};
+
+// avoid duplicate definitions of is_unary_function_impl
+#ifndef BOOST_MOVE_TT_TEST_MSC_FUNC_SIGS
+
+template <typename R> struct is_unary_function_impl<R (*)()>
+{
+	static const bool value = true;
+};
+
+template <typename R> struct is_unary_function_impl<R (*)(...)>
+{
+	static const bool value = true;
+};
+
+#else // BOOST_MOVE_TT_TEST_MSC_FUNC_SIGS
+
+template <typename R> struct is_unary_function_impl<R(__stdcall *)()>
+{
+	static const bool value = true;
+};
+
+#	ifndef _MANAGED
+
+template <typename R> struct is_unary_function_impl<R(__fastcall *)()>
+{
+	static const bool value = true;
+};
+
+#	endif
+
+template <typename R> struct is_unary_function_impl<R(__cdecl *)()>
+{
+	static const bool value = true;
+};
+
+template <typename R> struct is_unary_function_impl<R(__cdecl *)(...)>
+{
+	static const bool value = true;
+};
+
+#endif
+
+// avoid duplicate definitions of is_unary_function_impl
+#ifndef BOOST_MOVE_TT_TEST_MSC_FUNC_SIGS
+
+template <typename R, class T0> struct is_unary_function_impl<R (*)(T0)>
+{
+	static const bool value = true;
+};
+
+template <typename R, class T0> struct is_unary_function_impl<R (*)(T0...)>
+{
+	static const bool value = true;
+};
+
+#else // BOOST_MOVE_TT_TEST_MSC_FUNC_SIGS
+
+template <typename R, class T0> struct is_unary_function_impl<R(__stdcall *)(T0)>
+{
+	static const bool value = true;
+};
+
+#	ifndef _MANAGED
+
+template <typename R, class T0> struct is_unary_function_impl<R(__fastcall *)(T0)>
+{
+	static const bool value = true;
+};
+
+#	endif
+
+template <typename R, class T0> struct is_unary_function_impl<R(__cdecl *)(T0)>
+{
+	static const bool value = true;
+};
+
+template <typename R, class T0> struct is_unary_function_impl<R(__cdecl *)(T0...)>
+{
+	static const bool value = true;
+};
+
+#endif
+
+template <typename T> struct is_unary_function_impl<T &>
+{
+	static const bool value = false;
+};
+
+template <typename T> struct is_unary_function
+{
+	static const bool value = is_unary_function_impl<T>::value;
+};
+
+} //namespace move_upd
+// @endcond
+
+namespace movelib {
+
+namespace bmupd = boost::move_upd;
+namespace bmupmu = ::boost::move_upmu;
+
+//!The class template <tt>default_delete</tt> serves as the default deleter
+//!(destruction policy) for the class template <tt>unique_ptr</tt>.
+//!
+//! \tparam T The type to be deleted. It may be an incomplete type
+template <class T> struct default_delete
+{
+	//! Default constructor.
+	//!
+	constexpr default_delete() noexcept = default;
+
+	//! Trivial copy constructor
+	//!
+	default_delete(const default_delete &) noexcept = default;
+	//! Trivial assignment
+	//!
+	default_delete &operator=(const default_delete &) noexcept = default;
+
+	typedef typename bmupmu::remove_extent<T>::type element_type;
+
+	//! <b>Effects</b>: Constructs a default_delete object from another <tt>default_delete<U></tt> object.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!   - If T is not an array type and U* is implicitly convertible to T*.
+	//!   - If T is an array type and U* is a more CV qualified pointer to remove_extent<T>::type.
+	template <class U>
+	default_delete(
+	    const default_delete<U> &,
+	    typename bmupd::enable_def_del<U, T>::type * = 0) noexcept
+	{
+		//If T is not an array type, U derives from T
+		//and T has no virtual destructor, then you have a problem
+		static_assert((!bmupd::missing_virtual_destructor<default_delete, U>::value));
+	}
+
+	//! <b>Effects</b>: Constructs a default_delete object from another <tt>default_delete<U></tt> object.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!   - If T is not an array type and U* is implicitly convertible to T*.
+	//!   - If T is an array type and U* is a more CV qualified pointer to remove_extent<T>::type.
+	template <class U>
+	typename bmupd::enable_def_del<U, T, default_delete &>::type
+	operator=(const default_delete<U> &) noexcept
+	{
+		//If T is not an array type, U derives from T
+		//and T has no virtual destructor, then you have a problem
+		static_assert((!bmupd::missing_virtual_destructor<default_delete, U>::value));
+		return *this;
+	}
+
+	//! <b>Effects</b>: if T is not an array type, calls <tt>delete</tt> on static_cast<T*>(ptr),
+	//!   otherwise calls <tt>delete[]</tt> on static_cast<remove_extent<T>::type*>(ptr).
+	//!
+	//! <b>Remarks</b>: If U is an incomplete type, the program is ill-formed.
+	//!   This operator shall not participate in overload resolution unless:
+	//!      - T is not an array type and U* is convertible to T*, OR
+	//!      - T is an array type, and remove_cv<U>::type is the same type as
+	//!         remove_cv<remove_extent<T>::type>::type and U* is convertible to remove_extent<T>::type*.
+	template <class U>
+	typename bmupd::enable_defdel_call<U, T, void>::type operator()(U *ptr) const noexcept
+	{
+		//U must be a complete type
+		static_assert(sizeof(U) > 0);
+		//If T is not an array type, U derives from T
+		//and T has no virtual destructor, then you have a problem
+		static_assert((!bmupd::missing_virtual_destructor<default_delete, U>::value));
+		element_type *const p = static_cast<element_type *>(ptr);
+		move_upd::call_delete(p, move_upd::is_array_del<bmupmu::is_array<T>::value>());
+	}
+
+	//! <b>Effects</b>: Same as <tt>(*this)(static_cast<element_type*>(nullptr))</tt>.
+	//!
+	void operator()(bmupd::nullptr_type) const noexcept
+	{
+		static_assert(sizeof(element_type) > 0);
+	}
+};
+
+} // namespace movelib
+} // namespace boost
+
+#include <utility>
+
+namespace boost {
+
+using ::std::move;
+using ::std::forward;
+
+} //namespace boost
+
+//////////////////////////////////////////////////////////////////////////////
+//
+//                         move_if_not_lvalue_reference
+//
+//////////////////////////////////////////////////////////////////////////////
+
+namespace boost {
+
+template <class T>
+FORCEINLINE T &&
+move_if_not_lvalue_reference(typename std::remove_reference<T>::type &t) noexcept
+{
+	return static_cast<T &&>(t);
+}
+
+template <class T>
+FORCEINLINE T &&
+move_if_not_lvalue_reference(typename std::remove_reference<T>::type &&t) noexcept
+{
+	//"boost::forward<T> error: 'T' is a lvalue reference, can't forward as rvalue.";
+	static_assert(!std::is_lvalue_reference<T>::value);
+	return static_cast<T &&>(t);
+}
+
+} // namespace boost
+
+namespace boost {
+namespace move_detail {
+
+template <typename T> typename std::add_rvalue_reference<T>::type declval();
+
+} // namespace move_detail
+} // namespace boost
+
+namespace boost_move_adl_swap {
+
+template <class T>
+FORCEINLINE void
+swap_proxy(T &x, T &y)
+{
+	using std::swap;
+	swap(x, y);
+}
+
+} // namespace boost_move_adl_swap
+
+namespace boost_move_adl_swap {
+
+template <class T, std::size_t N>
+void
+swap_proxy(T (&x)[N], T (&y)[N])
+{
+	for (std::size_t i = 0; i < N; ++i) { ::boost_move_adl_swap::swap_proxy(x[i], y[i]); }
+}
+
+} // namespace boost_move_adl_swap
+
+namespace boost {
+
+//! Exchanges the values of a and b, using Argument Dependent Lookup (ADL) to select a
+//! specialized swap function if available. If no specialized swap function is available,
+//! std::swap is used.
+//!
+//! <b>Exception</b>: If T uses Boost.Move's move emulation and the compiler has
+//! no rvalue references then:
+//!
+//!   -  If T has a <code>T::swap(T&)</code> member, that member is called.
+//!   -  Otherwise a move-based swap is called, equivalent to:
+//!      <code>T t(::boost::move(x)); x = ::boost::move(y); y = ::boost::move(t);</code>.
+template <class T>
+FORCEINLINE void
+adl_move_swap(T &x, T &y)
+{
+	::boost_move_adl_swap::swap_proxy(x, y);
+}
+
+//! Exchanges elements between range [first1, last1) and another range starting at first2
+//! using boost::adl_move_swap.
+//!
+//! Parameters:
+//!   first1, last1   -   the first range of elements to swap
+//!   first2   -   beginning of the second range of elements to swap
+//!
+//! Type requirements:
+//!   - ForwardIt1, ForwardIt2 must meet the requirements of ForwardIterator.
+//!   - The types of dereferenced ForwardIt1 and ForwardIt2 must meet the
+//!     requirements of Swappable
+//!
+//! Return value: Iterator to the element past the last element exchanged in the range
+//! beginning with first2.
+template <class ForwardIt1, class ForwardIt2>
+ForwardIt2
+adl_move_swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2)
+{
+	while (first1 != last1)
+	{
+		::boost::adl_move_swap(*first1, *first2);
+		++first1;
+		++first2;
+	}
+	return first2;
+}
+
+template <class BidirIt1, class BidirIt2>
+BidirIt2
+adl_move_swap_ranges_backward(BidirIt1 first1, BidirIt1 last1, BidirIt2 last2)
+{
+	while (first1 != last1) { ::boost::adl_move_swap(*(--last1), *(--last2)); }
+	return last2;
+}
+
+template <class ForwardIt1, class ForwardIt2>
+void
+adl_move_iter_swap(ForwardIt1 a, ForwardIt2 b)
+{
+	boost::adl_move_swap(*a, *b);
+}
+
+} // namespace boost
+
+//!\file
+//! Describes the smart pointer unique_ptr, a drop-in replacement for std::unique_ptr,
+//! usable also from C++03 compilers.
+//!
+//! Main differences from std::unique_ptr to avoid heavy dependencies,
+//! specially in C++03 compilers:
+//!   - <tt>operator < </tt> uses pointer <tt>operator < </tt>instead of <tt>std::less<common_type></tt>.
+//!      This avoids dependencies on <tt>std::common_type</tt> and <tt>std::less</tt>
+//!      (<tt><type_traits>/<functional></tt> headers). In C++03 this avoid pulling Boost.Typeof and other
+//!      cascading dependencies. As in all Boost platforms <tt>operator <</tt> on raw pointers and
+//!      other smart pointers provides strict weak ordering in practice this should not be a problem for users.
+//!   - assignable from literal 0 for compilers without nullptr
+//!   - <tt>unique_ptr<T[]></tt> is constructible and assignable from <tt>unique_ptr<U[]></tt> if
+//!      cv-less T and cv-less U are the same type and T is more CV qualified than U.
+
+namespace boost {
+// @cond
+namespace move_upd {
+
+////////////////////////////////////////////
+//          deleter types
+////////////////////////////////////////////
+template <class D> struct deleter_types
+{
+	typedef typename bmupmu::add_lvalue_reference<D>::type del_ref;
+	typedef typename bmupmu::add_const_lvalue_reference<D>::type del_cref;
+	typedef typename bmupmu::if_c<bmupmu::is_lvalue_reference<D>::value, D, del_cref>::type
+	    deleter_arg_type1;
+	typedef typename bmupmu::remove_reference<D>::type &&deleter_arg_type2;
+};
+
+////////////////////////////////////////////
+//          unique_ptr_data
+////////////////////////////////////////////
+template <
+    class P,
+    class D,
+    bool = move_upd::is_unary_function<D>::value || bmupmu::is_reference<D>::value>
+struct unique_ptr_data
+{
+	typedef typename deleter_types<D>::deleter_arg_type1 deleter_arg_type1;
+	typedef typename deleter_types<D>::del_ref del_ref;
+	typedef typename deleter_types<D>::del_cref del_cref;
+
+	FORCEINLINE unique_ptr_data() noexcept : m_p(), d() { }
+
+	FORCEINLINE explicit unique_ptr_data(P p) noexcept : m_p(p), d() { }
+
+	FORCEINLINE unique_ptr_data(P p, deleter_arg_type1 d1) noexcept : m_p(p), d(d1) { }
+
+	template <class U>
+	FORCEINLINE unique_ptr_data(P p, U &&d1) noexcept : m_p(p), d(::boost::forward<U>(d1))
+	{
+	}
+
+	FORCEINLINE del_ref deleter() { return d; }
+	FORCEINLINE del_cref deleter() const { return d; }
+
+	P m_p;
+	D d;
+
+private:
+	unique_ptr_data &operator=(const unique_ptr_data &);
+	unique_ptr_data(const unique_ptr_data &);
+};
+
+template <class P, class D> struct unique_ptr_data<P, D, false> : private D
+{
+	typedef typename deleter_types<D>::deleter_arg_type1 deleter_arg_type1;
+	typedef typename deleter_types<D>::del_ref del_ref;
+	typedef typename deleter_types<D>::del_cref del_cref;
+
+	FORCEINLINE unique_ptr_data() noexcept : D(), m_p() { }
+
+	FORCEINLINE explicit unique_ptr_data(P p) noexcept : D(), m_p(p) { }
+
+	FORCEINLINE unique_ptr_data(P p, deleter_arg_type1 d1) noexcept : D(d1), m_p(p) { }
+
+	template <class U>
+	FORCEINLINE unique_ptr_data(P p, U &&d) noexcept : D(::boost::forward<U>(d)), m_p(p)
+	{
+	}
+
+	FORCEINLINE del_ref deleter() noexcept { return static_cast<del_ref>(*this); }
+	FORCEINLINE del_cref deleter() const noexcept { return static_cast<del_cref>(*this); }
+
+	P m_p;
+
+private:
+	unique_ptr_data &operator=(const unique_ptr_data &);
+	unique_ptr_data(const unique_ptr_data &);
+};
+
+////////////////////////////////////////////
+//          is_unique_ptr_convertible
+////////////////////////////////////////////
+
+//Although non-standard, we avoid using pointer_traits
+//to avoid heavy dependencies
+template <typename T> struct get_element_type
+{
+	struct DefaultWrap
+	{
+		typedef bmupmu::natify<T> element_type;
+	};
+	template <typename X> static char test(int, typename X::element_type *);
+	template <typename X> static int test(...);
+	static const bool value = (1 == sizeof(test<T>(0, 0)));
+	typedef typename bmupmu::if_c<value, T, DefaultWrap>::type::element_type type;
+};
+
+template <class T> struct get_element_type<T *>
+{
+	typedef T type;
+};
+
+template <class T> struct get_cvelement : bmupmu::remove_cv<typename get_element_type<T>::type>
+{
+};
+
+template <class P1, class P2> struct is_same_cvelement_and_convertible
+{
+	typedef typename bmupmu::remove_reference<P1>::type arg1;
+	typedef typename bmupmu::remove_reference<P2>::type arg2;
+	static const bool same_cvless = bmupmu::
+	    is_same<typename get_cvelement<arg1>::type, typename get_cvelement<arg2>::type>::value;
+	static const bool value = same_cvless && bmupmu::is_convertible<arg1, arg2>::value;
+};
+
+template <bool IsArray, class FromPointer, class ThisPointer>
+struct is_unique_ptr_convertible : is_same_cvelement_and_convertible<FromPointer, ThisPointer>
+{
+};
+
+template <class FromPointer, class ThisPointer>
+struct is_unique_ptr_convertible<false, FromPointer, ThisPointer>
+    : bmupmu::is_convertible<FromPointer, ThisPointer>
+{
+};
+
+////////////////////////////////////////
+////     enable_up_moveconv_assign
+////////////////////////////////////////
+
+template <class T, class FromPointer, class ThisPointer, class Type = bmupmu::nat>
+struct enable_up_ptr
+    : bmupmu::enable_if_c<
+          is_unique_ptr_convertible<bmupmu::is_array<T>::value, FromPointer, ThisPointer>::
+              value,
+          Type>
+{
+};
+
+////////////////////////////////////////
+////     enable_up_moveconv_assign
+////////////////////////////////////////
+
+template <class T, class D, class U, class E> struct unique_moveconvert_assignable
+{
+	static const bool t_is_array = bmupmu::is_array<T>::value;
+	static const bool value =
+	    t_is_array == bmupmu::is_array<U>::value &&
+	    bmupmu::extent<T>::value == bmupmu::extent<U>::value &&
+	    is_unique_ptr_convertible<
+	        t_is_array,
+	        typename bmupmu::pointer_type<U, E>::type,
+	        typename bmupmu::pointer_type<T, D>::type>::value;
+};
+
+template <class T, class D, class U, class E, std::size_t N>
+struct unique_moveconvert_assignable<T[], D, U[N], E>
+    : unique_moveconvert_assignable<T[], D, U[], E>
+{
+};
+
+template <class T, class D, class U, class E, class Type = bmupmu::nat>
+struct enable_up_moveconv_assign
+    : bmupmu::enable_if_c<unique_moveconvert_assignable<T, D, U, E>::value, Type>
+{
+};
+
+////////////////////////////////////////
+////     enable_up_moveconv_constr
+////////////////////////////////////////
+
+template <class D, class E, bool IsReference = bmupmu::is_reference<D>::value>
+struct unique_deleter_is_initializable : bmupmu::is_same<D, E>
+{
+};
+
+template <class T, class U> class is_rvalue_convertible
+{
+	typedef typename bmupmu::remove_reference<T>::type &&t_from;
+
+	typedef char true_t;
+	class false_t
+	{
+		char dummy[2];
+	};
+	static false_t dispatch(...);
+	static true_t dispatch(U);
+	static t_from trigger();
+
+public:
+	static const bool value = sizeof(dispatch(trigger())) == sizeof(true_t);
+};
+
+template <class D, class E> struct unique_deleter_is_initializable<D, E, false>
+{
+// Clang has some problems with is_rvalue_convertible with non-copyable types
+// so use intrinsic if available
+#if defined(__clang__)
+#	if __has_feature(is_convertible_to)
+	static const bool value = __is_convertible_to(E, D);
+#	else
+	static const bool value = is_rvalue_convertible<E, D>::value;
+#	endif
+#else
+	static const bool value = is_rvalue_convertible<E, D>::value;
+#endif
+};
+
+template <class T, class D, class U, class E, class Type = bmupmu::nat>
+struct enable_up_moveconv_constr
+    : bmupmu::enable_if_c<
+          unique_moveconvert_assignable<T, D, U, E>::value &&
+              unique_deleter_is_initializable<D, E>::value,
+          Type>
+{
+};
+
+} // namespace move_upd
+// @endcond
+
+namespace movelib {
+
+//! A unique pointer is an object that owns another object and
+//! manages that other object through a pointer.
+//!
+//! More precisely, a unique pointer is an object u that stores a pointer to a second object p and will dispose
+//! of p when u is itself destroyed (e.g., when leaving block scope). In this context, u is said to own p.
+//!
+//! The mechanism by which u disposes of p is known as p's associated deleter, a function object whose correct
+//! invocation results in p's appropriate disposition (typically its deletion).
+//!
+//! Let the notation u.p denote the pointer stored by u, and let u.d denote the associated deleter. Upon request,
+//! u can reset (replace) u.p and u.d with another pointer and deleter, but must properly dispose of its owned
+//! object via the associated deleter before such replacement is considered completed.
+//!
+//! Additionally, u can, upon request, transfer ownership to another unique pointer u2. Upon completion of
+//! such a transfer, the following postconditions hold:
+//!   - u2.p is equal to the pre-transfer u.p,
+//!   - u.p is equal to nullptr, and
+//!   - if the pre-transfer u.d maintained state, such state has been transferred to u2.d.
+//!
+//! As in the case of a reset, u2 must properly dispose of its pre-transfer owned object via the pre-transfer
+//! associated deleter before the ownership transfer is considered complete.
+//!
+//! Each object of a type U instantiated from the unique_ptr template specified in this subclause has the strict
+//! ownership semantics, specified above, of a unique pointer. In partial satisfaction of these semantics, each
+//! such U is MoveConstructible and MoveAssignable, but is not CopyConstructible nor CopyAssignable.
+//! The template parameter T of unique_ptr may be an incomplete type.
+//!
+//! The uses of unique_ptr include providing exception safety for dynamically allocated memory, passing
+//! ownership of dynamically allocated memory to a function, and returning dynamically allocated memory from
+//! a function.
+//!
+//! If T is an array type (e.g. unique_ptr<MyType[]>) the interface is slightly altered:
+//!   - Pointers to types derived from T are rejected by the constructors, and by reset.
+//!   - The observers <tt>operator*</tt> and <tt>operator-></tt> are not provided.
+//!   - The indexing observer <tt>operator[]</tt> is provided.
+//!
+//! \tparam T Provides the type of the stored pointer.
+//! \tparam D The deleter type:
+//!   -  The default type for the template parameter D is default_delete. A client-supplied template argument
+//!      D shall be a function object type, lvalue-reference to function, or lvalue-reference to function object type
+//!      for which, given a value d of type D and a value ptr of type unique_ptr<T, D>::pointer, the expression
+//!      d(ptr) is valid and has the effect of disposing of the pointer as appropriate for that deleter.
+//!   -  If the deleter's type D is not a reference type, D shall satisfy the requirements of Destructible.
+//!   -  If the type <tt>remove_reference<D>::type::pointer</tt> exists, it shall satisfy the requirements of NullablePointer.
+template <class T, class D = default_delete<T>> class unique_ptr
+{
+public:
+	unique_ptr(unique_ptr const &) = delete;
+	unique_ptr &operator=(unique_ptr const &) = delete;
+	typedef int boost_move_no_copy_constructor_or_assign;
+	typedef int boost_move_emulation_t;
+
+private:
+	typedef bmupmu::pointer_type<T, D> pointer_type_obtainer;
+	typedef bmupd::unique_ptr_data<typename pointer_type_obtainer::type, D> data_type;
+	typedef typename bmupd::deleter_types<D>::deleter_arg_type1 deleter_arg_type1;
+	typedef typename bmupd::deleter_types<D>::deleter_arg_type2 deleter_arg_type2;
+	data_type m_data;
+
+public:
+	//! If the type <tt>remove_reference<D>::type::pointer</tt> exists, then it shall be a
+	//! synonym for <tt>remove_reference<D>::type::pointer</tt>. Otherwise it shall be a
+	//! synonym for T*.
+	typedef typename pointer_type_obtainer::type pointer;
+	//! If T is an array type, then element_type is equal to T. Otherwise, if T is a type
+	//! in the form U[], element_type is equal to U.
+	typedef typename bmupmu::remove_extent<T>::type element_type;
+	typedef D deleter_type;
+
+	//! <b>Requires</b>: D shall satisfy the requirements of DefaultConstructible, and
+	//!   that construction shall not throw an exception.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr object that owns nothing, value-initializing the
+	//!   stored pointer and the stored deleter.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == nullptr</tt>. <tt>get_deleter()</tt> returns a reference to the stored deleter.
+	//!
+	//! <b>Remarks</b>: If this constructor is instantiated with a pointer type or reference type
+	//!   for the template argument D, the program is ill-formed.
+	FORCEINLINE constexpr unique_ptr() noexcept : m_data()
+	{
+		//If this constructor is instantiated with a pointer type or reference type
+		//for the template argument D, the program is ill-formed.
+		static_assert(!bmupmu::is_pointer<D>::value);
+		static_assert(!bmupmu::is_reference<D>::value);
+	}
+
+	//! <b>Effects</b>: Same as <tt>unique_ptr()</tt> (default constructor).
+	//!
+	FORCEINLINE constexpr unique_ptr(bmupd::nullptr_type) noexcept : m_data()
+	{
+		//If this constructor is instantiated with a pointer type or reference type
+		//for the template argument D, the program is ill-formed.
+		static_assert(!bmupmu::is_pointer<D>::value);
+		static_assert(!bmupmu::is_reference<D>::value);
+	}
+
+	//! <b>Requires</b>: D shall satisfy the requirements of DefaultConstructible, and
+	//!   that construction shall not throw an exception.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr which owns p, initializing the stored pointer
+	//!   with p and value initializing the stored deleter.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == p</tt>. <tt>get_deleter()</tt> returns a reference to the stored deleter.
+	//!
+	//! <b>Remarks</b>: If this constructor is instantiated with a pointer type or reference type
+	//!   for the template argument D, the program is ill-formed.
+	//!   This constructor shall not participate in overload resolution unless:
+	//!      - If T is not an array type and Pointer is implicitly convertible to pointer.
+	//!      - If T is an array type and Pointer is a more CV qualified pointer to element_type.
+	template <class Pointer>
+	FORCEINLINE explicit unique_ptr(
+	    Pointer p,
+	    typename bmupd::enable_up_ptr<T, Pointer, pointer>::type * = 0) noexcept
+	    : m_data(p)
+	{
+		//If T is not an array type, element_type_t<Pointer> derives from T
+		//it uses the default deleter and T has no virtual destructor, then you have a problem
+		static_assert(
+		    (!bmupd::missing_virtual_destructor<
+		        D, typename bmupd::get_element_type<Pointer>::type>::value));
+		//If this constructor is instantiated with a pointer type or reference type
+		//for the template argument D, the program is ill-formed.
+		static_assert(!bmupmu::is_pointer<D>::value);
+		static_assert(!bmupmu::is_reference<D>::value);
+	}
+
+	//!The signature of this constructor depends upon whether D is a reference type.
+	//!   - If D is non-reference type A, then the signature is <tt>unique_ptr(pointer p, const A& d)</tt>.
+	//!   - If D is an lvalue-reference type A&, then the signature is <tt>unique_ptr(pointer p, A& d)</tt>.
+	//!   - If D is an lvalue-reference type const A&, then the signature is <tt>unique_ptr(pointer p, const A& d)</tt>.
+	//!
+	//!
+	//! <b>Requires</b>: Either
+	//!   - D is not an lvalue-reference type and d is an lvalue or const rvalue.
+	//!         D shall satisfy the requirements of CopyConstructible, and the copy constructor of D
+	//!         shall not throw an exception. This unique_ptr will hold a copy of d.
+	//!   - D is an lvalue-reference type and d is an lvalue. the type which D references need not be CopyConstructible nor
+	//!      MoveConstructible. This unique_ptr will hold a D which refers to the lvalue d.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr object which owns p, initializing the stored pointer with p and
+	//!   initializing the deleter as described above.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == p</tt>. <tt>get_deleter()</tt> returns a reference to the stored deleter. If D is a
+	//!   reference type then <tt>get_deleter()</tt> returns a reference to the lvalue d.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!      - If T is not an array type and Pointer is implicitly convertible to pointer.
+	//!      - If T is an array type and Pointer is a more CV qualified pointer to element_type.
+	template <class Pointer>
+	FORCEINLINE unique_ptr(
+	    Pointer p,
+	    deleter_arg_type1 d1,
+	    typename bmupd::enable_up_ptr<T, Pointer, pointer>::type * = 0) noexcept
+	    : m_data(p, d1)
+	{
+		//If T is not an array type, element_type_t<Pointer> derives from T
+		//it uses the default deleter and T has no virtual destructor, then you have a problem
+		static_assert(
+		    (!bmupd::missing_virtual_destructor<
+		        D, typename bmupd::get_element_type<Pointer>::type>::value));
+	}
+
+	//! <b>Effects</b>: Same effects as <tt>template<class Pointer> unique_ptr(Pointer p, deleter_arg_type1 d1)</tt>
+	//!   and additionally <tt>get() == nullptr</tt>
+	FORCEINLINE unique_ptr(bmupd::nullptr_type, deleter_arg_type1 d1) noexcept
+	    : m_data(pointer(), d1)
+	{
+	}
+
+	//! The signature of this constructor depends upon whether D is a reference type.
+	//!   - If D is non-reference type A, then the signature is <tt>unique_ptr(pointer p, A&& d)</tt>.
+	//!   - If D is an lvalue-reference type A&, then the signature is <tt>unique_ptr(pointer p, A&& d)</tt>.
+	//!   - If D is an lvalue-reference type const A&, then the signature is <tt>unique_ptr(pointer p, const A&& d)</tt>.
+	//!
+	//! <b>Requires</b>: Either
+	//!   - D is not an lvalue-reference type and d is a non-const rvalue. D
+	//!      shall satisfy the requirements of MoveConstructible, and the move constructor
+	//!      of D shall not throw an exception. This unique_ptr will hold a value move constructed from d.
+	//!   - D is an lvalue-reference type and d is an rvalue, the program is ill-formed.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr object which owns p, initializing the stored pointer with p and
+	//!   initializing the deleter as described above.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == p</tt>. <tt>get_deleter()</tt> returns a reference to the stored deleter. If D is a
+	//!   reference type then <tt>get_deleter()</tt> returns a reference to the lvalue d.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!      - If T is not an array type and Pointer is implicitly convertible to pointer.
+	//!      - If T is an array type and Pointer is a more CV qualified pointer to element_type.
+	template <class Pointer>
+	FORCEINLINE unique_ptr(
+	    Pointer p,
+	    deleter_arg_type2 d2,
+	    typename bmupd::enable_up_ptr<T, Pointer, pointer>::type * = 0) noexcept
+	    : m_data(p, ::boost::move(d2))
+	{
+		//If T is not an array type, element_type_t<Pointer> derives from T
+		//it uses the default deleter and T has no virtual destructor, then you have a problem
+		static_assert(
+		    (!bmupd::missing_virtual_destructor<
+		        D, typename bmupd::get_element_type<Pointer>::type>::value));
+	}
+
+	//! <b>Effects</b>: Same effects as <tt>template<class Pointer> unique_ptr(Pointer p, deleter_arg_type2 d2)</tt>
+	//!   and additionally <tt>get() == nullptr</tt>
+	FORCEINLINE unique_ptr(bmupd::nullptr_type, deleter_arg_type2 d2) noexcept
+	    : m_data(pointer(), ::boost::move(d2))
+	{
+	}
+
+	//! <b>Requires</b>: If D is not a reference type, D shall satisfy the requirements of MoveConstructible.
+	//! Construction of the deleter from an rvalue of type D shall not throw an exception.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr by transferring ownership from u to *this. If D is a reference type,
+	//! this deleter is copy constructed from u's deleter; otherwise, this deleter is move constructed from u's
+	//! deleter.
+	//!
+	//! <b>Postconditions</b>: <tt>get()</tt> yields the value u.get() yielded before the construction. <tt>get_deleter()</tt>
+	//! returns a reference to the stored deleter that was constructed from u.get_deleter(). If D is a
+	//! reference type then <tt>get_deleter()</tt> and <tt>u.get_deleter()</tt> both reference the same lvalue deleter.
+	FORCEINLINE unique_ptr(unique_ptr &&u) noexcept
+	    : m_data(u.release(), ::boost::move_if_not_lvalue_reference<D>(u.get_deleter()))
+	{
+	}
+
+	//! <b>Requires</b>: If E is not a reference type, construction of the deleter from an rvalue of type E shall be
+	//!   well formed and shall not throw an exception. Otherwise, E is a reference type and construction of the
+	//!   deleter from an lvalue of type E shall be well formed and shall not throw an exception.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!   - <tt>unique_ptr<U, E>::pointer</tt> is implicitly convertible to pointer,
+	//!   - U is not an array type, and
+	//!   - either D is a reference type and E is the same type as D, or D is not a reference type and E is
+	//!      implicitly convertible to D.
+	//!
+	//! <b>Effects</b>: Constructs a unique_ptr by transferring ownership from u to *this. If E is a reference type,
+	//!   this deleter is copy constructed from u's deleter; otherwise, this deleter is move constructed from u's deleter.
+	//!
+	//! <b>Postconditions</b>: <tt>get()</tt> yields the value <tt>u.get()</tt> yielded before the construction. <tt>get_deleter()</tt>
+	//!   returns a reference to the stored deleter that was constructed from <tt>u.get_deleter()</tt>.
+	template <class U, class E>
+	FORCEINLINE unique_ptr(
+	    unique_ptr<U, E> &&u,
+	    typename bmupd::enable_up_moveconv_constr<T, D, U, E>::type * = 0) noexcept
+	    : m_data(u.release(), ::boost::move_if_not_lvalue_reference<E>(u.get_deleter()))
+	{
+		//If T is not an array type, U derives from T
+		//it uses the default deleter and T has no virtual destructor, then you have a problem
+		static_assert((
+		    !bmupd::missing_virtual_destructor<D, typename unique_ptr<U, E>::pointer>::value));
+	}
+
+	//! <b>Requires</b>: The expression <tt>get_deleter()(get())</tt> shall be well formed, shall have well-defined behavior,
+	//!   and shall not throw exceptions.
+	//!
+	//! <b>Effects</b>: If <tt>get() == nullpt1r</tt> there are no effects. Otherwise <tt>get_deleter()(get())</tt>.
+	//!
+	//! <b>Note</b>: The use of default_delete requires T to be a complete type
+	~unique_ptr()
+	{
+		if (m_data.m_p) m_data.deleter()(m_data.m_p);
+	}
+
+	//! <b>Requires</b>: If D is not a reference type, D shall satisfy the requirements of MoveAssignable
+	//!   and assignment of the deleter from an rvalue of type D shall not throw an exception. Otherwise, D
+	//!   is a reference type; <tt>remove_reference<D>::type</tt> shall satisfy the CopyAssignable requirements and
+	//!   assignment of the deleter from an lvalue of type D shall not throw an exception.
+	//!
+	//! <b>Effects</b>: Transfers ownership from u to *this as if by calling <tt>reset(u.release())</tt> followed
+	//!   by <tt>get_deleter() = std::forward<D>(u.get_deleter())</tt>.
+	//!
+	//! <b>Returns</b>: *this.
+	unique_ptr &operator=(unique_ptr &&u) noexcept
+	{
+		this->reset(u.release());
+		m_data.deleter() = ::boost::move_if_not_lvalue_reference<D>(u.get_deleter());
+		return *this;
+	}
+
+	//! <b>Requires</b>: If E is not a reference type, assignment of the deleter from an rvalue of type E shall be
+	//!   well-formed and shall not throw an exception. Otherwise, E is a reference type and assignment of the
+	//!   deleter from an lvalue of type E shall be well-formed and shall not throw an exception.
+	//!
+	//! <b>Remarks</b>: This operator shall not participate in overload resolution unless:
+	//!   - <tt>unique_ptr<U, E>::pointer</tt> is implicitly convertible to pointer and
+	//!   - U is not an array type.
+	//!
+	//! <b>Effects</b>: Transfers ownership from u to *this as if by calling <tt>reset(u.release())</tt> followed by
+	//!   <tt>get_deleter() = std::forward<E>(u.get_deleter())</tt>.
+	//!
+	//! <b>Returns</b>: *this.
+	template <class U, class E>
+	typename bmupd::enable_up_moveconv_assign<T, D, U, E, unique_ptr &>::type
+	operator=(unique_ptr<U, E> &&u) noexcept
+	{
+		this->reset(u.release());
+		m_data.deleter() = ::boost::move_if_not_lvalue_reference<E>(u.get_deleter());
+		return *this;
+	}
+
+	//! <b>Effects</b>: <tt>reset()</tt>.
+	//!
+	//! <b>Postcondition</b>: <tt>get() == nullptr</tt>
+	//!
+	//! <b>Returns</b>: *this.
+	unique_ptr &operator=(bmupd::nullptr_type) noexcept
+	{
+		this->reset();
+		return *this;
+	}
+
+	//! <b>Requires</b>: <tt>get() != nullptr</tt>.
+	//!
+	//! <b>Returns</b>: <tt>*get()</tt>.
+	//!
+	//! <b>Remarks</b: If T is an array type, the program is ill-formed.
+	typename bmupmu::add_lvalue_reference<element_type>::type operator*() const noexcept
+	{
+		static_assert((!bmupmu::is_array<T>::value));
+		return *m_data.m_p;
+	}
+
+	//! <b>Requires</b>: i < the number of elements in the array to which the stored pointer points.
+	//!
+	//! <b>Returns</b>: <tt>get()[i]</tt>.
+	//!
+	//! <b>Remarks</b: If T is not an array type, the program is ill-formed.
+	FORCEINLINE typename bmupmu::add_lvalue_reference<element_type>::type
+	operator[](std::size_t i) const noexcept
+	{
+		assert(bmupmu::extent<T>::value == 0 || i < bmupmu::extent<T>::value);
+		assert(m_data.m_p);
+		return m_data.m_p[i];
+	}
+
+	//! <b>Requires</b>: <tt>get() != nullptr</tt>.
+	//!
+	//! <b>Returns</b>: <tt>get()</tt>.
+	//!
+	//! <b>Note</b>: use typically requires that T be a complete type.
+	//!
+	//! <b>Remarks</b: If T is an array type, the program is ill-formed.
+	FORCEINLINE pointer operator->() const noexcept
+	{
+		static_assert((!bmupmu::is_array<T>::value));
+		assert(m_data.m_p);
+		return m_data.m_p;
+	}
+
+	//! <b>Returns</b>: The stored pointer.
+	//!
+	FORCEINLINE pointer get() const noexcept { return m_data.m_p; }
+
+	//! <b>Returns</b>: A reference to the stored deleter.
+	//!
+	FORCEINLINE typename bmupmu::add_lvalue_reference<D>::type get_deleter() noexcept
+	{
+		return m_data.deleter();
+	}
+
+	//! <b>Returns</b>: A reference to the stored deleter.
+	//!
+	FORCEINLINE typename bmupmu::add_const_lvalue_reference<D>::type
+	get_deleter() const noexcept
+	{
+		return m_data.deleter();
+	}
+
+	//! <b>Returns</b>: Returns: get() != nullptr.
+	//!
+	FORCEINLINE explicit operator bool() const noexcept
+	{
+		return m_data.m_p ? &bmupd::bool_conversion::for_bool : bmupd::explicit_bool_arg(0);
+	}
+
+	//! <b>Postcondition</b>: <tt>get() == nullptr</tt>.
+	//!
+	//! <b>Returns</b>: The value <tt>get()</tt> had at the start of the call to release.
+	FORCEINLINE pointer release() noexcept
+	{
+		const pointer tmp = m_data.m_p;
+		m_data.m_p = pointer();
+		return tmp;
+	}
+
+	//! <b>Requires</b>: The expression <tt>get_deleter()(get())</tt> shall be well formed, shall have well-defined behavior,
+	//!   and shall not throw exceptions.
+	//!
+	//! <b>Effects</b>: assigns p to the stored pointer, and then if the old value of the stored pointer, old_p, was not
+	//!   equal to nullptr, calls <tt>get_deleter()(old_p)</tt>. Note: The order of these operations is significant
+	//!   because the call to <tt>get_deleter()</tt> may destroy *this.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == p</tt>. Note: The postcondition does not hold if the call to <tt>get_deleter()</tt>
+	//!   destroys *this since <tt>this->get()</tt> is no longer a valid expression.
+	//!
+	//! <b>Remarks</b>: This constructor shall not participate in overload resolution unless:
+	//!      - If T is not an array type and Pointer is implicitly convertible to pointer.
+	//!      - If T is an array type and Pointer is a more CV qualified pointer to element_type.
+	template <class Pointer>
+	typename bmupd::enable_up_ptr<T, Pointer, pointer, void>::type reset(Pointer p) noexcept
+	{
+		//If T is not an array type, element_type_t<Pointer> derives from T
+		//it uses the default deleter and T has no virtual destructor, then you have a problem
+		static_assert(
+		    (!bmupd::missing_virtual_destructor<
+		        D, typename bmupd::get_element_type<Pointer>::type>::value));
+		pointer tmp = m_data.m_p;
+		m_data.m_p = p;
+		if (tmp) m_data.deleter()(tmp);
+	}
+
+	//! <b>Requires</b>: The expression <tt>get_deleter()(get())</tt> shall be well formed, shall have well-defined behavior,
+	//!   and shall not throw exceptions.
+	//!
+	//! <b>Effects</b>: assigns nullptr to the stored pointer, and then if the old value of the stored pointer, old_p, was not
+	//!   equal to nullptr, calls <tt>get_deleter()(old_p)</tt>. Note: The order of these operations is significant
+	//!   because the call to <tt>get_deleter()</tt> may destroy *this.
+	//!
+	//! <b>Postconditions</b>: <tt>get() == p</tt>. Note: The postcondition does not hold if the call to <tt>get_deleter()</tt>
+	//!   destroys *this since <tt>this->get()</tt> is no longer a valid expression.
+	void reset() noexcept { this->reset(pointer()); }
+
+	//! <b>Effects</b>: Same as <tt>reset()</tt>
+	//!
+	void reset(bmupd::nullptr_type) noexcept { this->reset(); }
+
+	//! <b>Requires</b>: <tt>get_deleter()</tt> shall be swappable and shall not throw an exception under swap.
+	//!
+	//! <b>Effects</b>: Invokes swap on the stored pointers and on the stored deleters of *this and u.
+	void swap(unique_ptr &u) noexcept
+	{
+		::boost::adl_move_swap(m_data.m_p, u.m_data.m_p);
+		::boost::adl_move_swap(m_data.deleter(), u.m_data.deleter());
+	}
+};
+
+//! <b>Effects</b>: Calls <tt>x.swap(y)</tt>.
+//!
+template <class T, class D>
+FORCEINLINE void
+swap(unique_ptr<T, D> &x, unique_ptr<T, D> &y) noexcept
+{
+	x.swap(y);
+}
+
+//! <b>Returns</b>: <tt>x.get() == y.get()</tt>.
+//!
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator==(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return x.get() == y.get();
+}
+
+//! <b>Returns</b>: <tt>x.get() != y.get()</tt>.
+//!
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator!=(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return x.get() != y.get();
+}
+
+//! <b>Returns</b>: x.get() < y.get().
+//!
+//! <b>Remarks</b>: This comparison shall induce a
+//!   strict weak ordering betwen pointers.
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator<(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return x.get() < y.get();
+}
+
+//! <b>Returns</b>: !(y < x).
+//!
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator<=(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return !(y < x);
+}
+
+//! <b>Returns</b>: y < x.
+//!
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator>(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return y < x;
+}
+
+//! <b>Returns</b>:!(x < y).
+//!
+template <class T1, class D1, class T2, class D2>
+FORCEINLINE bool
+operator>=(const unique_ptr<T1, D1> &x, const unique_ptr<T2, D2> &y)
+{
+	return !(x < y);
+}
+
+//! <b>Returns</b>:!x.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator==(const unique_ptr<T, D> &x, bmupd::nullptr_type) noexcept
+{
+	return !x;
+}
+
+//! <b>Returns</b>:!x.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator==(bmupd::nullptr_type, const unique_ptr<T, D> &x) noexcept
+{
+	return !x;
+}
+
+//! <b>Returns</b>: (bool)x.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator!=(const unique_ptr<T, D> &x, bmupd::nullptr_type) noexcept
+{
+	return !!x;
+}
+
+//! <b>Returns</b>: (bool)x.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator!=(bmupd::nullptr_type, const unique_ptr<T, D> &x) noexcept
+{
+	return !!x;
+}
+
+//! <b>Requires</b>: <tt>operator </tt> shall induce a strict weak ordering on unique_ptr<T, D>::pointer values.
+//!
+//! <b>Returns</b>: Returns <tt>x.get() < pointer()</tt>.
+template <class T, class D>
+FORCEINLINE bool
+operator<(const unique_ptr<T, D> &x, bmupd::nullptr_type)
+{
+	return x.get() < typename unique_ptr<T, D>::pointer();
+}
+
+//! <b>Requires</b>: <tt>operator </tt> shall induce a strict weak ordering on unique_ptr<T, D>::pointer values.
+//!
+//! <b>Returns</b>: Returns <tt>pointer() < x.get()</tt>.
+template <class T, class D>
+FORCEINLINE bool
+operator<(bmupd::nullptr_type, const unique_ptr<T, D> &x)
+{
+	return typename unique_ptr<T, D>::pointer() < x.get();
+}
+
+//! <b>Returns</b>: <tt>nullptr < x</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator>(const unique_ptr<T, D> &x, bmupd::nullptr_type)
+{
+	return x.get() > typename unique_ptr<T, D>::pointer();
+}
+
+//! <b>Returns</b>: <tt>x < nullptr</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator>(bmupd::nullptr_type, const unique_ptr<T, D> &x)
+{
+	return typename unique_ptr<T, D>::pointer() > x.get();
+}
+
+//! <b>Returns</b>: <tt>!(nullptr < x)</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator<=(const unique_ptr<T, D> &x, bmupd::nullptr_type)
+{
+	return !(bmupd::nullptr_type() < x);
+}
+
+//! <b>Returns</b>: <tt>!(x < nullptr)</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator<=(bmupd::nullptr_type, const unique_ptr<T, D> &x)
+{
+	return !(x < bmupd::nullptr_type());
+}
+
+//! <b>Returns</b>: <tt>!(x < nullptr)</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator>=(const unique_ptr<T, D> &x, bmupd::nullptr_type)
+{
+	return !(x < bmupd::nullptr_type());
+}
+
+//! <b>Returns</b>: <tt>!(nullptr < x)</tt>.
+//!
+template <class T, class D>
+FORCEINLINE bool
+operator>=(bmupd::nullptr_type, const unique_ptr<T, D> &x)
+{
+	return !(bmupd::nullptr_type() < x);
+}
+
+} // namespace movelib
+} // namespace boost
+
+#if defined _MSC_VER
+#	pragma warning(pop)
+#endif
+
+
+
 
 #ifdef __GNUC__
 #	pragma GCC diagnostic pop

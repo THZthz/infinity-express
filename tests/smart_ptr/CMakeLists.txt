@@ -3,10 +3,6 @@ file(GLOB TEST_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 foreach (source_file ${TEST_SOURCES})
     get_filename_component(name ${source_file} NAME_WE ABSOLUTE)
 
-    if (name STREQUAL "sp_bml_unique_ptr_test")
-        continue()
-    endif ()
-
     # should failed to compile
     if (name MATCHES "fail")
         continue()

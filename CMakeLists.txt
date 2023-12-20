@@ -133,6 +133,7 @@ set(IE_SOURCES
         src/utils/TaskScheduler.cpp
         src/utils/Tween.cpp
         src/utils/VG.cpp
+        src/utils/VG_gl_utils.cpp
 
         # imgui
         modules/imgui/imgui.cpp

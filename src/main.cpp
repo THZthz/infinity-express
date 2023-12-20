@@ -35,9 +35,9 @@
 int
 main()
 {
-	//			VgApp app;
-//	App app;
-//	app.start();
+//				VgApp app;
+		App app;
+		app.start();
 
 	//	CellAutomata gen;
 	//	gen.generate();
@@ -320,24 +320,24 @@ App::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//	glClear(GL_COLOR_BUFFER_BIT);
 
-	//	nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
-	//	nvgSave(m_vg);
-	//
-	//	double xd, yd;
-	//	glfwGetCursorPos(m_window, &xd, &yd);
-	//	glm::vec2 pw =
-	//	    m_camera.convertScreenToWorld({float(xd) / m_windowScale, float(yd) / m_windowScale});
-	//	nvgBeginPath(m_vg);
-	//	nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
-	//	nvgCircle(m_vg, pw.x, pw.y, 3 / m_camera.getZoom());
-	//	//		nvgCircle(m_vg, m_pointer.x, m_pointer.y, 3);
-	//	nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
-	//	nvgFill(m_vg);
-	//
-	//	nvgRestore(m_vg);
-	//	nvgEndFrame(m_vg);
+		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
+		nvgSave(m_vg);
 
-	//			m_physicsWorld.debugRender();
+		double xd, yd;
+		glfwGetCursorPos(m_window, &xd, &yd);
+		glm::vec2 pw =
+		    m_camera.convertScreenToWorld({float(xd) / m_windowScale, float(yd) / m_windowScale});
+		nvgBeginPath(m_vg);
+		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
+		nvgCircle(m_vg, pw.x, pw.y, 3 / m_camera.getZoom());
+		//		nvgCircle(m_vg, m_pointer.x, m_pointer.y, 3);
+		nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
+		nvgFill(m_vg);
+
+		nvgRestore(m_vg);
+		nvgEndFrame(m_vg);
+
+				m_physicsWorld.debugRender();
 
 	m_framebuffer->blit(prevFBO); // blit to prev FBO and rebind it
 
@@ -351,7 +351,7 @@ App::render()
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 	}
 
-	drawLights();
+//	drawLights();
 }
 
 void
@@ -390,80 +390,11 @@ App::renderUI()
 	ImGui::Render();
 }
 
-
-static constexpr char *g_crtVertexShaderSource = (char *const)
-    R"vertex(
-#version 330 core
-layout(location = 0) in vec3 a_pos;
-layout(location = 1) in vec3 a_color;
-layout(location = 2) in vec2 a_texCoord;
-
-out vec3 v_color;
-out vec2 v_texCoord;
-
-void main() {
-	gl_Position = vec4(a_pos, 1.0);
-	v_color = a_color;
-	v_texCoord = vec2(a_texCoord.x, a_texCoord.y);
-}
-)vertex";
-static constexpr char *g_crtFragmentShaderSource = (char *const)
-    R"frag(
-#version 330 core
-
-out vec4 o_fragColor;
-
-in vec3 v_color;
-in vec2 v_texCoord;
-
-uniform sampler2D u_texture1;
-uniform float u_time;
-uniform vec2 u_resolution;
-
-// retro crt effect
-vec4 CRT(vec2 uv, sampler2D tex, float curvature) {
-	uv = uv * 2. - 1.;
-	vec2 offset = uv.yx / curvature;
-	uv += uv * offset * offset;
-	uv = uv * .5 + .5;
-
-	// distance from center of image, used to adjust blur
-	float d = length(uv - vec2(0.5, 0.5));
-
-	// blur amount
-	float blur = (1.0 + sin(u_time * 0.2)) * 0.4;
-	blur *= 1.0 + sin(u_time * 1.0) * 0.1;
-	blur = pow(blur, 3.0);
-	blur *= 0.05;
-	// reduce blur towards center
-	blur *= d;
-
-	float edge_blur = 0.021;
-	vec2 edge = smoothstep(0., edge_blur, uv) * (1. - smoothstep(1. - edge_blur, 1., uv));
-
-	// chromatic aberration
-	vec3 col;
-	col.r = texture(tex, vec2(uv.x + blur, uv.y)).r;
-	col.g = texture(tex, uv).g;
-	col.b = texture(tex, vec2(uv.x - blur, uv.y)).b;
-	col *= edge.x * edge.y;
-
-	// scanline
-	float scanline = sin(uv.y * u_resolution.y * 2) * 0.035;
-	col -= scanline;
-
-	// vignette
-	col *= 1.0 - d * 0.5;
-
-	return vec4(col, 1.0);
-}
-
-void main() {
-	o_fragColor = CRT(v_texCoord, u_texture1, 5.9);
-}
-)frag";
-
-ShaderCRT::ShaderCRT() : ie::Shader(g_crtVertexShaderSource, g_crtFragmentShaderSource)
+ShaderCRT::ShaderCRT()
+    : ie::Shader(
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/crt.vert",
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/crt.frag",
+          true)
 {
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	float vertices[] = {
@@ -508,134 +439,11 @@ ShaderCRT::use(float frameWidth, float frameHeight) const
 	glBindVertexArray(m_vertexArray);
 }
 
-// Quick vertex shader to draw a light with.
-// Just use a sprite in a real project, it makes the shape/gradient more flexible.
-static constexpr char *g_lightVertexShaderSource = (char *const)
-    R"vertex(
-#version 330 core
-
-layout(location = 0) in vec2 a_vertex;
-layout(location = 1) in vec2 a_uv;
-
-out vec2 v_uv;
-
-uniform mat4 u_matrix;
-
-void main() {
-	gl_Position = u_matrix * vec4(a_vertex, 0, 1);
-	v_uv = a_uv;
-}
-)vertex";
-
-// Quick fragment shader to draw a light with.
-// Just use a sprite in a real project, it makes the shape/gradient more flexible.
-static constexpr char *g_lightFragmentShaderSource = (char *const)
-    R"frag(
-#version 330 core
-
-in vec2 v_uv;
-
-uniform vec3 u_color;
-
-out vec4 fragColor;
-
-void main() {
-	// A nice radial gradient with quadratic falloff.
-	float brightness = max(0.0, 1.0 - pow(dot(v_uv, v_uv), 0.25));
-	fragColor = vec4(brightness * u_color, 1.0);
-}
-)frag";
-
-static constexpr char *g_shadowVertexShaderSource = (char *const)
-    R"vertex(
-#version 330 core
-
-layout(location = 0) in vec4 a_segment;
-layout(location = 1) in vec2 a_shadow_coord;
-
-uniform mat4 u_matrix;
-uniform vec3 u_light;
-
-out vec4 v_penumbras;
-out vec3 v_edges;
-out vec3 v_proj_pos;
-out vec4 v_endpoints;
-
-// column major in glsl, but row major in hlsl.
-mat2 adjugate(vec2 c1, vec2 c2) { return mat2(c2[1], -c1[1], -c2[0], c1[0]); }
-
-void main() {
-	// Unpack the vertex shader input.
-	vec2 endpoint_a = (u_matrix * vec4(a_segment.zw, 0.0, 1.0)).xy;
-	vec2 endpoint_b = (u_matrix * vec4(a_segment.xy, 0.0, 1.0)).xy;
-	vec2 endpoint = mix(endpoint_a, endpoint_b, a_shadow_coord.x);
-	float light_radius = u_light.z;
-
-	// Deltas from the segment to the light center.
-	vec2 delta_a = endpoint_a - u_light.xy;
-	vec2 delta_b = endpoint_b - u_light.xy;
-	vec2 delta = endpoint - u_light.xy;
-
-	// Offsets from the light center to the edge of the light volume.
-	vec2 offset_a = vec2(-light_radius, light_radius) * normalize(delta_a).yx;
-	vec2 offset_b = vec2(light_radius, -light_radius) * normalize(delta_b).yx;
-	vec2 offset = mix(offset_a, offset_b, a_shadow_coord.x);
-
-	// Vertex projection.
-	float w = a_shadow_coord.y;
-	vec3 proj_pos = vec3(mix(delta - offset, endpoint, w), w);
-	gl_Position = vec4(proj_pos.xy, 0, w);
-
-	vec2 penumbra_a = adjugate(offset_a, -delta_a) * (delta - mix(offset, delta_a, w));
-	vec2 penumbra_b = adjugate(-offset_b, delta_b) * (delta - mix(offset, delta_b, w));
-	v_penumbras = (light_radius > 0.0 ? vec4(penumbra_a, penumbra_b) : vec4(0, 1, 0, 1));
-
-	// Edge values for light penetration and clipping.
-	vec2 seg_delta = endpoint_b - endpoint_a;
-	vec2 seg_normal = seg_delta.yx * vec2(-1.0, 1.0);
-	// Calculate where the light -> pixel ray will intersect with the segment.
-	v_edges.xy = -adjugate(seg_delta, delta_a + delta_b) * (delta - offset * (1.0 - w));
-	v_edges.y *= 2.0; // Skip a multiply in the fragment shader.
-	// Calculate a clipping coordinate that is 0 at the near edge (when w = 1)...
-	// otherwise calculate the dot product with the projected coordinate.
-	v_edges.z = dot(seg_normal, delta - offset) * (1.0 - w);
-
-	// Light penetration values.
-	float light_penetration = 0.01;
-	v_proj_pos = vec3(proj_pos.xy, w * light_penetration);
-	v_endpoints = vec4(endpoint_a, endpoint_b) / light_penetration;
-}
-)vertex";
-static constexpr char *g_shadowFragmentShaderSource = (char *const)
-    R"frag(
-#version 330 core
-
-in vec4 v_penumbras;
-in vec3 v_edges;
-in vec3 v_proj_pos;
-in vec4 v_endpoints;
-
-out vec4 fragColor;
-
-void main() {
-	// Calculate the light intersection point, but clamp to endpoints to avoid artifacts.
-	float intersection_t = clamp(v_edges.x / abs(v_edges.y), -0.5, 0.5);
-	vec2 intersection_point = (0.5 - intersection_t) * v_endpoints.xy + (0.5 + intersection_t) * v_endpoints.zw;
-	// The delta from the intersection to the pixel.
-	vec2 penetration_delta = intersection_point - v_proj_pos.xy / v_proj_pos.z;
-	// Apply a simple falloff function.
-	float bleed = min(dot(penetration_delta, penetration_delta), 1.0);
-
-	// Penumbra mixing.
-	vec2 penumbras = smoothstep(-1.0, 1.0, v_penumbras.xz / v_penumbras.yw);
-	float penumbra = dot(penumbras, step(v_penumbras.yw, vec2(0.0)));
-	penumbra -= 1.0 / 64.0; // Numerical precision fudge factor.
-
-	fragColor = vec4(bleed * (1.0 - penumbra) * step(v_edges.z, 0.0));
-}
-)frag";
-
-ShaderLight::ShaderLight() : ie::Shader(g_lightVertexShaderSource, g_lightFragmentShaderSource)
+ShaderLight::ShaderLight()
+    : ie::Shader(
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/light.vert",
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/light.frag",
+          true)
 {
 	glGenBuffers(1, &m_vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
@@ -666,7 +474,10 @@ ShaderLight::use()
 }
 
 ShaderShadow::ShaderShadow()
-    : ie::Shader(g_shadowVertexShaderSource, g_shadowFragmentShaderSource)
+    : ie::Shader(
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/shadow.vert",
+          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/shadow.frag",
+          true)
 {
 	glGenBuffers(1, &m_vertexBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, m_vertexBuffer);
@@ -732,6 +543,8 @@ VgApp::preload()
 	loadDemoData(m_vg, &m_data, NVG_IMAGE_SRGB);
 
 	initGPUTimer(&m_gpuTimer);
+	
+	m_showUI = false;
 }
 
 void

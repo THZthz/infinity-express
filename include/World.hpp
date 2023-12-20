@@ -33,6 +33,10 @@ public:
 		    false,
 		    false,
 		    false,
+		    false,
+		    false,
+		    false,
+		    false,
 		    &m_debugDraw};
 	}
 
@@ -48,7 +52,6 @@ public:
 		worldDef.workerCount = maxThreads;
 		worldDef.enqueueTask = &enqueueTask;
 		worldDef.finishTask = &finishTask;
-		worldDef.finishAllTasks = &finishAllTasks;
 		worldDef.userTaskContext = this;
 		worldDef.enableSleep = true;
 		//		worldDef.gravity = {0.0f, -10.0f};
@@ -92,6 +95,7 @@ public:
 		for (int32_t i = 0; i < 1; ++i)
 		{
 			b2World_Step(m_worldId, timeStep, m_velocityIters, m_relaxIters);
+			m_taskCount = 0; // reset task count after one step of physics world's update
 		}
 
 		if (timeStep > 0.0f) { ++m_stepCount; }
@@ -140,20 +144,21 @@ private:
 	    void* taskContext,
 	    void* userContext)
 	{
-		auto* world = static_cast<PhysicsWorld*>(userContext);
-		if (world->m_taskCount < maxTasks)
+		auto* sample = static_cast<PhysicsWorld*>(userContext);
+		if (sample->m_taskCount < maxTasks)
 		{
-			Task& t = world->m_tasks[world->m_taskCount];
-			t.m_SetSize = itemCount;
-			t.m_MinRange = minRange;
-			t.m_task = task;
-			t.m_taskContext = taskContext;
-			world->m_scheduler.AddTaskSetToPipe(&t);
-			++world->m_taskCount;
-			return &t;
+			auto& sampleTask = sample->m_tasks[sample->m_taskCount];
+			sampleTask.m_SetSize = itemCount;
+			sampleTask.m_MinRange = minRange;
+			sampleTask.m_task = task;
+			sampleTask.m_taskContext = taskContext;
+			sample->m_scheduler.AddTaskSetToPipe(&sampleTask);
+			++sample->m_taskCount;
+			return &sampleTask;
 		}
 		else
 		{
+			// This is not fatal but the maxTasks should be increased
 			assert(false);
 			task(0, itemCount, 0, taskContext);
 			return nullptr;
@@ -162,15 +167,12 @@ private:
 
 	static void finishTask(void* taskPtr, void* userContext)
 	{
-		auto* world = static_cast<PhysicsWorld*>(userContext);
-		world->m_scheduler.WaitforTask(static_cast<Task*>(taskPtr));
-	}
-
-	static void finishAllTasks(void* userContext)
-	{
-		auto* world = static_cast<PhysicsWorld*>(userContext);
-		world->m_scheduler.WaitforAll();
-		world->m_taskCount = 0;
+		if (taskPtr != nullptr)
+		{
+			auto* sampleTask = static_cast<Task*>(taskPtr);
+			auto* sample = static_cast<PhysicsWorld*>(userContext);
+			sample->m_scheduler.WaitforTask(sampleTask);
+		}
 	}
 
 	static constexpr int32_t maxTasks = 1024;

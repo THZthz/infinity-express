@@ -18,8 +18,6 @@ modules/libtess2
 
 # directly copied modules
 modules/boost/
-modules/catch2/
-modules/nice-color-palettes/
 
 # temporarily be here and soon will be removed
 modules/glbinding
