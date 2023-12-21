@@ -16,30 +16,27 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-class X: public boost::enable_shared_from_raw
+class X : public boost::enable_shared_from_raw
 {
 public:
-
-    explicit X( boost::weak_ptr< X > & r )
-    {
-        r = boost::weak_from_raw( this );
-    }
+	explicit X(boost::weak_ptr<X> &r) { r = boost::weak_from_raw(this); }
 };
 
-int main()
+int
+main()
 {
-    boost::weak_ptr<X> p1, p2;
+	boost::weak_ptr<X> p1, p2;
 
-    {
-        boost::shared_ptr< X > px( new X( p1 ) );
-        p2 = boost::weak_from_raw( px.get() );
+	{
+		boost::shared_ptr<X> px(new X(p1));
+		p2 = boost::weak_from_raw(px.get());
 
-        BOOST_TEST( !p1.expired() );
-        BOOST_TEST( !p2.expired() );
-    }
+		BOOST_TEST(!p1.expired());
+		BOOST_TEST(!p2.expired());
+	}
 
-    BOOST_TEST( p1.expired() );
-    BOOST_TEST( p2.expired() );
+	BOOST_TEST(p1.expired());
+	BOOST_TEST(p2.expired());
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

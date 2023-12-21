@@ -5,49 +5,50 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-int main()
+int
+main()
 {
-    boost::owner_equal_to<> const eq = {};
+	boost::owner_equal_to<> const eq = {};
 
-    {
-        boost::local_shared_ptr<int> p1( new int );
-        boost::local_shared_ptr<int> p2( p1 );
+	{
+		boost::local_shared_ptr<int> p1(new int);
+		boost::local_shared_ptr<int> p2(p1);
 
-        BOOST_TEST( eq( p1, p2 ) );
-        BOOST_TEST( eq( p2, p1 ) );
+		BOOST_TEST(eq(p1, p2));
+		BOOST_TEST(eq(p2, p1));
 
-        boost::local_shared_ptr<int> p3( new int );
+		boost::local_shared_ptr<int> p3(new int);
 
-        BOOST_TEST( !eq( p1, p3 ) );
-        BOOST_TEST( !eq( p3, p1 ) );
+		BOOST_TEST(!eq(p1, p3));
+		BOOST_TEST(!eq(p3, p1));
 
-        boost::local_shared_ptr<int> p4;
-        boost::local_shared_ptr<int> p5;
+		boost::local_shared_ptr<int> p4;
+		boost::local_shared_ptr<int> p5;
 
-        BOOST_TEST( eq( p4, p5 ) );
-        BOOST_TEST( eq( p5, p4 ) );
+		BOOST_TEST(eq(p4, p5));
+		BOOST_TEST(eq(p5, p4));
 
-        BOOST_TEST( !eq( p4, p3 ) );
-        BOOST_TEST( !eq( p3, p4 ) );
+		BOOST_TEST(!eq(p4, p3));
+		BOOST_TEST(!eq(p3, p4));
 
-        boost::local_shared_ptr<int> p6( static_cast<int*>(0) );
+		boost::local_shared_ptr<int> p6(static_cast<int *>(0));
 
-        BOOST_TEST( !eq( p4, p6 ) );
-        BOOST_TEST( !eq( p6, p4 ) );
+		BOOST_TEST(!eq(p4, p6));
+		BOOST_TEST(!eq(p6, p4));
 
-        boost::local_shared_ptr<void> p7( p1 );
+		boost::local_shared_ptr<void> p7(p1);
 
-        BOOST_TEST( eq( p1, p7 ) );
-        BOOST_TEST( eq( p7, p1 ) );
+		BOOST_TEST(eq(p1, p7));
+		BOOST_TEST(eq(p7, p1));
 
-        boost::local_shared_ptr<void> p8;
+		boost::local_shared_ptr<void> p8;
 
-        BOOST_TEST( !eq( p1, p8 ) );
-        BOOST_TEST( !eq( p8, p1 ) );
+		BOOST_TEST(!eq(p1, p8));
+		BOOST_TEST(!eq(p8, p1));
 
-        BOOST_TEST( eq( p4, p8 ) );
-        BOOST_TEST( eq( p8, p4 ) );
-/*
+		BOOST_TEST(eq(p4, p8));
+		BOOST_TEST(eq(p8, p4));
+		/*
         boost::local_weak_ptr<int> q1( p1 );
 
         BOOST_TEST( eq( p1, q1 ) );
@@ -109,7 +110,7 @@ int main()
         BOOST_TEST( !eq( q1, q4 ) );
         BOOST_TEST( !eq( q4, q1 ) );
 */
-    }
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

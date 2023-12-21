@@ -1,6 +1,7 @@
 enable_testing()
 
 add_subdirectory(smart_ptr)
+add_subdirectory(smart_ptr2)
 
 add_executable(test_bitwise_enum ./test_bitwise_enum.cpp)
 target_include_directories(test_bitwise_enum PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../include/)

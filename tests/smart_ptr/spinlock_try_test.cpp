@@ -16,31 +16,32 @@
 static boost::detail::spinlock sp = BOOST_DETAIL_SPINLOCK_INIT;
 static boost::detail::spinlock sp2 = BOOST_DETAIL_SPINLOCK_INIT;
 
-int main()
+int
+main()
 {
-    BOOST_TEST( sp.try_lock() );
-    BOOST_TEST( !sp.try_lock() );
-    BOOST_TEST( sp2.try_lock() );
-    BOOST_TEST( !sp.try_lock() );
-    BOOST_TEST( !sp2.try_lock() );
-    sp.unlock();
-    sp2.unlock();
+	BOOST_TEST(sp.try_lock());
+	BOOST_TEST(!sp.try_lock());
+	BOOST_TEST(sp2.try_lock());
+	BOOST_TEST(!sp.try_lock());
+	BOOST_TEST(!sp2.try_lock());
+	sp.unlock();
+	sp2.unlock();
 
-    sp.lock();
-    BOOST_TEST( !sp.try_lock() );
-    sp2.lock();
-    BOOST_TEST( !sp.try_lock() );
-    BOOST_TEST( !sp2.try_lock() );
-    sp.unlock();
-    sp2.unlock();
+	sp.lock();
+	BOOST_TEST(!sp.try_lock());
+	sp2.lock();
+	BOOST_TEST(!sp.try_lock());
+	BOOST_TEST(!sp2.try_lock());
+	sp.unlock();
+	sp2.unlock();
 
-    {
-        boost::detail::spinlock::scoped_lock lock( sp );
-        BOOST_TEST( !sp.try_lock() );
-        boost::detail::spinlock::scoped_lock lock2( sp2 );
-        BOOST_TEST( !sp.try_lock() );
-        BOOST_TEST( !sp2.try_lock() );
-    }
+	{
+		boost::detail::spinlock::scoped_lock lock(sp);
+		BOOST_TEST(!sp.try_lock());
+		boost::detail::spinlock::scoped_lock lock2(sp2);
+		BOOST_TEST(!sp.try_lock());
+		BOOST_TEST(!sp2.try_lock());
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -17,22 +17,14 @@
 class X
 {
 public:
+	static int instances;
 
-    static int instances;
+	X() { ++instances; }
 
-    X()
-    {
-        ++instances;
-    }
-
-    ~X()
-    {
-        --instances;
-    }
+	~X() { --instances; }
 
 private:
-
-    X( X const& );
+	X(X const&);
 };
 
 int X::instances = 0;
@@ -40,22 +32,14 @@ int X::instances = 0;
 class Y
 {
 public:
+	static int instances;
 
-    static int instances;
+	Y() { ++instances; }
 
-    Y()
-    {
-        ++instances;
-    }
-
-    ~Y()
-    {
-        --instances;
-    }
+	~Y() { --instances; }
 
 private:
-
-    Y( Y const& );
+	Y(Y const&);
 };
 
 int Y::instances = 0;
@@ -65,58 +49,54 @@ static boost::shared_ptr<void> s_pv;
 class Z
 {
 public:
+	static int instances;
 
-    static int instances;
+	Z() { ++instances; }
 
-    Z()
-    {
-        ++instances;
-    }
+	~Z()
+	{
+		--instances;
 
-    ~Z()
-    {
-        --instances;
-
-        boost::shared_ptr<Y> pv( new Y );
-        s_pv = pv;
-    }
+		boost::shared_ptr<Y> pv(new Y);
+		s_pv = pv;
+	}
 
 private:
-
-    Z( Z const& );
+	Z(Z const&);
 };
 
 int Z::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST( X::instances == 0 );
-    BOOST_TEST( Y::instances == 0 );
-    BOOST_TEST( Z::instances == 0 );
+	BOOST_TEST(X::instances == 0);
+	BOOST_TEST(Y::instances == 0);
+	BOOST_TEST(Z::instances == 0);
 
-    {
-        boost::shared_ptr<Z> pv( new Z );
-        s_pv = pv;
-    }
+	{
+		boost::shared_ptr<Z> pv(new Z);
+		s_pv = pv;
+	}
 
-    BOOST_TEST( X::instances == 0 );
-    BOOST_TEST( Y::instances == 0 );
-    BOOST_TEST( Z::instances == 1 );
+	BOOST_TEST(X::instances == 0);
+	BOOST_TEST(Y::instances == 0);
+	BOOST_TEST(Z::instances == 1);
 
-    {
-        boost::shared_ptr<X> pv( new X );
-        s_pv = pv;
-    }
+	{
+		boost::shared_ptr<X> pv(new X);
+		s_pv = pv;
+	}
 
-    BOOST_TEST( X::instances == 0 );
-    BOOST_TEST( Y::instances == 1 );
-    BOOST_TEST( Z::instances == 0 );
+	BOOST_TEST(X::instances == 0);
+	BOOST_TEST(Y::instances == 1);
+	BOOST_TEST(Z::instances == 0);
 
-    s_pv.reset();
+	s_pv.reset();
 
-    BOOST_TEST( X::instances == 0 );
-    BOOST_TEST( Y::instances == 0 );
-    BOOST_TEST( Z::instances == 0 );
+	BOOST_TEST(X::instances == 0);
+	BOOST_TEST(Y::instances == 0);
+	BOOST_TEST(Z::instances == 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

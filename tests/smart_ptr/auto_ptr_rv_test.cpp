@@ -10,114 +10,106 @@
 // http://www.boost.org/LICENSE_1_0.txt
 //
 
-#if defined( BOOST_NO_AUTO_PTR )
+#if defined(BOOST_NO_AUTO_PTR)
 
-int main()
+int
+main()
 {
 }
 
 #else
 
-#include "smart_ptr.hpp"
-#include "lightweight_test.hpp"
-#include <memory>
+#	include "smart_ptr.hpp"
+#	include "lightweight_test.hpp"
+#	include <memory>
 
 struct X
 {
-    static long instances;
+	static long instances;
 
-    X()
-    {
-        ++instances;
-    }
+	X() { ++instances; }
 
-    ~X()
-    {
-        --instances;
-    }
+	~X() { --instances; }
 
-    static std::auto_ptr<X> create()
-    {
-        return std::auto_ptr<X>( new X );
-    }
+	static std::auto_ptr<X> create() { return std::auto_ptr<X>(new X); }
 
 private:
-
-    X( X const & );
-    X & operator=( X const & );
+	X(X const &);
+	X &operator=(X const &);
 };
 
 long X::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<X> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<X const> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X const> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<void> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<void> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<void const> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<void const> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 #endif // #if defined( BOOST_NO_AUTO_PTR )

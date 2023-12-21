@@ -10,11 +10,12 @@
 
 struct X
 {
-    int m;
+	int m;
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X[]> px( new X[ 1 ] );
-    px->m = 0;
+	boost::shared_ptr<X[]> px(new X[1]);
+	px->m = 0;
 }

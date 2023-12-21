@@ -7,29 +7,25 @@
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-boost::detail::atomic_count count( 0 );
+boost::detail::atomic_count count(0);
 
-void f()
+void
+f()
 {
-    ++count;
+	++count;
 }
 
-int main()
+int
+main()
 {
-    int const N = 4;
-    boost::detail::lw_thread_t th[ N ] = {};
+	int const N = 4;
+	boost::detail::lw_thread_t th[N] = {};
 
-    for( int i = 0; i < N; ++i )
-    {
-        boost::detail::lw_thread_create( th[ i ], f );
-    }
+	for (int i = 0; i < N; ++i) { boost::detail::lw_thread_create(th[i], f); }
 
-    for( int i = 0; i < N; ++i )
-    {
-        boost::detail::lw_thread_join( th[ i ] );
-    }
+	for (int i = 0; i < N; ++i) { boost::detail::lw_thread_join(th[i]); }
 
-    BOOST_TEST_EQ( count, N );
+	BOOST_TEST_EQ(count, N);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

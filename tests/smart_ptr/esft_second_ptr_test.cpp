@@ -18,34 +18,36 @@
 
 //
 
-class X: public boost::enable_shared_from_this<X>
+class X : public boost::enable_shared_from_this<X>
 {
 };
 
-void null_deleter( void const* )
+void
+null_deleter(void const*)
 {
 }
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X> px( new X );
+	boost::shared_ptr<X> px(new X);
 
-    {
-        boost::shared_ptr<X> px2( px.get(), null_deleter );
-        BOOST_TEST( px == px2 );
-    }
+	{
+		boost::shared_ptr<X> px2(px.get(), null_deleter);
+		BOOST_TEST(px == px2);
+	}
 
-    try
-    {
-        boost::shared_ptr< X > qx = px->shared_from_this();
+	try
+	{
+		boost::shared_ptr<X> qx = px->shared_from_this();
 
-        BOOST_TEST( px == qx );
-        BOOST_TEST( !( px < qx ) && !( qx < px ) );
-    }
-    catch( boost::bad_weak_ptr const& )
-    {
-        BOOST_ERROR( "px->shared_from_this() failed" );
-    }
+		BOOST_TEST(px == qx);
+		BOOST_TEST(!(px < qx) && !(qx < px));
+	}
+	catch (boost::bad_weak_ptr const&)
+	{
+		BOOST_ERROR("px->shared_from_this() failed");
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -11,33 +11,31 @@
 
 struct X
 {
-    static int destroyed;
+	static int destroyed;
 
-    ~X()
-    {
-        ++destroyed;
-    }
+	~X() { ++destroyed; }
 };
 
 int X::destroyed = 0;
 
-int main()
+int
+main()
 {
-    {
-        X::destroyed = 0;
+	{
+		X::destroyed = 0;
 
-        boost::make_shared< X[3] >();
+		boost::make_shared<X[3]>();
 
-        BOOST_TEST_EQ( X::destroyed, 3 );
-    }
+		BOOST_TEST_EQ(X::destroyed, 3);
+	}
 
-    {
-        X::destroyed = 0;
+	{
+		X::destroyed = 0;
 
-        boost::make_shared< X[] >( 3 );
+		boost::make_shared<X[]>(3);
 
-        BOOST_TEST_EQ( X::destroyed, 3 );
-    }
+		BOOST_TEST_EQ(X::destroyed, 3);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

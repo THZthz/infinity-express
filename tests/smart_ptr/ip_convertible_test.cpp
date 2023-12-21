@@ -17,38 +17,43 @@ struct W
 {
 };
 
-void intrusive_ptr_add_ref( W* )
+void
+intrusive_ptr_add_ref(W*)
 {
 }
 
-void intrusive_ptr_release( W* )
+void
+intrusive_ptr_release(W*)
 {
 }
 
-struct X: public virtual W
+struct X : public virtual W
 {
 };
 
-struct Y: public virtual W
+struct Y : public virtual W
 {
 };
 
-struct Z: public X
+struct Z : public X
 {
 };
 
-int f( boost::intrusive_ptr<X> )
+int
+f(boost::intrusive_ptr<X>)
 {
-    return 1;
+	return 1;
 }
 
-int f( boost::intrusive_ptr<Y> )
+int
+f(boost::intrusive_ptr<Y>)
 {
-    return 2;
+	return 2;
 }
 
-int main()
+int
+main()
 {
-    BOOST_TEST( 1 == f( boost::intrusive_ptr<Z>() ) );
-    return boost::report_errors();
+	BOOST_TEST(1 == f(boost::intrusive_ptr<Z>()));
+	return boost::report_errors();
 }

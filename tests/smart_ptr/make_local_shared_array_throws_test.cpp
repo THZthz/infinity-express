@@ -10,78 +10,100 @@ Distributed under the Boost Software License, Version 1.0.
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-class type {
+class type
+{
 public:
-    static unsigned instances;
+	static unsigned instances;
 
-    type() {
-        if (instances == 5) {
-            throw true;
-        }
-        ++instances;
-    }
+	type()
+	{
+		if (instances == 5) { throw true; }
+		++instances;
+	}
 
-    ~type() {
-        --instances;
-    }
+	~type() { --instances; }
 
 private:
-    type(const type&);
-    type& operator=(const type&);
+	type(const type&);
+	type& operator=(const type&);
 };
 
 unsigned type::instances = 0;
 
-int main()
+int
+main()
 {
-    try {
-        boost::make_local_shared<type[]>(6);
-        BOOST_ERROR("make_local_shared did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared<type[][2]>(3);
-        BOOST_ERROR("make_local_shared did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared<type[6]>();
-        BOOST_ERROR("make_local_shared did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared<type[3][2]>();
-        BOOST_ERROR("make_local_shared did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared_noinit<type[]>(6);
-        BOOST_ERROR("make_local_shared_noinit did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared_noinit<type[][2]>(3);
-        BOOST_ERROR("make_local_shared_noinit did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared_noinit<type[6]>();
-        BOOST_ERROR("make_local_shared_noinit did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    try {
-        boost::make_local_shared_noinit<type[3][2]>();
-        BOOST_ERROR("make_local_shared_noinit did not throw");
-    } catch (...) {
-        BOOST_TEST(type::instances == 0);
-    }
-    return boost::report_errors();
+	try
+	{
+		boost::make_local_shared<type[]>(6);
+		BOOST_ERROR("make_local_shared did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared<type[][2]>(3);
+		BOOST_ERROR("make_local_shared did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared<type[6]>();
+		BOOST_ERROR("make_local_shared did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared<type[3][2]>();
+		BOOST_ERROR("make_local_shared did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared_noinit<type[]>(6);
+		BOOST_ERROR("make_local_shared_noinit did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared_noinit<type[][2]>(3);
+		BOOST_ERROR("make_local_shared_noinit did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared_noinit<type[6]>();
+		BOOST_ERROR("make_local_shared_noinit did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	try
+	{
+		boost::make_local_shared_noinit<type[3][2]>();
+		BOOST_ERROR("make_local_shared_noinit did not throw");
+	}
+	catch (...)
+	{
+		BOOST_TEST(type::instances == 0);
+	}
+	return boost::report_errors();
 }
-

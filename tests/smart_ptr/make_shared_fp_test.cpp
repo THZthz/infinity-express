@@ -12,8 +12,9 @@
 #include "smart_ptr.hpp"
 #include "smart_ptr.hpp"
 
-int main()
+int
+main()
 {
-    typedef boost::shared_ptr<int>(*FP)(); 
-    FP fp = boost::make_shared<int>;
+	typedef boost::shared_ptr<int> (*FP)();
+	FP fp = boost::make_shared<int>;
 }

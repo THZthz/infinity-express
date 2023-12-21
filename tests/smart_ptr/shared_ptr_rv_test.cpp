@@ -13,98 +13,89 @@
 
 struct X
 {
-    static long instances;
+	static long instances;
 
-    X()
-    {
-        ++instances;
-    }
+	X() { ++instances; }
 
-    ~X()
-    {
-        --instances;
-    }
+	~X() { --instances; }
 
-    static boost::shared_ptr<X> create()
-    {
-        return boost::shared_ptr<X>( new X );
-    }
+	static boost::shared_ptr<X> create() { return boost::shared_ptr<X>(new X); }
 
 private:
-
-    X( X const & );
-    X & operator=( X const & );
+	X(X const &);
+	X &operator=(X const &);
 };
 
 long X::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<X> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<X const> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X const> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<void> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<void> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<void const> p( X::create() );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<void const> p(X::create());
+		BOOST_TEST(X::instances == 1);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
 
-        p.reset();
-        BOOST_TEST( X::instances == 0 );
+		p.reset();
+		BOOST_TEST(X::instances == 0);
 
-        p = X::create();
-        BOOST_TEST( X::instances == 1 );
-    }
+		p = X::create();
+		BOOST_TEST(X::instances == 1);
+	}
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

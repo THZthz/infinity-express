@@ -15,17 +15,18 @@
 static boost::detail::spinlock sp = BOOST_DETAIL_SPINLOCK_INIT;
 static boost::detail::spinlock sp2 = BOOST_DETAIL_SPINLOCK_INIT;
 
-int main()
+int
+main()
 {
-    sp.lock();
-    sp2.lock();
-    sp.unlock();
-    sp2.unlock();
+	sp.lock();
+	sp2.lock();
+	sp.unlock();
+	sp2.unlock();
 
-    {
-        boost::detail::spinlock::scoped_lock lock( sp );
-        boost::detail::spinlock::scoped_lock lock2( sp2 );
-    }
+	{
+		boost::detail::spinlock::scoped_lock lock(sp);
+		boost::detail::spinlock::scoped_lock lock2(sp2);
+	}
 
-    return 0;
+	return 0;
 }

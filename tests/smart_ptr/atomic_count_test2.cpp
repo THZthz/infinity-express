@@ -11,45 +11,46 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-int main()
+int
+main()
 {
-    boost::detail::atomic_count n( 4 );
+	boost::detail::atomic_count n(4);
 
-    BOOST_TEST( n == 4 );
+	BOOST_TEST(n == 4);
 
-    BOOST_TEST( ++n == 5 );
-    BOOST_TEST( ++n == 6 );
+	BOOST_TEST(++n == 5);
+	BOOST_TEST(++n == 6);
 
-    BOOST_TEST( n == 6 );
+	BOOST_TEST(n == 6);
 
-    BOOST_TEST( --n == 5 );
-    BOOST_TEST( --n == 4 );
+	BOOST_TEST(--n == 5);
+	BOOST_TEST(--n == 4);
 
-    BOOST_TEST( n == 4 );
+	BOOST_TEST(n == 4);
 
-    boost::detail::atomic_count m( 0 );
+	boost::detail::atomic_count m(0);
 
-    BOOST_TEST( m == 0 );
+	BOOST_TEST(m == 0);
 
-    BOOST_TEST( ++m == 1 );
-    BOOST_TEST( ++m == 2 );
+	BOOST_TEST(++m == 1);
+	BOOST_TEST(++m == 2);
 
-    BOOST_TEST( m == 2 );
+	BOOST_TEST(m == 2);
 
-    BOOST_TEST( --m == 1 );
-    BOOST_TEST( --m == 0 );
+	BOOST_TEST(--m == 1);
+	BOOST_TEST(--m == 0);
 
-    BOOST_TEST( m == 0 );
+	BOOST_TEST(m == 0);
 
-    BOOST_TEST( --m == -1 );
-    BOOST_TEST( --m == -2 );
+	BOOST_TEST(--m == -1);
+	BOOST_TEST(--m == -2);
 
-    BOOST_TEST( m == -2 );
+	BOOST_TEST(m == -2);
 
-    BOOST_TEST( ++m == -1 );
-    BOOST_TEST( ++m == 0 );
+	BOOST_TEST(++m == -1);
+	BOOST_TEST(++m == 0);
 
-    BOOST_TEST( m == 0 );
+	BOOST_TEST(m == 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

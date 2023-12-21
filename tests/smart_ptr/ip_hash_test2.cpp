@@ -9,59 +9,50 @@
 
 #if defined(BOOST_NO_CXX11_HDR_FUNCTIONAL)
 
-int main() {}
+int
+main()
+{
+}
 
 #else
 
 class base
 {
 private:
+	int use_count_;
 
-    int use_count_;
-
-    base(base const &);
-    base & operator=(base const &);
+	base(base const &);
+	base &operator=(base const &);
 
 protected:
+	base() : use_count_(0) { }
 
-    base(): use_count_(0)
-    {
-    }
-
-    virtual ~base()
-    {
-    }
+	virtual ~base() { }
 
 public:
+	long use_count() const { return use_count_; }
 
-    long use_count() const
-    {
-        return use_count_;
-    }
+	inline friend void intrusive_ptr_add_ref(base *p) { ++p->use_count_; }
 
-    inline friend void intrusive_ptr_add_ref(base * p)
-    {
-        ++p->use_count_;
-    }
-
-    inline friend void intrusive_ptr_release(base * p)
-    {
-        if(--p->use_count_ == 0) delete p;
-    }
+	inline friend void intrusive_ptr_release(base *p)
+	{
+		if (--p->use_count_ == 0) delete p;
+	}
 };
 
-struct X: public base
+struct X : public base
 {
 };
 
-int main()
+int
+main()
 {
-    boost::intrusive_ptr<X> p1, p2( new X );
+	boost::intrusive_ptr<X> p1, p2(new X);
 
-    BOOST_TEST_EQ( std::hash< boost::intrusive_ptr<X> >()( p1 ), std::hash< X* >()( p1.get() ) );
-    BOOST_TEST_EQ( std::hash< boost::intrusive_ptr<X> >()( p2 ), std::hash< X* >()( p2.get() ) );
+	BOOST_TEST_EQ(std::hash<boost::intrusive_ptr<X> >()(p1), std::hash<X *>()(p1.get()));
+	BOOST_TEST_EQ(std::hash<boost::intrusive_ptr<X> >()(p2), std::hash<X *>()(p2.get()));
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 #endif // #if defined(BOOST_NO_CXX11_HDR_FUNCTIONAL)

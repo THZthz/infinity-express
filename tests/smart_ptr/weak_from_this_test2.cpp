@@ -14,46 +14,45 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-class X: public boost::enable_shared_from_this< X >
+class X : public boost::enable_shared_from_this<X>
 {
 private:
-
-    boost::weak_ptr<X> px_;
+	boost::weak_ptr<X> px_;
 
 public:
+	X()
+	{
+		boost::weak_ptr<X> p1 = weak_from_this();
+		BOOST_TEST(p1._empty());
+		BOOST_TEST(p1.expired());
+	}
 
-    X()
-    {
-        boost::weak_ptr<X> p1 = weak_from_this();
-        BOOST_TEST( p1._empty() );
-        BOOST_TEST( p1.expired() );
-    }
+	void check()
+	{
+		boost::weak_ptr<X> p2 = weak_from_this();
+		BOOST_TEST(!p2.expired());
 
-    void check()
-    {
-        boost::weak_ptr<X> p2 = weak_from_this();
-        BOOST_TEST( !p2.expired() );
+		BOOST_TEST(p2.lock().get() == this);
 
-        BOOST_TEST( p2.lock().get() == this );
+		px_ = p2;
+	}
 
-        px_ = p2;
-    }
+	~X()
+	{
+		boost::weak_ptr<X> p3 = weak_from_this();
+		BOOST_TEST(p3.expired());
 
-    ~X()
-    {
-        boost::weak_ptr<X> p3 = weak_from_this();
-        BOOST_TEST( p3.expired() );
-
-        BOOST_TEST( !(px_ < p3) && !(p3 < px_) );
-    }
+		BOOST_TEST(!(px_ < p3) && !(p3 < px_));
+	}
 };
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr< X > px( new X );
-        px->check();
-    }
+	{
+		boost::shared_ptr<X> px(new X);
+		px->check();
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -6,34 +6,30 @@
 
 #include "lightweight_test.hpp"
 
-static boost::detail::atomic_count count( 0 );
+static boost::detail::atomic_count count(0);
 
-void f( int n )
+void
+f(int n)
 {
-    for( int i = 0; i < n; ++i )
-    {
-        ++count;
-    }
+	for (int i = 0; i < n; ++i) { ++count; }
 }
 
-int main()
+int
+main()
 {
-    int const N = 100000; // iterations
-    int const M = 8;      // threads
+	int const N = 100000; // iterations
+	int const M = 8; // threads
 
-    boost::detail::lw_thread_t th[ M ] = {};
+	boost::detail::lw_thread_t th[M] = {};
 
-    for( int i = 0; i < M; ++i )
-    {
-        boost::detail::lw_thread_create( th[ i ], [N] { return f(N); } );
-    }
+	for (int i = 0; i < M; ++i)
+	{
+		boost::detail::lw_thread_create(th[i], [N] { return f(N); });
+	}
 
-    for( int i = 0; i < M; ++i )
-    {
-        boost::detail::lw_thread_join( th[ i ] );
-    }
+	for (int i = 0; i < M; ++i) { boost::detail::lw_thread_join(th[i]); }
 
-    BOOST_TEST_EQ( count, N * M );
+	BOOST_TEST_EQ(count, N * M);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

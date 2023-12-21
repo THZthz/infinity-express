@@ -17,36 +17,38 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-class V: public boost::enable_shared_from_this<V>
+class V : public boost::enable_shared_from_this<V>
 {
 };
 
-void test()
+void
+test()
 {
-    boost::shared_ptr<V> p( new V );
+	boost::shared_ptr<V> p(new V);
 
-    boost::weak_ptr<V> q = p;
-    BOOST_TEST( !q.expired() );
+	boost::weak_ptr<V> q = p;
+	BOOST_TEST(!q.expired());
 
-    boost::weak_ptr<V> q2 = p->weak_from_this();
-    BOOST_TEST( !q2.expired() );
-    BOOST_TEST( !(q < q2) && !(q2 < q) );
+	boost::weak_ptr<V> q2 = p->weak_from_this();
+	BOOST_TEST(!q2.expired());
+	BOOST_TEST(!(q < q2) && !(q2 < q));
 
-    V v2( *p );
+	V v2(*p);
 
-    boost::weak_ptr<V> q3 = v2.weak_from_this();
-    BOOST_TEST( q3.expired() );
+	boost::weak_ptr<V> q3 = v2.weak_from_this();
+	BOOST_TEST(q3.expired());
 
-    *p = V();
+	*p = V();
 
-    boost::weak_ptr<V> q4 = p->weak_from_this();
-    BOOST_TEST( !q4.expired() );
-    BOOST_TEST( !(q < q4) && !(q4 < q) );
-    BOOST_TEST( !(q2 < q4) && !(q4 < q2) );
+	boost::weak_ptr<V> q4 = p->weak_from_this();
+	BOOST_TEST(!q4.expired());
+	BOOST_TEST(!(q < q4) && !(q4 < q));
+	BOOST_TEST(!(q2 < q4) && !(q4 < q2));
 }
 
-int main()
+int
+main()
 {
-    test();
-    return boost::report_errors();
+	test();
+	return boost::report_errors();
 }

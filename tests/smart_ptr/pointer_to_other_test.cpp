@@ -20,61 +20,87 @@
 #include <memory>
 
 
-template<class T, class U> void assert_same_type( T** pt = 0, U** pu = 0 )
+template <class T, class U>
+void
+assert_same_type(T **pt = 0, U **pu = 0)
 {
-    pt = pu;
+	pt = pu;
 }
 
 struct X;
 struct Y;
 
-int main()
+int
+main()
 {
-    // shared_ptr
+	// shared_ptr
 
-    assert_same_type< boost::pointer_to_other< boost::shared_ptr<X>, Y >::type, boost::shared_ptr<Y> >();
-    assert_same_type< boost::pointer_to_other< boost::shared_ptr<X>, void >::type, boost::shared_ptr<void> >();
-    assert_same_type< boost::pointer_to_other< boost::shared_ptr<void>, Y >::type, boost::shared_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_ptr<X>, Y>::type, boost::shared_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_ptr<X>, void>::type, boost::shared_ptr<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_ptr<void>, Y>::type, boost::shared_ptr<Y> >();
 
-    // shared_array
+	// shared_array
 
-    assert_same_type< boost::pointer_to_other< boost::shared_array<X>, Y >::type, boost::shared_array<Y> >();
-    assert_same_type< boost::pointer_to_other< boost::shared_array<X>, void >::type, boost::shared_array<void> >();
-    assert_same_type< boost::pointer_to_other< boost::shared_array<void>, Y >::type, boost::shared_array<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_array<X>, Y>::type, boost::shared_array<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_array<X>, void>::type,
+	    boost::shared_array<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::shared_array<void>, Y>::type,
+	    boost::shared_array<Y> >();
 
-    // scoped_ptr
+	// scoped_ptr
 
-    assert_same_type< boost::pointer_to_other< boost::scoped_ptr<X>, Y >::type, boost::scoped_ptr<Y> >();
-    assert_same_type< boost::pointer_to_other< boost::scoped_ptr<X>, void >::type, boost::scoped_ptr<void> >();
-    assert_same_type< boost::pointer_to_other< boost::scoped_ptr<void>, Y >::type, boost::scoped_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_ptr<X>, Y>::type, boost::scoped_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_ptr<X>, void>::type, boost::scoped_ptr<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_ptr<void>, Y>::type, boost::scoped_ptr<Y> >();
 
-    // scoped_array
+	// scoped_array
 
-    assert_same_type< boost::pointer_to_other< boost::scoped_array<X>, Y >::type, boost::scoped_array<Y> >();
-    assert_same_type< boost::pointer_to_other< boost::scoped_array<X>, void >::type, boost::scoped_array<void> >();
-    assert_same_type< boost::pointer_to_other< boost::scoped_array<void>, Y >::type, boost::scoped_array<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_array<X>, Y>::type, boost::scoped_array<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_array<X>, void>::type,
+	    boost::scoped_array<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::scoped_array<void>, Y>::type,
+	    boost::scoped_array<Y> >();
 
-    // intrusive_ptr
+	// intrusive_ptr
 
-    assert_same_type< boost::pointer_to_other< boost::intrusive_ptr<X>, Y >::type, boost::intrusive_ptr<Y> >();
-    assert_same_type< boost::pointer_to_other< boost::intrusive_ptr<X>, void >::type, boost::intrusive_ptr<void> >();
-    assert_same_type< boost::pointer_to_other< boost::intrusive_ptr<void>, Y >::type, boost::intrusive_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::intrusive_ptr<X>, Y>::type, boost::intrusive_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::intrusive_ptr<X>, void>::type,
+	    boost::intrusive_ptr<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<boost::intrusive_ptr<void>, Y>::type,
+	    boost::intrusive_ptr<Y> >();
 
-#if !defined( BOOST_NO_AUTO_PTR )
+#if !defined(BOOST_NO_AUTO_PTR)
 
-    // auto_ptr
+	// auto_ptr
 
-    assert_same_type< boost::pointer_to_other< std::auto_ptr<X>, Y >::type, std::auto_ptr<Y> >();
-    assert_same_type< boost::pointer_to_other< std::auto_ptr<X>, void >::type, std::auto_ptr<void> >();
-    assert_same_type< boost::pointer_to_other< std::auto_ptr<void>, Y >::type, std::auto_ptr<Y> >();
+	assert_same_type<boost::pointer_to_other<std::auto_ptr<X>, Y>::type, std::auto_ptr<Y> >();
+	assert_same_type<
+	    boost::pointer_to_other<std::auto_ptr<X>, void>::type, std::auto_ptr<void> >();
+	assert_same_type<
+	    boost::pointer_to_other<std::auto_ptr<void>, Y>::type, std::auto_ptr<Y> >();
 
 #endif
 
-    // raw pointer
-   
-    assert_same_type< boost::pointer_to_other< X *, Y >::type, Y * >();
-    assert_same_type< boost::pointer_to_other< X *, void >::type, void * >();
-    assert_same_type< boost::pointer_to_other< void *, Y >::type, Y * >();
+	// raw pointer
 
-    return 0;
+	assert_same_type<boost::pointer_to_other<X *, Y>::type, Y *>();
+	assert_same_type<boost::pointer_to_other<X *, void>::type, void *>();
+	assert_same_type<boost::pointer_to_other<void *, Y>::type, Y *>();
+
+	return 0;
 }

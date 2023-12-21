@@ -4,16 +4,20 @@
 
 #if defined(__cpp_deduction_guides)
 
-#include "smart_ptr.hpp"
-#include <memory>
+#	include "smart_ptr.hpp"
+#	include <memory>
 
-int main()
+int
+main()
 {
-    boost::shared_ptr p2( std::unique_ptr<int>( new int ) );
+	boost::shared_ptr p2(std::unique_ptr<int>(new int));
 }
 
 #else
 
-int main() {}
+int
+main()
+{
+}
 
 #endif

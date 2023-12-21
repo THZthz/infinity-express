@@ -16,82 +16,78 @@
 class X
 {
 private:
-
-    int m_;
+	int m_;
 
 public:
-
-    X(): m_() {}
+	X() : m_() { }
 };
 
-class Y: public boost::enable_shared_from
+class Y : public boost::enable_shared_from
 {
 };
 
-class Z: public X, public Y
+class Z : public X, public Y
 {
 public:
-
-    boost::weak_ptr<Z> weak_from_this()
-    {
-        return boost::weak_from( this );
-    }
+	boost::weak_ptr<Z> weak_from_this() { return boost::weak_from(this); }
 };
 
-void null_deleter( void const* )
+void
+null_deleter(void const*)
 {
 }
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<Z> sp( new Z );
-    boost::weak_ptr<Z> p( sp );
+	boost::shared_ptr<Z> sp(new Z);
+	boost::weak_ptr<Z> p(sp);
 
-    {
-        boost::weak_ptr<Z> q = sp->weak_from_this();
+	{
+		boost::weak_ptr<Z> q = sp->weak_from_this();
 
-        BOOST_TEST_EQ( p.lock(), q.lock() );
-        BOOST_TEST( !( p < q ) && !( q < p ) );
-    }
+		BOOST_TEST_EQ(p.lock(), q.lock());
+		BOOST_TEST(!(p < q) && !(q < p));
+	}
 
-    Z v2( *sp );
+	Z v2(*sp);
 
-    {
-        boost::weak_ptr<Z> q = v2.weak_from_this();
-        BOOST_TEST( q.expired() );
-    }
+	{
+		boost::weak_ptr<Z> q = v2.weak_from_this();
+		BOOST_TEST(q.expired());
+	}
 
-    *sp = Z();
+	*sp = Z();
 
-    {
-        boost::weak_ptr<Z> q = sp->weak_from_this();
+	{
+		boost::weak_ptr<Z> q = sp->weak_from_this();
 
-        BOOST_TEST_EQ( p.lock(), q.lock() );
-        BOOST_TEST( !( p < q ) && !( q < p ) );
-    }
+		BOOST_TEST_EQ(p.lock(), q.lock());
+		BOOST_TEST(!(p < q) && !(q < p));
+	}
 
-    {
-        boost::shared_ptr<Z> sp2( sp.get(), null_deleter );
-    }
+	{
+		boost::shared_ptr<Z> sp2(sp.get(), null_deleter);
+	}
 
-    {
-        boost::weak_ptr<Z> q = sp->weak_from_this();
+	{
+		boost::weak_ptr<Z> q = sp->weak_from_this();
 
-        BOOST_TEST_EQ( p.lock(), q.lock() );
-        BOOST_TEST( !( p < q ) && !( q < p ) );
-    }
+		BOOST_TEST_EQ(p.lock(), q.lock());
+		BOOST_TEST(!(p < q) && !(q < p));
+	}
 
-    {
-        boost::weak_ptr<Z> p2 = sp->weak_from_this();
+	{
+		boost::weak_ptr<Z> p2 = sp->weak_from_this();
 
-        BOOST_TEST( !p.expired() );
-        BOOST_TEST( !p2.expired() );
+		BOOST_TEST(!p.expired());
+		BOOST_TEST(!p2.expired());
 
-        sp.reset();
+		sp.reset();
 
-        BOOST_TEST( p.expired() );
-        BOOST_TEST( p2.expired() );
-    }
+		BOOST_TEST(p.expired());
+		BOOST_TEST(p2.expired());
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

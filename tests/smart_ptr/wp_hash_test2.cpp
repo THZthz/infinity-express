@@ -8,46 +8,47 @@
 
 #include <functional>
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<int> p1, p2( new int );
-        boost::weak_ptr<int> q1( p1 ), q2( p2 ), q3;
+	{
+		boost::shared_ptr<int> p1, p2(new int);
+		boost::weak_ptr<int> q1(p1), q2(p2), q3;
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int> >()( q1 ), q1.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int> >()( q2 ), q2.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int> >()( q3 ), q3.owner_hash_value() );
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int> >()(q1), q1.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int> >()(q2), q2.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int> >()(q3), q3.owner_hash_value());
 
-        p2.reset();
+		p2.reset();
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int> >()( q2 ), q2.owner_hash_value() );
-    }
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int> >()(q2), q2.owner_hash_value());
+	}
 
-    {
-        boost::shared_ptr<int[]> p1, p2( new int[1] );
-        boost::weak_ptr<int[]> q1( p1 ), q2( p2 ), q3;
+	{
+		boost::shared_ptr<int[]> p1, p2(new int[1]);
+		boost::weak_ptr<int[]> q1(p1), q2(p2), q3;
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[]> >()( q1 ), q1.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[]> >()( q2 ), q2.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[]> >()( q3 ), q3.owner_hash_value() );
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[]> >()(q1), q1.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[]> >()(q2), q2.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[]> >()(q3), q3.owner_hash_value());
 
-        p2.reset();
+		p2.reset();
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[]> >()( q2 ), q2.owner_hash_value() );
-    }
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[]> >()(q2), q2.owner_hash_value());
+	}
 
-    {
-        boost::shared_ptr<int[1]> p1, p2( new int[1] );
-        boost::weak_ptr<int[1]> q1( p1 ), q2( p2 ), q3;
+	{
+		boost::shared_ptr<int[1]> p1, p2(new int[1]);
+		boost::weak_ptr<int[1]> q1(p1), q2(p2), q3;
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[1]> >()( q1 ), q1.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[1]> >()( q2 ), q2.owner_hash_value() );
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[1]> >()( q3 ), q3.owner_hash_value() );
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[1]> >()(q1), q1.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[1]> >()(q2), q2.owner_hash_value());
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[1]> >()(q3), q3.owner_hash_value());
 
-        p2.reset();
+		p2.reset();
 
-        BOOST_TEST_EQ( std::hash< boost::weak_ptr<int[1]> >()( q2 ), q2.owner_hash_value() );
-    }
+		BOOST_TEST_EQ(std::hash<boost::weak_ptr<int[1]> >()(q2), q2.owner_hash_value());
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

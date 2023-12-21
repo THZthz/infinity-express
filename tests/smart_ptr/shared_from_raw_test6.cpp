@@ -22,28 +22,34 @@
 static int assertion_failed_ = 0;
 
 namespace boost {
-	
-	void assertion_failed(char const *expr, char const *function, char const *file, long line) {
-		printf("Assertion '%s' failed in function '%s', file '%s', line %ld\n", expr, function, file, line);
-		++assertion_failed_;
-	}
-	
+
+void
+assertion_failed(char const *expr, char const *function, char const *file, long line)
+{
+	printf("Assertion '%s' failed in function '%s', file '%s', line %ld\n", expr, function,
+	       file, line);
+	++assertion_failed_;
+}
+
 } // namespace boost
 
-class X : public boost::enable_shared_from_raw {
+class X : public boost::enable_shared_from_raw
+{
 };
 
-int main() {
+int
+main()
+{
 	boost::shared_ptr<X> px;
-	
+
 	{
 		X x;
 		px = boost::shared_from_raw(&x);
 	}
-	
+
 	BOOST_TEST_EQ(assertion_failed_, 1);
-	
+
 	// px is a dangling pointer here
-	
+
 	return boost::report_errors();
 }

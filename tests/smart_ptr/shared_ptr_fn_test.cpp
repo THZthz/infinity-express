@@ -12,32 +12,34 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-static void f()
+static void
+f()
 {
 }
 
 struct null_deleter
 {
-    template<class Y> void operator()( Y* ) {}
+	template <class Y> void operator()(Y*) { }
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<void()> pf( f, null_deleter() );
+	boost::shared_ptr<void()> pf(f, null_deleter());
 
-    BOOST_TEST( pf.get() == f );
-    BOOST_TEST_EQ( pf.use_count(), 1 );
-    BOOST_TEST( boost::get_deleter<null_deleter>( pf ) != 0 );
+	BOOST_TEST(pf.get() == f);
+	BOOST_TEST_EQ(pf.use_count(), 1);
+	BOOST_TEST(boost::get_deleter<null_deleter>(pf) != 0);
 
-    boost::weak_ptr<void()> wp( pf );
+	boost::weak_ptr<void()> wp(pf);
 
-    BOOST_TEST( wp.lock().get() == f );
-    BOOST_TEST_EQ( wp.use_count(), 1 );
+	BOOST_TEST(wp.lock().get() == f);
+	BOOST_TEST_EQ(wp.use_count(), 1);
 
-    pf.reset();
+	pf.reset();
 
-    BOOST_TEST( wp.lock().get() == 0 );
-    BOOST_TEST_EQ( wp.use_count(), 0 );
+	BOOST_TEST(wp.lock().get() == 0);
+	BOOST_TEST_EQ(wp.use_count(), 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

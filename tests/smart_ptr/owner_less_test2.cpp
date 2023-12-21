@@ -5,45 +5,46 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-int main()
+int
+main()
 {
-    boost::owner_less<> const lt = {};
+	boost::owner_less<> const lt = {};
 
-    {
-        boost::local_shared_ptr<int> p1( new int );
-        boost::local_shared_ptr<int> p2( p1 );
+	{
+		boost::local_shared_ptr<int> p1(new int);
+		boost::local_shared_ptr<int> p2(p1);
 
-        BOOST_TEST( !lt( p1, p2 ) );
-        BOOST_TEST( !lt( p2, p1 ) );
+		BOOST_TEST(!lt(p1, p2));
+		BOOST_TEST(!lt(p2, p1));
 
-        boost::local_shared_ptr<int> p3( new int );
+		boost::local_shared_ptr<int> p3(new int);
 
-        BOOST_TEST( lt( p1, p3 ) || lt( p3, p1 ) );
+		BOOST_TEST(lt(p1, p3) || lt(p3, p1));
 
-        boost::local_shared_ptr<int> p4;
-        boost::local_shared_ptr<int> p5;
+		boost::local_shared_ptr<int> p4;
+		boost::local_shared_ptr<int> p5;
 
-        BOOST_TEST( !lt( p4, p5 ) );
-        BOOST_TEST( !lt( p5, p4 ) );
+		BOOST_TEST(!lt(p4, p5));
+		BOOST_TEST(!lt(p5, p4));
 
-        BOOST_TEST( lt( p4, p3 ) || lt( p3, p4 ) );
+		BOOST_TEST(lt(p4, p3) || lt(p3, p4));
 
-        boost::local_shared_ptr<int> p6( static_cast<int*>(0) );
+		boost::local_shared_ptr<int> p6(static_cast<int *>(0));
 
-        BOOST_TEST( lt( p4, p6 ) || lt( p6, p4 ) );
+		BOOST_TEST(lt(p4, p6) || lt(p6, p4));
 
-        boost::local_shared_ptr<void> p7( p1 );
+		boost::local_shared_ptr<void> p7(p1);
 
-        BOOST_TEST( !lt( p1, p7 ) );
-        BOOST_TEST( !lt( p7, p1 ) );
+		BOOST_TEST(!lt(p1, p7));
+		BOOST_TEST(!lt(p7, p1));
 
-        boost::local_shared_ptr<void> p8;
+		boost::local_shared_ptr<void> p8;
 
-        BOOST_TEST( lt( p1, p8 ) || lt( p8, p1 ) );
+		BOOST_TEST(lt(p1, p8) || lt(p8, p1));
 
-        BOOST_TEST( !lt( p4, p8 ) );
-        BOOST_TEST( !lt( p8, p4 ) );
-/*
+		BOOST_TEST(!lt(p4, p8));
+		BOOST_TEST(!lt(p8, p4));
+		/*
         boost::local_weak_ptr<int> q1( p1 );
 
         BOOST_TEST( !lt( p1, q1 ) );
@@ -99,7 +100,7 @@ int main()
 
         BOOST_TEST( lt( q1, q4 ) || lt( q4, q1 ) );
 */
-    }
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

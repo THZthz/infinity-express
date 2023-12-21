@@ -10,73 +10,75 @@
 #include <boost/config/pragma_message.hpp>
 
 #if defined(BOOST_DISABLE_THREADS)
-BOOST_PRAGMA_MESSAGE( "BOOST_DISABLE_THREADS is defined" )
+BOOST_PRAGMA_MESSAGE("BOOST_DISABLE_THREADS is defined")
 #else
-BOOST_PRAGMA_MESSAGE( "BOOST_DISABLE_THREADS is not defined" )
+BOOST_PRAGMA_MESSAGE("BOOST_DISABLE_THREADS is not defined")
 #endif
 
 #if defined(BOOST_NO_CXX11_HDR_ATOMIC)
-BOOST_PRAGMA_MESSAGE( "BOOST_NO_CXX11_HDR_ATOMIC is defined" )
+BOOST_PRAGMA_MESSAGE("BOOST_NO_CXX11_HDR_ATOMIC is defined")
 #else
-BOOST_PRAGMA_MESSAGE( "BOOST_NO_CXX11_HDR_ATOMIC is not defined" )
+BOOST_PRAGMA_MESSAGE("BOOST_NO_CXX11_HDR_ATOMIC is not defined")
 #endif
 
-void abi_test_1( boost::shared_ptr<void> & p );
-boost::shared_ptr<void> abi_test_2( boost::shared_ptr<void> const & p );
+void abi_test_1(boost::shared_ptr<void>& p);
+boost::shared_ptr<void> abi_test_2(boost::shared_ptr<void> const& p);
 boost::shared_ptr<void> abi_test_3();
 
 static int deleter_called;
 
-void deleter( void* )
+void
+deleter(void*)
 {
-    ++deleter_called;
+	++deleter_called;
 }
 
-int main()
+int
+main()
 {
-    {
-        deleter_called = 0;
+	{
+		deleter_called = 0;
 
-        boost::shared_ptr<void> p( static_cast<void*>( 0 ), deleter );
+		boost::shared_ptr<void> p(static_cast<void*>(0), deleter);
 
-        BOOST_TEST_EQ( p.use_count(), 1 );
+		BOOST_TEST_EQ(p.use_count(), 1);
 
-        abi_test_1( p );
+		abi_test_1(p);
 
-        BOOST_TEST_EQ( p.use_count(), 0 );
-        BOOST_TEST_EQ( deleter_called, 1 );
-    }
+		BOOST_TEST_EQ(p.use_count(), 0);
+		BOOST_TEST_EQ(deleter_called, 1);
+	}
 
-    {
-        deleter_called = 0;
+	{
+		deleter_called = 0;
 
-        boost::shared_ptr<void> p1( static_cast<void*>( 0 ), deleter );
+		boost::shared_ptr<void> p1(static_cast<void*>(0), deleter);
 
-        BOOST_TEST_EQ( p1.use_count(), 1 );
+		BOOST_TEST_EQ(p1.use_count(), 1);
 
-        boost::shared_ptr<void> p2 = abi_test_2( p1 );
+		boost::shared_ptr<void> p2 = abi_test_2(p1);
 
-        BOOST_TEST_EQ( p1.use_count(), 2 );
-        BOOST_TEST_EQ( p2.use_count(), 2 );
+		BOOST_TEST_EQ(p1.use_count(), 2);
+		BOOST_TEST_EQ(p2.use_count(), 2);
 
-        p1.reset();
+		p1.reset();
 
-        BOOST_TEST_EQ( p2.use_count(), 1 );
+		BOOST_TEST_EQ(p2.use_count(), 1);
 
-        p2.reset();
+		p2.reset();
 
-        BOOST_TEST_EQ( deleter_called, 1 );
-    }
+		BOOST_TEST_EQ(deleter_called, 1);
+	}
 
-    {
-        boost::shared_ptr<void> p = abi_test_3();
+	{
+		boost::shared_ptr<void> p = abi_test_3();
 
-        BOOST_TEST_EQ( p.use_count(), 1 );
+		BOOST_TEST_EQ(p.use_count(), 1);
 
-        p.reset();
+		p.reset();
 
-        BOOST_TEST_EQ( p.use_count(), 0 );
-    }
+		BOOST_TEST_EQ(p.use_count(), 0);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

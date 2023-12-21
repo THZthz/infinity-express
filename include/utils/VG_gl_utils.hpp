@@ -1,8 +1,3 @@
-//
-// Copyright (c) 2020 Stylus Labs - see LICENSE.txt
-//   based on nanovg:
-// Copyright (c) 2013 Mikko Mononen memon@inside.org
-//
 #ifndef NANOVG_GL_UTILS_H
 #define NANOVG_GL_UTILS_H
 
@@ -71,6 +66,19 @@ private:
 	static constexpr char* fragment =(char *const) "";
 
 	Shader m_shader{vertex, fragment};
+};
+
+class SpriteBatch {
+public:
+ struct Texture {
+    GLuint id;
+    int width;
+    int height;
+} ;
+
+
+
+Texture createTexture(const char *filename);
 };
 
 } // namespace ie

@@ -16,31 +16,31 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-class X: public boost::enable_shared_from_raw
+class X : public boost::enable_shared_from_raw
 {
 public:
+	X()
+	{
+		boost::weak_ptr<X> p1 = boost::weak_from_raw(this);
+		BOOST_TEST(!p1.expired());
 
-    X()
-    {
-        boost::weak_ptr<X> p1 = boost::weak_from_raw( this );
-        BOOST_TEST( !p1.expired() );
+		boost::weak_ptr<X> p2 = boost::weak_from_raw(this);
+		BOOST_TEST(!p2.expired());
+		BOOST_TEST(!(p1 < p2) && !(p2 < p1));
 
-        boost::weak_ptr<X> p2 = boost::weak_from_raw( this );
-        BOOST_TEST( !p2.expired() );
-        BOOST_TEST( !( p1 < p2 ) && !( p2 < p1 ) );
+		boost::weak_ptr<X> p3 = boost::shared_from_raw(this);
+		BOOST_TEST(!(p1 < p3) && !(p3 < p1));
 
-        boost::weak_ptr<X> p3 = boost::shared_from_raw( this );
-        BOOST_TEST( !( p1 < p3 ) && !( p3 < p1 ) );
-
-        boost::weak_ptr<X> p4 = boost::weak_from_raw( this );
-        BOOST_TEST( !p4.expired() );
-        BOOST_TEST( !( p3 < p4 ) && !( p4 < p3 ) );
-        BOOST_TEST( !( p1 < p4 ) && !( p4 < p1 ) );
-    }
+		boost::weak_ptr<X> p4 = boost::weak_from_raw(this);
+		BOOST_TEST(!p4.expired());
+		BOOST_TEST(!(p3 < p4) && !(p4 < p3));
+		BOOST_TEST(!(p1 < p4) && !(p4 < p1));
+	}
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr< X > px( new X );
-    return boost::report_errors();
+	boost::shared_ptr<X> px(new X);
+	return boost::report_errors();
 }

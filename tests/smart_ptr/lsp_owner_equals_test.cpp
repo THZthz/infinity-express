@@ -5,47 +5,48 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-int main()
+int
+main()
 {
-    {
-        boost::local_shared_ptr<int> p1( new int );
-        boost::local_shared_ptr<int> p2( p1 );
+	{
+		boost::local_shared_ptr<int> p1(new int);
+		boost::local_shared_ptr<int> p2(p1);
 
-        BOOST_TEST( p1.owner_equals( p2 ) );
-        BOOST_TEST( p2.owner_equals( p1 ) );
+		BOOST_TEST(p1.owner_equals(p2));
+		BOOST_TEST(p2.owner_equals(p1));
 
-        boost::local_shared_ptr<int> p3( new int );
+		boost::local_shared_ptr<int> p3(new int);
 
-        BOOST_TEST( !p1.owner_equals( p3 ) );
-        BOOST_TEST( !p3.owner_equals( p1 ) );
+		BOOST_TEST(!p1.owner_equals(p3));
+		BOOST_TEST(!p3.owner_equals(p1));
 
-        boost::local_shared_ptr<int> p4;
-        boost::local_shared_ptr<int> p5;
+		boost::local_shared_ptr<int> p4;
+		boost::local_shared_ptr<int> p5;
 
-        BOOST_TEST( p4.owner_equals( p5 ) );
-        BOOST_TEST( p5.owner_equals( p4 ) );
+		BOOST_TEST(p4.owner_equals(p5));
+		BOOST_TEST(p5.owner_equals(p4));
 
-        BOOST_TEST( !p4.owner_equals( p3 ) );
-        BOOST_TEST( !p3.owner_equals( p4 ) );
+		BOOST_TEST(!p4.owner_equals(p3));
+		BOOST_TEST(!p3.owner_equals(p4));
 
-        boost::local_shared_ptr<int> p6( static_cast<int*>(0) );
+		boost::local_shared_ptr<int> p6(static_cast<int *>(0));
 
-        BOOST_TEST( !p4.owner_equals( p6 ) );
-        BOOST_TEST( !p6.owner_equals( p4 ) );
+		BOOST_TEST(!p4.owner_equals(p6));
+		BOOST_TEST(!p6.owner_equals(p4));
 
-        boost::local_shared_ptr<void> p7( p1 );
+		boost::local_shared_ptr<void> p7(p1);
 
-        BOOST_TEST( p1.owner_equals( p7 ) );
-        BOOST_TEST( p7.owner_equals( p1 ) );
+		BOOST_TEST(p1.owner_equals(p7));
+		BOOST_TEST(p7.owner_equals(p1));
 
-        boost::local_shared_ptr<void> p8;
+		boost::local_shared_ptr<void> p8;
 
-        BOOST_TEST( !p1.owner_equals( p8 ) );
-        BOOST_TEST( !p8.owner_equals( p1 ) );
+		BOOST_TEST(!p1.owner_equals(p8));
+		BOOST_TEST(!p8.owner_equals(p1));
 
-        BOOST_TEST( p4.owner_equals( p8 ) );
-        BOOST_TEST( p8.owner_equals( p4 ) );
-/*
+		BOOST_TEST(p4.owner_equals(p8));
+		BOOST_TEST(p8.owner_equals(p4));
+		/*
         boost::local_weak_ptr<int> q1( p1 );
 
         BOOST_TEST( p1.owner_equals( q1 ) );
@@ -107,7 +108,7 @@ int main()
         BOOST_TEST( !q1.owner_equals( q4 ) );
         BOOST_TEST( !q4.owner_equals( q1 ) );
 */
-    }
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

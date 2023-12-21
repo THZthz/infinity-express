@@ -15,83 +15,82 @@
 #include <memory>
 #include <cstddef>
 
-#if !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
 class incomplete;
 
 struct X
 {
-    int v_;
+	int v_;
 
-    explicit X( int v ): v_( v )
-    {
-    }
+	explicit X(int v) : v_(v) { }
 
-    ~X()
-    {
-        v_ = 0;
-    }
+	~X() { v_ = 0; }
 };
 
-template<class P1, class P2> bool share_ownership( P1 const& p1, P2 const& p2 )
+template <class P1, class P2>
+bool
+share_ownership(P1 const& p1, P2 const& p2)
 {
-    return !p1.owner_before( p2 ) && !p2.owner_before( p1 );
+	return !p1.owner_before(p2) && !p2.owner_before(p1);
 }
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<float> p( new float );
-        boost::weak_ptr<float> p2( p );
+	{
+		boost::shared_ptr<float> p(new float);
+		boost::weak_ptr<float> p2(p);
 
-        int m2 = 0;
-        boost::weak_ptr<int const volatile> p3( std::move( p2 ), &m2 );
+		int m2 = 0;
+		boost::weak_ptr<int const volatile> p3(std::move(p2), &m2);
 
-        BOOST_TEST( p3.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p3 ) );
-        BOOST_TEST( p3.lock().get() == &m2 );
+		BOOST_TEST(p3.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p3));
+		BOOST_TEST(p3.lock().get() == &m2);
 
-        BOOST_TEST( p2.empty() );
-    }
+		BOOST_TEST(p2.empty());
+	}
 
-    {
-        boost::shared_ptr<incomplete> p;
-        boost::weak_ptr<incomplete> p2( p );
+	{
+		boost::shared_ptr<incomplete> p;
+		boost::weak_ptr<incomplete> p2(p);
 
-        int m2 = 0;
-        boost::weak_ptr<int const volatile> p3( std::move( p2 ), &m2 );
+		int m2 = 0;
+		boost::weak_ptr<int const volatile> p3(std::move(p2), &m2);
 
-        BOOST_TEST( p3.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p3 ) );
-        BOOST_TEST( p3.lock().get() == 0 );
+		BOOST_TEST(p3.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p3));
+		BOOST_TEST(p3.lock().get() == 0);
 
-        BOOST_TEST( p2.empty() );
-    }
+		BOOST_TEST(p2.empty());
+	}
 
-    {
-        boost::shared_ptr<X> p( new X( 5 ) );
-        boost::weak_ptr<X> p2( p );
+	{
+		boost::shared_ptr<X> p(new X(5));
+		boost::weak_ptr<X> p2(p);
 
-        boost::weak_ptr<int const volatile> p3( std::move( p2 ), &p2.lock()->v_ );
+		boost::weak_ptr<int const volatile> p3(std::move(p2), &p2.lock()->v_);
 
-        BOOST_TEST( p3.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p3 ) );
-        BOOST_TEST( p3.lock().get() == &p->v_ );
+		BOOST_TEST(p3.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p3));
+		BOOST_TEST(p3.lock().get() == &p->v_);
 
-        BOOST_TEST( p2.empty() );
+		BOOST_TEST(p2.empty());
 
-        p.reset();
-        BOOST_TEST( p3.expired() );
-    }
+		p.reset();
+		BOOST_TEST(p3.expired());
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 #else // defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
-int main()
+int
+main()
 {
-    return 0;
+	return 0;
 }
 
 #endif

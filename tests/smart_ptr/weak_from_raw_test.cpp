@@ -15,24 +15,27 @@
 #include "lightweight_test.hpp"
 
 
-struct X: public boost::enable_shared_from_raw
-{};
-
-void basic_weak_from_raw_test()
+struct X : public boost::enable_shared_from_raw
 {
-    X *p(new X);
-    boost::weak_ptr<X> weak = boost::weak_from_raw(p);
-    BOOST_TEST(!weak.expired());
-    boost::shared_ptr<X> shared(p);
-    weak = boost::weak_from_raw(p);
-    BOOST_TEST(weak.expired() == false);
-    boost::shared_ptr<X> shared2(weak);
-    BOOST_TEST((shared < shared2 || shared2 < shared) == false);
-    BOOST_TEST(shared.get() == p);
+};
+
+void
+basic_weak_from_raw_test()
+{
+	X *p(new X);
+	boost::weak_ptr<X> weak = boost::weak_from_raw(p);
+	BOOST_TEST(!weak.expired());
+	boost::shared_ptr<X> shared(p);
+	weak = boost::weak_from_raw(p);
+	BOOST_TEST(weak.expired() == false);
+	boost::shared_ptr<X> shared2(weak);
+	BOOST_TEST((shared < shared2 || shared2 < shared) == false);
+	BOOST_TEST(shared.get() == p);
 }
 
-int main()
+int
+main()
 {
-    basic_weak_from_raw_test();
-    return boost::report_errors();
+	basic_weak_from_raw_test();
+	return boost::report_errors();
 }

@@ -13,7 +13,8 @@ struct X
 {
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X[]> px2(( std::auto_ptr<X>() ));
+	boost::shared_ptr<X[]> px2((std::auto_ptr<X>()));
 }

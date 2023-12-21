@@ -12,12 +12,10 @@
 
 // Sanity check only
 
-int main()
+int
+main()
 {
-    for( unsigned k = 0; k < 256; ++k )
-    {
-        boost::detail::yield( k );
-    }
+	for (unsigned k = 0; k < 256; ++k) { boost::detail::yield(k); }
 
-    return 0;
+	return 0;
 }

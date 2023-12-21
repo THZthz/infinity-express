@@ -15,48 +15,43 @@
 struct deleter
 {
 private:
-
-    void operator& ();
-    void operator& () const;
+	void operator&();
+	void operator&() const;
 
 public:
+	int data;
 
-    int data;
+	deleter() : data(17041) { }
 
-    deleter(): data( 17041 )
-    {
-    }
-
-    void operator()( void * )
-    {
-    }
+	void operator()(void *) { }
 };
 
 struct X
 {
 };
 
-int main()
+int
+main()
 {
-    X x;
+	X x;
 
-    {
-        boost::shared_ptr<X> p( &x, deleter() );
+	{
+		boost::shared_ptr<X> p(&x, deleter());
 
-        deleter * q = boost::get_deleter<deleter>( p );
+		deleter *q = boost::get_deleter<deleter>(p);
 
-        BOOST_TEST( q != 0 );
-        BOOST_TEST( q != 0 && q->data == 17041 );
-    }
+		BOOST_TEST(q != 0);
+		BOOST_TEST(q != 0 && q->data == 17041);
+	}
 
-    {
-        boost::shared_ptr<X> p( &x, deleter(), std::allocator<X>() );
+	{
+		boost::shared_ptr<X> p(&x, deleter(), std::allocator<X>());
 
-        deleter * q = boost::get_deleter<deleter>( p );
+		deleter *q = boost::get_deleter<deleter>(p);
 
-        BOOST_TEST( q != 0 );
-        BOOST_TEST( q != 0 && q->data == 17041 );
-    }
+		BOOST_TEST(q != 0);
+		BOOST_TEST(q != 0 && q->data == 17041);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -13,8 +13,10 @@ struct X
 {
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X> px;
-    boost::weak_ptr<X[]> px2; px2 = px;
+	boost::shared_ptr<X> px;
+	boost::weak_ptr<X[]> px2;
+	px2 = px;
 }

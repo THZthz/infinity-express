@@ -17,21 +17,23 @@ struct X
 {
 };
 
-static void test_get_deleter( boost::shared_ptr<X> const & p )
+static void
+test_get_deleter(boost::shared_ptr<X> const &p)
 {
-    BOOST_TEST( boost::get_deleter<deleter>( p ) != 0 );
+	BOOST_TEST(boost::get_deleter<deleter>(p) != 0);
 }
 
 struct deleter
 {
-    void operator()( X const * p ) { delete p; }
+	void operator()(X const *p) { delete p; }
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X> p( new X, deleter() );
+	boost::shared_ptr<X> p(new X, deleter());
 
-    test_get_deleter( p );
+	test_get_deleter(p);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

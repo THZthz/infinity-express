@@ -12,96 +12,91 @@
 #include "lightweight_test.hpp"
 #include <utility>
 
-#if !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
+#if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 
 struct X
 {
-    static long instances;
+	static long instances;
 
-    X()
-    {
-        ++instances;
-    }
+	X() { ++instances; }
 
-    ~X()
-    {
-        --instances;
-    }
+	~X() { --instances; }
 
 private:
-
-    X( X const & );
-    X & operator=( X const & );
+	X(X const &);
+	X &operator=(X const &);
 };
 
 long X::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    {
-        boost::shared_ptr<X> p( new X );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X> p(new X);
+		BOOST_TEST(X::instances == 1);
 
-        boost::shared_ptr<X> p2( std::move( p ) );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p.get() == 0 );
+		boost::shared_ptr<X> p2(std::move(p));
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p.get() == 0);
 
-        boost::shared_ptr<void> p3( std::move( p2 ) );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p2.get() == 0 );
+		boost::shared_ptr<void> p3(std::move(p2));
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p2.get() == 0);
 
-        p3.reset();
-        BOOST_TEST( X::instances == 0 );
-    }
+		p3.reset();
+		BOOST_TEST(X::instances == 0);
+	}
 
-    {
-        boost::shared_ptr<X> p( new X );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X> p(new X);
+		BOOST_TEST(X::instances == 1);
 
-        boost::shared_ptr<X> p2;
-        p2 = std::move( p );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p.get() == 0 );
+		boost::shared_ptr<X> p2;
+		p2 = std::move(p);
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p.get() == 0);
 
-        boost::shared_ptr<void> p3;
-        p3 = std::move( p2 );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p2.get() == 0 );
+		boost::shared_ptr<void> p3;
+		p3 = std::move(p2);
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p2.get() == 0);
 
-        p3.reset();
-        BOOST_TEST( X::instances == 0 );
-    }
+		p3.reset();
+		BOOST_TEST(X::instances == 0);
+	}
 
-    {
-        boost::shared_ptr<X> p( new X );
-        BOOST_TEST( X::instances == 1 );
+	{
+		boost::shared_ptr<X> p(new X);
+		BOOST_TEST(X::instances == 1);
 
-        boost::shared_ptr<X> p2( new X );
-        BOOST_TEST( X::instances == 2 );
-        p2 = std::move( p );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p.get() == 0 );
+		boost::shared_ptr<X> p2(new X);
+		BOOST_TEST(X::instances == 2);
+		p2 = std::move(p);
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p.get() == 0);
 
-        boost::shared_ptr<void> p3( new X );
-        BOOST_TEST( X::instances == 2 );
-        p3 = std::move( p2 );
-        BOOST_TEST( X::instances == 1 );
-        BOOST_TEST( p2.get() == 0 );
+		boost::shared_ptr<void> p3(new X);
+		BOOST_TEST(X::instances == 2);
+		p3 = std::move(p2);
+		BOOST_TEST(X::instances == 1);
+		BOOST_TEST(p2.get() == 0);
 
-        p3.reset();
-        BOOST_TEST( X::instances == 0 );
-    }
+		p3.reset();
+		BOOST_TEST(X::instances == 0);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 #else // defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
-int main()
+int
+main()
 {
-    return 0;
+	return 0;
 }
 
 #endif

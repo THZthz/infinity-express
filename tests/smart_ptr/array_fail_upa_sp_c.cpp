@@ -13,8 +13,9 @@ struct X
 {
 };
 
-int main()
+int
+main()
 {
-    std::unique_ptr<X[]> px;
-    boost::shared_ptr<X> px2( px );
+	std::unique_ptr<X[]> px;
+	boost::shared_ptr<X> px2(px);
 }

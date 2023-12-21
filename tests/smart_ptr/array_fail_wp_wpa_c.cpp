@@ -12,8 +12,9 @@ struct X
 {
 };
 
-int main()
+int
+main()
 {
-    boost::weak_ptr<X> px;
-    boost::weak_ptr<X[]> px2( px );
+	boost::weak_ptr<X> px;
+	boost::weak_ptr<X[]> px2(px);
 }

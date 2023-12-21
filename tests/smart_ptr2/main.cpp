@@ -1,13 +1,7 @@
-/*
-Copyright 2017 Glen Joseph Fernandes
-(glenjofe@gmail.com)
+#include <catch2/catch_session.hpp>
+#include <catch2/catch_test_macros.hpp>
 
-Distributed under the Boost Software License, Version 1.0.
-(http://www.boost.org/LICENSE_1_0.txt)
-*/
-
-#include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
+#include "utils/smart_ptr.hpp"
 
 struct allow
 {
@@ -69,80 +63,87 @@ private:
 
 unsigned type::instances = 0;
 
-int
-main()
+TEST_CASE("construct local shared array", "[local_shared_array.construct]")
 {
+	//
 	{
 		boost::local_shared_ptr<type[]> result =
 		    boost::allocate_local_shared<type[]>(creator<type>(), 3);
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 3);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 3);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<type[3]> result =
 		    boost::allocate_local_shared<type[3]>(creator<type>());
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 3);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 3);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<type[][2]> result =
 		    boost::allocate_local_shared<type[][2]>(creator<>(), 2);
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 4);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 4);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<type[2][2]> result =
 		    boost::allocate_local_shared<type[2][2]>(creator<>());
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 4);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 4);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<const type[]> result =
 		    boost::allocate_local_shared<const type[]>(creator<>(), 3);
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 3);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 3);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<const type[3]> result =
 		    boost::allocate_local_shared<const type[3]>(creator<>());
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 3);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 3);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<const type[][2]> result =
 		    boost::allocate_local_shared<const type[][2]>(creator<>(), 2);
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 4);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 4);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
 	{
 		boost::local_shared_ptr<const type[2][2]> result =
 		    boost::allocate_local_shared<const type[2][2]>(creator<>());
-		BOOST_TEST(result.get() != 0);
-		BOOST_TEST(result.local_use_count() == 1);
-		BOOST_TEST(type::instances == 4);
+		REQUIRE(result.get() != 0);
+		REQUIRE(result.local_use_count() == 1);
+		REQUIRE(type::instances == 4);
 		result.reset();
-		BOOST_TEST(type::instances == 0);
+		REQUIRE(type::instances == 0);
 	}
-	return boost::report_errors();
+}
+
+int
+main(int argc, char *argv[])
+{
+	int result = Catch::Session().run(argc, argv);
+
+	return result;
 }

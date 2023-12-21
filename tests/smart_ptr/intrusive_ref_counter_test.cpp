@@ -16,17 +16,17 @@
 
 #if defined(BOOST_MSVC)
 
-#pragma warning(disable: 4786)  // identifier truncated in debug info
-#pragma warning(disable: 4710)  // function not inlined
-#pragma warning(disable: 4711)  // function selected for automatic inline expansion
-#pragma warning(disable: 4514)  // unreferenced inline removed
-#pragma warning(disable: 4355)  // 'this' : used in base member initializer list
-#pragma warning(disable: 4511)  // copy constructor could not be generated
-#pragma warning(disable: 4512)  // assignment operator could not be generated
+#	pragma warning(disable : 4786) // identifier truncated in debug info
+#	pragma warning(disable : 4710) // function not inlined
+#	pragma warning(disable : 4711) // function selected for automatic inline expansion
+#	pragma warning(disable : 4514) // unreferenced inline removed
+#	pragma warning(disable : 4355) // 'this' : used in base member initializer list
+#	pragma warning(disable : 4511) // copy constructor could not be generated
+#	pragma warning(disable : 4512) // assignment operator could not be generated
 
-#if (BOOST_MSVC >= 1310)
-#pragma warning(disable: 4675)  // resolved overload found with Koenig lookup
-#endif
+#	if (BOOST_MSVC >= 1310)
+#		pragma warning(disable : 4675) // resolved overload found with Koenig lookup
+#	endif
 
 #endif
 
@@ -36,16 +36,12 @@
 
 namespace N1 {
 
-class my_class :
-    public boost::intrusive_ref_counter< my_class >
+class my_class : public boost::intrusive_ref_counter<my_class>
 {
 public:
-    static unsigned int destructor_count;
+	static unsigned int destructor_count;
 
-    ~my_class()
-    {
-        ++destructor_count;
-    }
+	~my_class() { ++destructor_count; }
 };
 
 unsigned int my_class::destructor_count = 0;
@@ -54,16 +50,12 @@ unsigned int my_class::destructor_count = 0;
 
 namespace N2 {
 
-class my_class :
-    public boost::intrusive_ref_counter< my_class, boost::thread_unsafe_counter >
+class my_class : public boost::intrusive_ref_counter<my_class, boost::thread_unsafe_counter>
 {
 public:
-    static unsigned int destructor_count;
+	static unsigned int destructor_count;
 
-    ~my_class()
-    {
-        ++destructor_count;
-    }
+	~my_class() { ++destructor_count; }
 };
 
 unsigned int my_class::destructor_count = 0;
@@ -72,18 +64,16 @@ unsigned int my_class::destructor_count = 0;
 
 namespace N3 {
 
-struct root :
-    public boost::intrusive_ref_counter< root >
+struct root : public boost::intrusive_ref_counter<root>
 {
-    virtual ~root() {}
+	virtual ~root() { }
 };
 
 } // namespace N3
 
 namespace N4 {
 
-struct X :
-    public virtual N3::root
+struct X : public virtual N3::root
 {
 };
 
@@ -91,8 +81,7 @@ struct X :
 
 namespace N5 {
 
-struct Y :
-    public virtual N3::root
+struct Y : public virtual N3::root
 {
 };
 
@@ -100,16 +89,11 @@ struct Y :
 
 namespace N6 {
 
-struct Z :
-    public N4::X,
-    public N5::Y
+struct Z : public N4::X, public N5::Y
 {
-    static unsigned int destructor_count;
+	static unsigned int destructor_count;
 
-    ~Z()
-    {
-        ++destructor_count;
-    }
+	~Z() { ++destructor_count; }
 };
 
 unsigned int Z::destructor_count = 0;
@@ -117,39 +101,40 @@ unsigned int Z::destructor_count = 0;
 } // namespace N6
 
 
-int main()
+int
+main()
 {
-    // The test check that ADL works
-    {
-        boost::intrusive_ptr< N1::my_class > p = new N1::my_class();
-        p = NULL;
-        BOOST_TEST(N1::my_class::destructor_count == 1);
-    }
-    {
-        boost::intrusive_ptr< N2::my_class > p = new N2::my_class();
-        p = NULL;
-        BOOST_TEST(N2::my_class::destructor_count == 1);
-    }
-    {
-        N1::my_class* p = new N1::my_class();
-        intrusive_ptr_add_ref(p);
-        intrusive_ptr_release(p);
-        BOOST_TEST(N1::my_class::destructor_count == 2);
-    }
+	// The test check that ADL works
+	{
+		boost::intrusive_ptr<N1::my_class> p = new N1::my_class();
+		p = NULL;
+		BOOST_TEST(N1::my_class::destructor_count == 1);
+	}
+	{
+		boost::intrusive_ptr<N2::my_class> p = new N2::my_class();
+		p = NULL;
+		BOOST_TEST(N2::my_class::destructor_count == 1);
+	}
+	{
+		N1::my_class* p = new N1::my_class();
+		intrusive_ptr_add_ref(p);
+		intrusive_ptr_release(p);
+		BOOST_TEST(N1::my_class::destructor_count == 2);
+	}
 
-    // The test checks that destroying through the base class works
-    {
-        boost::intrusive_ptr< N6::Z > p1 = new N6::Z();
-        BOOST_TEST(p1->use_count() == 1);
-        BOOST_TEST(N6::Z::destructor_count == 0);
-        boost::intrusive_ptr< N3::root > p2 = p1;
-        BOOST_TEST(p1->use_count() == 2);
-        BOOST_TEST(N6::Z::destructor_count == 0);
-        p1 = NULL;
-        BOOST_TEST(N6::Z::destructor_count == 0);
-        p2 = NULL;
-        BOOST_TEST(N6::Z::destructor_count == 1);
-    }
+	// The test checks that destroying through the base class works
+	{
+		boost::intrusive_ptr<N6::Z> p1 = new N6::Z();
+		BOOST_TEST(p1->use_count() == 1);
+		BOOST_TEST(N6::Z::destructor_count == 0);
+		boost::intrusive_ptr<N3::root> p2 = p1;
+		BOOST_TEST(p1->use_count() == 2);
+		BOOST_TEST(N6::Z::destructor_count == 0);
+		p1 = NULL;
+		BOOST_TEST(N6::Z::destructor_count == 0);
+		p2 = NULL;
+		BOOST_TEST(N6::Z::destructor_count == 1);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

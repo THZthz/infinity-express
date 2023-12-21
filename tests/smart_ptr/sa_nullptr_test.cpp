@@ -13,100 +13,95 @@
 #include <cstddef>
 #include <memory>
 
-#if !defined( BOOST_NO_CXX11_NULLPTR )
+#if !defined(BOOST_NO_CXX11_NULLPTR)
 
 struct X
 {
-    static int instances;
+	static int instances;
 
-    X()
-    {
-        ++instances;
-    }
+	X() { ++instances; }
 
-    ~X()
-    {
-        --instances;
-    }
+	~X() { --instances; }
 
 private:
-
-    X( X const & );
-    X & operator=( X const & );
+	X(X const &);
+	X &operator=(X const &);
 };
 
 int X::instances = 0;
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_array<int> p( nullptr );
+	{
+		boost::shared_array<int> p(nullptr);
 
-        BOOST_TEST( p.get() == 0 );
-        BOOST_TEST( p.use_count() == 0 );
+		BOOST_TEST(p.get() == 0);
+		BOOST_TEST(p.use_count() == 0);
 
-        BOOST_TEST( p == nullptr );
-        BOOST_TEST( nullptr == p );
-        BOOST_TEST( !( p != nullptr ) );
-        BOOST_TEST( !( nullptr != p ) );
-    }
+		BOOST_TEST(p == nullptr);
+		BOOST_TEST(nullptr == p);
+		BOOST_TEST(!(p != nullptr));
+		BOOST_TEST(!(nullptr != p));
+	}
 
-    {
-        boost::shared_array<int> p( new int[ 1 ] );
+	{
+		boost::shared_array<int> p(new int[1]);
 
-        BOOST_TEST( p.get() != 0 );
-        BOOST_TEST( p.use_count() == 1 );
+		BOOST_TEST(p.get() != 0);
+		BOOST_TEST(p.use_count() == 1);
 
-        BOOST_TEST( p != nullptr );
-        BOOST_TEST( nullptr != p );
-        BOOST_TEST( !( p == nullptr ) );
-        BOOST_TEST( !( nullptr == p ) );
+		BOOST_TEST(p != nullptr);
+		BOOST_TEST(nullptr != p);
+		BOOST_TEST(!(p == nullptr));
+		BOOST_TEST(!(nullptr == p));
 
-        p = nullptr;
+		p = nullptr;
 
-        BOOST_TEST( p.get() == 0 );
-        BOOST_TEST( p.use_count() == 0 );
+		BOOST_TEST(p.get() == 0);
+		BOOST_TEST(p.use_count() == 0);
 
-        BOOST_TEST( p == nullptr );
-        BOOST_TEST( nullptr == p );
-        BOOST_TEST( !( p != nullptr ) );
-        BOOST_TEST( !( nullptr != p ) );
-    }
+		BOOST_TEST(p == nullptr);
+		BOOST_TEST(nullptr == p);
+		BOOST_TEST(!(p != nullptr));
+		BOOST_TEST(!(nullptr != p));
+	}
 
-    {
-        BOOST_TEST( X::instances == 0 );
+	{
+		BOOST_TEST(X::instances == 0);
 
-        boost::shared_array<X> p( new X[ 2 ] );
-        BOOST_TEST( X::instances == 2 );
+		boost::shared_array<X> p(new X[2]);
+		BOOST_TEST(X::instances == 2);
 
-        BOOST_TEST( p.get() != 0 );
-        BOOST_TEST( p.use_count() == 1 );
+		BOOST_TEST(p.get() != 0);
+		BOOST_TEST(p.use_count() == 1);
 
-        BOOST_TEST( p != nullptr );
-        BOOST_TEST( nullptr != p );
-        BOOST_TEST( !( p == nullptr ) );
-        BOOST_TEST( !( nullptr == p ) );
+		BOOST_TEST(p != nullptr);
+		BOOST_TEST(nullptr != p);
+		BOOST_TEST(!(p == nullptr));
+		BOOST_TEST(!(nullptr == p));
 
-        p = nullptr;
-        BOOST_TEST( X::instances == 0 );
+		p = nullptr;
+		BOOST_TEST(X::instances == 0);
 
-        BOOST_TEST( p.get() == 0 );
-        BOOST_TEST( p.use_count() == 0 );
+		BOOST_TEST(p.get() == 0);
+		BOOST_TEST(p.use_count() == 0);
 
-        BOOST_TEST( p == nullptr );
-        BOOST_TEST( nullptr == p );
-        BOOST_TEST( !( p != nullptr ) );
-        BOOST_TEST( !( nullptr != p ) );
-    }
+		BOOST_TEST(p == nullptr);
+		BOOST_TEST(nullptr == p);
+		BOOST_TEST(!(p != nullptr));
+		BOOST_TEST(!(nullptr != p));
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 #else
 
-int main()
+int
+main()
 {
-    return 0;
+	return 0;
 }
 
 #endif

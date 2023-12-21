@@ -13,17 +13,16 @@
 
 struct B
 {
-    virtual ~B()
-    {
-    }
+	virtual ~B() { }
 };
 
-struct D: B
+struct D : B
 {
 };
 
-int main()
+int
+main()
 {
-    std::unique_ptr<D[]> p1( new D[ 1 ] );
-    std::unique_ptr<B[]> p2 = boost::static_pointer_cast<B[]>( std::move( p1 ) );
+	std::unique_ptr<D[]> p1(new D[1]);
+	std::unique_ptr<B[]> p2 = boost::static_pointer_cast<B[]>(std::move(p1));
 }

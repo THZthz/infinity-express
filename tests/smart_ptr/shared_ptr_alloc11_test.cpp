@@ -16,29 +16,18 @@
 #include <memory>
 #include <cstddef>
 
-template< class T > class cxx11_allocator
+template <class T> class cxx11_allocator
 {
 public:
+	typedef T value_type;
 
-    typedef T value_type;
+	cxx11_allocator() { }
 
-    cxx11_allocator()
-    {
-    }
+	template <class Y> cxx11_allocator(cxx11_allocator<Y> const&) { }
 
-    template< class Y > cxx11_allocator( cxx11_allocator<Y> const & )
-    {
-    }
+	T* allocate(std::size_t n) { return static_cast<T*>(::operator new(n * sizeof(T))); }
 
-    T * allocate( std::size_t n )
-    {
-        return static_cast< T* >( ::operator new( n * sizeof( T ) ) );
-    }
-
-    void deallocate( T * p, std::size_t n )
-    {
-        ::operator delete( p );
-    }
+	void deallocate(T* p, std::size_t n) { ::operator delete(p); }
 };
 
 //
@@ -47,60 +36,56 @@ struct D;
 
 struct X
 {
-    static int instances;
+	static int instances;
 
-    X(): deleted_( false )
-    {
-        ++instances;
-    }
+	X() : deleted_(false) { ++instances; }
 
-    ~X()
-    {
-        BOOST_TEST( deleted_ );
-        --instances;
-    }
+	~X()
+	{
+		BOOST_TEST(deleted_);
+		--instances;
+	}
 
 private:
+	friend struct D;
 
-    friend struct D;
+	bool deleted_;
 
-    bool deleted_;
-
-    X( X const & );
-    X & operator=( X const & );
+	X(X const&);
+	X& operator=(X const&);
 };
 
 int X::instances = 0;
 
 struct D
 {
-    void operator()( X * px ) const
-    {
-        px->deleted_ = true;
-        delete px;
-    }
+	void operator()(X* px) const
+	{
+		px->deleted_ = true;
+		delete px;
+	}
 };
 
-int main()
+int
+main()
 {
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    boost::shared_ptr<void> pv( new X, D(), cxx11_allocator<X>() );
+	boost::shared_ptr<void> pv(new X, D(), cxx11_allocator<X>());
 
-    BOOST_TEST( X::instances == 1 );
+	BOOST_TEST(X::instances == 1);
 
-    pv.reset();
+	pv.reset();
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    pv.reset( new X, D(), cxx11_allocator<void>() );
+	pv.reset(new X, D(), cxx11_allocator<void>());
 
-    BOOST_TEST( X::instances == 1 );
+	BOOST_TEST(X::instances == 1);
 
-    pv.reset();
+	pv.reset();
 
-    BOOST_TEST( X::instances == 0 );
+	BOOST_TEST(X::instances == 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
-

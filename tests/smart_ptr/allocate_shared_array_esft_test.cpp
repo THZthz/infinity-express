@@ -8,86 +8,83 @@ Distributed under the Boost Software License, Version 1.0.
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-template<class T = void>
-struct creator {
-    typedef T value_type;
+template <class T = void> struct creator
+{
+	typedef T value_type;
 
-    template<class U>
-    struct rebind {
-        typedef creator<U> other;
-    };
+	template <class U> struct rebind
+	{
+		typedef creator<U> other;
+	};
 
-    creator() { }
+	creator() { }
 
-    template<class U>
-    creator(const creator<U>&) { }
+	template <class U> creator(const creator<U>&) { }
 
-    T* allocate(std::size_t size) {
-        return static_cast<T*>(::operator new(sizeof(T) * size));
-    }
+	T* allocate(std::size_t size) { return static_cast<T*>(::operator new(sizeof(T) * size)); }
 
-    void deallocate(T* ptr, std::size_t) const {
-        ::operator delete(ptr);
-    }
+	void deallocate(T* ptr, std::size_t) const { ::operator delete(ptr); }
 };
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator==(const creator<T>&, const creator<U>&)
 {
-    return true;
+	return true;
 }
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator!=(const creator<T>&, const creator<U>&)
 {
-    return false;
+	return false;
 }
 
-class type
-    : public boost::enable_shared_from_this<type> {
+class type : public boost::enable_shared_from_this<type>
+{
 public:
-    static unsigned instances;
+	static unsigned instances;
 
-    type() {
-        ++instances;
-    }
+	type() { ++instances; }
 
-    ~type() {
-        --instances;
-    }
+	~type() { --instances; }
 
 private:
-    type(const type&);
-    type& operator=(const type&);
+	type(const type&);
+	type& operator=(const type&);
 };
 
 unsigned type::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST(type::instances == 0);
-    {
-        boost::shared_ptr<type[]> result =
-            boost::allocate_shared<type[]>(creator<type>(), 3);
-        try {
-            result[0].shared_from_this();
-            BOOST_ERROR("shared_from_this did not throw");
-        } catch (...) {
-            BOOST_TEST(type::instances == 3);
-        }
-    }
-    BOOST_TEST(type::instances == 0);
-    {
-        boost::shared_ptr<type[]> result =
-            boost::allocate_shared_noinit<type[]>(creator<>(), 3);
-        try {
-            result[0].shared_from_this();
-            BOOST_ERROR("shared_from_this did not throw");
-        } catch (...) {
-            BOOST_TEST(type::instances == 3);
-        }
-    }
-    return boost::report_errors();
+	BOOST_TEST(type::instances == 0);
+	{
+		boost::shared_ptr<type[]> result = boost::allocate_shared<type[]>(creator<type>(), 3);
+		try
+		{
+			result[0].shared_from_this();
+			BOOST_ERROR("shared_from_this did not throw");
+		}
+		catch (...)
+		{
+			BOOST_TEST(type::instances == 3);
+		}
+	}
+	BOOST_TEST(type::instances == 0);
+	{
+		boost::shared_ptr<type[]> result =
+		    boost::allocate_shared_noinit<type[]>(creator<>(), 3);
+		try
+		{
+			result[0].shared_from_this();
+			BOOST_ERROR("shared_from_this did not throw");
+		}
+		catch (...)
+		{
+			BOOST_TEST(type::instances == 3);
+		}
+	}
+	return boost::report_errors();
 }

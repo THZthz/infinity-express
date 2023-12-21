@@ -23,46 +23,53 @@ struct Y
 {
 };
 
-struct Z: public X
+struct Z : public X
 {
 };
 
-int f( boost::weak_ptr<void const> )
+int
+f(boost::weak_ptr<void const>)
 {
-    return 1;
+	return 1;
 }
 
-int f( boost::weak_ptr<int> )
+int
+f(boost::weak_ptr<int>)
 {
-    return 2;
+	return 2;
 }
 
-int f( boost::weak_ptr<incomplete> )
+int
+f(boost::weak_ptr<incomplete>)
 {
-    return 3;
+	return 3;
 }
 
-int g( boost::weak_ptr<X> )
+int
+g(boost::weak_ptr<X>)
 {
-    return 4;
+	return 4;
 }
 
-int g( boost::weak_ptr<Y> )
+int
+g(boost::weak_ptr<Y>)
 {
-    return 5;
+	return 5;
 }
 
-int g( boost::weak_ptr<incomplete> )
+int
+g(boost::weak_ptr<incomplete>)
 {
-    return 6;
+	return 6;
 }
 
-int main()
+int
+main()
 {
-    BOOST_TEST( 1 == f( boost::weak_ptr<double>() ) );
-    BOOST_TEST( 1 == f( boost::shared_ptr<double>() ) );
-    BOOST_TEST( 4 == g( boost::weak_ptr<Z>() ) );
-    BOOST_TEST( 4 == g( boost::shared_ptr<Z>() ) );
+	BOOST_TEST(1 == f(boost::weak_ptr<double>()));
+	BOOST_TEST(1 == f(boost::shared_ptr<double>()));
+	BOOST_TEST(4 == g(boost::weak_ptr<Z>()));
+	BOOST_TEST(4 == g(boost::shared_ptr<Z>()));
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

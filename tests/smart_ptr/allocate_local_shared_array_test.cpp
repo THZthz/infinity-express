@@ -11,257 +11,244 @@ Distributed under the Boost Software License, Version 1.0.
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-template<class T = void>
-struct creator {
-    typedef T value_type;
+template <class T = void> struct creator
+{
+	typedef T value_type;
 
-    template<class U>
-    struct rebind {
-        typedef creator<U> other;
-    };
+	template <class U> struct rebind
+	{
+		typedef creator<U> other;
+	};
 
-    creator() { }
+	creator() { }
 
-    template<class U>
-    creator(const creator<U>&) { }
+	template <class U> creator(const creator<U>&) { }
 
-    T* allocate(std::size_t size) {
-        return static_cast<T*>(::operator new(sizeof(T) * size));
-    }
+	T* allocate(std::size_t size) { return static_cast<T*>(::operator new(sizeof(T) * size)); }
 
-    void deallocate(T* ptr, std::size_t) const {
-        ::operator delete(ptr);
-    }
+	void deallocate(T* ptr, std::size_t) const { ::operator delete(ptr); }
 };
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator==(const creator<T>&, const creator<U>&)
 {
-    return true;
+	return true;
 }
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator!=(const creator<T>&, const creator<U>&)
 {
-    return false;
+	return false;
 }
 
-class type {
+class type
+{
 public:
-    static unsigned instances;
+	static unsigned instances;
 
-    type()
-        : value_(0.0) {
-        ++instances;
-    }
+	type() : value_(0.0) { ++instances; }
 
-    ~type() {
-        --instances;
-    }
+	~type() { --instances; }
 
-    void set(long double value) {
-        value_ = value;
-    }
+	void set(long double value) { value_ = value; }
 
-    long double get() const {
-        return value_;
-    }
+	long double get() const { return value_; }
 
 private:
-    type(const type&);
-    type& operator=(const type&);
+	type(const type&);
+	type& operator=(const type&);
 
-    long double value_;
+	long double value_;
 };
 
 unsigned type::instances = 0;
 
-int main()
+int
+main()
 {
-    {
-        boost::local_shared_ptr<int[]> result =
-            boost::allocate_local_shared<int[]>(creator<int>(), 3);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0] == 0);
-        BOOST_TEST(result[1] == 0);
-        BOOST_TEST(result[2] == 0);
-    }
-    {
-        boost::local_shared_ptr<int[3]> result =
-            boost::allocate_local_shared<int[3]>(creator<int>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0] == 0);
-        BOOST_TEST(result[1] == 0);
-        BOOST_TEST(result[2] == 0);
-    }
-    {
-        boost::local_shared_ptr<int[][2]> result =
-            boost::allocate_local_shared<int[][2]>(creator<>(), 2);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 0);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 0);
-    }
-    {
-        boost::local_shared_ptr<int[2][2]> result =
-            boost::allocate_local_shared<int[2][2]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 0);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 0);
-    }
-    {
-        boost::local_shared_ptr<const int[]> result =
-            boost::allocate_local_shared<const int[]>(creator<>(), 3);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0] == 0);
-        BOOST_TEST(result[1] == 0);
-        BOOST_TEST(result[2] == 0);
-    }
-    {
-        boost::local_shared_ptr<const int[3]> result =
-            boost::allocate_local_shared<const int[3]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0] == 0);
-        BOOST_TEST(result[1] == 0);
-        BOOST_TEST(result[2] == 0);
-    }
-    {
-        boost::local_shared_ptr<const int[][2]> result =
-            boost::allocate_local_shared<const int[][2]>(creator<>(), 2);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 0);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 0);
-    }
-    {
-        boost::local_shared_ptr<const int[2][2]> result =
-            boost::allocate_local_shared<const int[2][2]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<int>::value));
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 0);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 0);
-    }
-    {
-        boost::local_shared_ptr<type[]> result =
-            boost::allocate_local_shared<type[]>(creator<type>(), 3);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 3);
-        boost::weak_ptr<type[]> w1 = result;
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<type[3]> result =
-            boost::allocate_local_shared<type[3]>(creator<type>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 3);
-        boost::weak_ptr<type[3]> w1 = result;
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<type[][2]> result =
-            boost::allocate_local_shared<type[][2]>(creator<>(), 2);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 4);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<type[2][2]> result =
-            boost::allocate_local_shared<type[2][2]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 4);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<const type[]> result =
-            boost::allocate_local_shared<const type[]>(creator<>(), 3);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 3);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<const type[3]> result =
-            boost::allocate_local_shared<const type[3]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 3);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<const type[][2]> result =
-            boost::allocate_local_shared<const type[][2]>(creator<>(), 2);
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 4);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    {
-        boost::local_shared_ptr<const type[2][2]> result =
-            boost::allocate_local_shared<const type[2][2]>(creator<>());
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result.local_use_count() == 1);
-        BOOST_TEST(boost::alignment::is_aligned(result.get(),
-            boost::alignment_of<type>::value));
-        BOOST_TEST(type::instances == 4);
-        result.reset();
-        BOOST_TEST(type::instances == 0);
-    }
-    return boost::report_errors();
+	{
+		boost::local_shared_ptr<int[]> result =
+		    boost::allocate_local_shared<int[]>(creator<int>(), 3);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0] == 0);
+		BOOST_TEST(result[1] == 0);
+		BOOST_TEST(result[2] == 0);
+	}
+	{
+		boost::local_shared_ptr<int[3]> result =
+		    boost::allocate_local_shared<int[3]>(creator<int>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0] == 0);
+		BOOST_TEST(result[1] == 0);
+		BOOST_TEST(result[2] == 0);
+	}
+	{
+		boost::local_shared_ptr<int[][2]> result =
+		    boost::allocate_local_shared<int[][2]>(creator<>(), 2);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 0);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 0);
+	}
+	{
+		boost::local_shared_ptr<int[2][2]> result =
+		    boost::allocate_local_shared<int[2][2]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 0);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 0);
+	}
+	{
+		boost::local_shared_ptr<const int[]> result =
+		    boost::allocate_local_shared<const int[]>(creator<>(), 3);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0] == 0);
+		BOOST_TEST(result[1] == 0);
+		BOOST_TEST(result[2] == 0);
+	}
+	{
+		boost::local_shared_ptr<const int[3]> result =
+		    boost::allocate_local_shared<const int[3]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0] == 0);
+		BOOST_TEST(result[1] == 0);
+		BOOST_TEST(result[2] == 0);
+	}
+	{
+		boost::local_shared_ptr<const int[][2]> result =
+		    boost::allocate_local_shared<const int[][2]>(creator<>(), 2);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 0);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 0);
+	}
+	{
+		boost::local_shared_ptr<const int[2][2]> result =
+		    boost::allocate_local_shared<const int[2][2]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<int>::value));
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 0);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 0);
+	}
+	{
+		boost::local_shared_ptr<type[]> result =
+		    boost::allocate_local_shared<type[]>(creator<type>(), 3);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 3);
+		boost::weak_ptr<type[]> w1 = result;
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<type[3]> result =
+		    boost::allocate_local_shared<type[3]>(creator<type>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 3);
+		boost::weak_ptr<type[3]> w1 = result;
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<type[][2]> result =
+		    boost::allocate_local_shared<type[][2]>(creator<>(), 2);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 4);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<type[2][2]> result =
+		    boost::allocate_local_shared<type[2][2]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 4);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<const type[]> result =
+		    boost::allocate_local_shared<const type[]>(creator<>(), 3);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 3);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<const type[3]> result =
+		    boost::allocate_local_shared<const type[3]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 3);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<const type[][2]> result =
+		    boost::allocate_local_shared<const type[][2]>(creator<>(), 2);
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 4);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	{
+		boost::local_shared_ptr<const type[2][2]> result =
+		    boost::allocate_local_shared<const type[2][2]>(creator<>());
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result.local_use_count() == 1);
+		BOOST_TEST(
+		    boost::alignment::is_aligned(result.get(), boost::alignment_of<type>::value));
+		BOOST_TEST(type::instances == 4);
+		result.reset();
+		BOOST_TEST(type::instances == 0);
+	}
+	return boost::report_errors();
 }
-

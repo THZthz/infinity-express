@@ -5,6 +5,7 @@
 #define BOOST_SP_REPORT_IMPLEMENTATION
 #include "smart_ptr.hpp"
 
-int main()
+int
+main()
 {
 }

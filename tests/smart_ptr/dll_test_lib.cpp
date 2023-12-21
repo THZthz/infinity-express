@@ -11,32 +11,37 @@
 #include <memory>
 
 #if defined(DLL_TEST_DYN_LINK)
-# define EXPORT BOOST_SYMBOL_EXPORT
+#	define EXPORT BOOST_SYMBOL_EXPORT
 #else
-# define EXPORT
+#	define EXPORT
 #endif
 
-EXPORT boost::shared_ptr<int> dll_test_41()
+EXPORT boost::shared_ptr<int>
+dll_test_41()
 {
-    return boost::shared_ptr<int>( new int( 41 ) );
+	return boost::shared_ptr<int>(new int(41));
 }
 
-EXPORT boost::shared_ptr<int> dll_test_42()
+EXPORT boost::shared_ptr<int>
+dll_test_42()
 {
-    return boost::make_shared<int>( 42 );
+	return boost::make_shared<int>(42);
 }
 
-EXPORT boost::shared_ptr<int> dll_test_43()
+EXPORT boost::shared_ptr<int>
+dll_test_43()
 {
-    return boost::allocate_shared<int>( std::allocator<int>(), 43 );
+	return boost::allocate_shared<int>(std::allocator<int>(), 43);
 }
 
-EXPORT boost::shared_ptr<int[]> dll_test_44()
+EXPORT boost::shared_ptr<int[]>
+dll_test_44()
 {
-    return boost::make_shared<int[1]>( 44 );
+	return boost::make_shared<int[1]>(44);
 }
 
-EXPORT boost::shared_ptr<int[]> dll_test_45()
+EXPORT boost::shared_ptr<int[]>
+dll_test_45()
 {
-    return boost::allocate_shared<int[1]>( std::allocator<int>(), 45 );
+	return boost::allocate_shared<int[1]>(std::allocator<int>(), 45);
 }

@@ -22,24 +22,25 @@ struct X
 {
 };
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<X> p = boost::make_shared<X>();
+	{
+		boost::shared_ptr<X> p = boost::make_shared<X>();
 
-        BOOST_TEST(boost::get_deleter<void>(p) == 0);
-        BOOST_TEST(boost::get_deleter<void const>(p) == 0);
-        BOOST_TEST(boost::get_deleter<int>(p) == 0);
-        BOOST_TEST(boost::get_deleter<int const>(p) == 0);
-        BOOST_TEST(boost::get_deleter<X>(p) == 0);
-        BOOST_TEST(boost::get_deleter<X const>(p) == 0);
-        BOOST_TEST(boost::get_deleter<deleter>(p) == 0);
-        BOOST_TEST(boost::get_deleter<deleter const>(p) == 0);
-        BOOST_TEST(boost::get_deleter<deleter2>(p) == 0);
-        BOOST_TEST(boost::get_deleter<deleter2 const>(p) == 0);
-    }
+		BOOST_TEST(boost::get_deleter<void>(p) == 0);
+		BOOST_TEST(boost::get_deleter<void const>(p) == 0);
+		BOOST_TEST(boost::get_deleter<int>(p) == 0);
+		BOOST_TEST(boost::get_deleter<int const>(p) == 0);
+		BOOST_TEST(boost::get_deleter<X>(p) == 0);
+		BOOST_TEST(boost::get_deleter<X const>(p) == 0);
+		BOOST_TEST(boost::get_deleter<deleter>(p) == 0);
+		BOOST_TEST(boost::get_deleter<deleter const>(p) == 0);
+		BOOST_TEST(boost::get_deleter<deleter2>(p) == 0);
+		BOOST_TEST(boost::get_deleter<deleter2 const>(p) == 0);
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
 
 struct deleter2

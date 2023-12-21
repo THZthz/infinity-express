@@ -20,184 +20,182 @@ class incomplete;
 
 struct X
 {
-    int v_;
+	int v_;
 
-    explicit X( int v ): v_( v )
-    {
-    }
+	explicit X(int v) : v_(v) { }
 
-    ~X()
-    {
-        v_ = 0;
-    }
+	~X() { v_ = 0; }
 };
 
-template<class P1, class P2> bool share_ownership( P1 const& p1, P2 const& p2 )
+template <class P1, class P2>
+bool
+share_ownership(P1 const& p1, P2 const& p2)
 {
-    return !p1.owner_before( p2 ) && !p2.owner_before( p1 );
+	return !p1.owner_before(p2) && !p2.owner_before(p1);
 }
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<double> p( new double );
+	{
+		boost::shared_ptr<double> p(new double);
 
-        float m = 0;
-        boost::weak_ptr<float> p2( p, &m );
+		float m = 0;
+		boost::weak_ptr<float> p2(p, &m);
 
-        BOOST_TEST( p2.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p2 ) );
-        BOOST_TEST( p2.lock().get() == &m );
+		BOOST_TEST(p2.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p2));
+		BOOST_TEST(p2.lock().get() == &m);
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int const> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int const> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int volatile> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int volatile> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void const volatile> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void const volatile> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void const volatile> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void const volatile> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == &m2 );
-        }
-    }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == &m2);
+		}
+	}
 
-    {
-        boost::shared_ptr<incomplete> p;
+	{
+		boost::shared_ptr<incomplete> p;
 
-        float m = 0;
-        boost::weak_ptr<float> p2( p, &m );
+		float m = 0;
+		boost::weak_ptr<float> p2(p, &m);
 
-        BOOST_TEST( p2.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p2 ) );
+		BOOST_TEST(p2.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p2));
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int const> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int const> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<int volatile> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<int volatile> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void const volatile> p3( p, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void const volatile> p3(p, &m2);
 
-            BOOST_TEST( p3.use_count() == p.use_count() );
-            BOOST_TEST( share_ownership( p, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
+			BOOST_TEST(p3.use_count() == p.use_count());
+			BOOST_TEST(share_ownership(p, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
 
-        {
-            int m2 = 0;
-            boost::weak_ptr<void const volatile> p3( p2, &m2 );
+		{
+			int m2 = 0;
+			boost::weak_ptr<void const volatile> p3(p2, &m2);
 
-            BOOST_TEST( p3.use_count() == p2.use_count() );
-            BOOST_TEST( share_ownership( p2, p3 ) );
-            BOOST_TEST( p3.lock().get() == 0 );
-        }
-    }
+			BOOST_TEST(p3.use_count() == p2.use_count());
+			BOOST_TEST(share_ownership(p2, p3));
+			BOOST_TEST(p3.lock().get() == 0);
+		}
+	}
 
-    {
-        boost::shared_ptr<X> p( new X( 5 ) );
+	{
+		boost::shared_ptr<X> p(new X(5));
 
-        boost::weak_ptr<int const> p2( p, &p->v_ );
+		boost::weak_ptr<int const> p2(p, &p->v_);
 
-        BOOST_TEST( p2.use_count() == p.use_count() );
-        BOOST_TEST( share_ownership( p, p2 ) );
-        BOOST_TEST( p2.lock().get() == &p->v_ );
+		BOOST_TEST(p2.use_count() == p.use_count());
+		BOOST_TEST(share_ownership(p, p2));
+		BOOST_TEST(p2.lock().get() == &p->v_);
 
-        p.reset();
-        BOOST_TEST( p2.expired() );
-    }
+		p.reset();
+		BOOST_TEST(p2.expired());
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

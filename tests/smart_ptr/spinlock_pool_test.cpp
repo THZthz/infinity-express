@@ -12,19 +12,20 @@
 
 // Sanity check only
 
-int main()
+int
+main()
 {
-    int x = 0;
+	int x = 0;
 
-    {
-        boost::detail::spinlock_pool<0>::scoped_lock lock( &x );
-        ++x;
-    }
+	{
+		boost::detail::spinlock_pool<0>::scoped_lock lock(&x);
+		++x;
+	}
 
-    {
-        boost::detail::spinlock_pool<1>::scoped_lock lock( &x );
-        boost::detail::spinlock_pool<2>::scoped_lock lock2( &x );
-    }
+	{
+		boost::detail::spinlock_pool<1>::scoped_lock lock(&x);
+		boost::detail::spinlock_pool<2>::scoped_lock lock2(&x);
+	}
 
-    return 0;
+	return 0;
 }

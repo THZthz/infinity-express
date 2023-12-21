@@ -12,12 +12,14 @@ struct X
 {
 };
 
-struct Y: public X
+struct Y : public X
 {
 };
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<Y[]> px;
-    boost::shared_ptr<X[]> px2; px2 = px;
+	boost::shared_ptr<Y[]> px;
+	boost::shared_ptr<X[]> px2;
+	px2 = px;
 }

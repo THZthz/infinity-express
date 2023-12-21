@@ -13,11 +13,13 @@ struct X
 {
 };
 
-struct Y: public X
+struct Y : public X
 {
 };
 
-int main()
+int
+main()
 {
-    boost::weak_ptr<X[]> px2; px2 = boost::shared_ptr<Y[]>();
+	boost::weak_ptr<X[]> px2;
+	px2 = boost::shared_ptr<Y[]>();
 }

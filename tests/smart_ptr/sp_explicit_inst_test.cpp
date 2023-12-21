@@ -10,14 +10,15 @@
 
 #include "smart_ptr.hpp"
 
-template class boost::shared_ptr< int >;
+template class boost::shared_ptr<int>;
 
 struct X
 {
 };
 
-template class boost::shared_ptr< X >;
+template class boost::shared_ptr<X>;
 
-int main()
+int
+main()
 {
 }

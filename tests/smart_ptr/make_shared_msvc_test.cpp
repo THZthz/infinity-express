@@ -8,12 +8,13 @@
 //  http://www.boost.org/LICENSE_1_0.txt
 //
 
-template<class T> struct value
+template <class T> struct value
 {
 };
 
 #include "smart_ptr.hpp"
 
-int main()
+int
+main()
 {
 }

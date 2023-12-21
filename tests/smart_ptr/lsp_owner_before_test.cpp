@@ -5,43 +5,44 @@
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-int main()
+int
+main()
 {
-    {
-        boost::local_shared_ptr<int> p1( new int );
-        boost::local_shared_ptr<int> p2( p1 );
+	{
+		boost::local_shared_ptr<int> p1(new int);
+		boost::local_shared_ptr<int> p2(p1);
 
-        BOOST_TEST( !p1.owner_before( p2 ) );
-        BOOST_TEST( !p2.owner_before( p1 ) );
+		BOOST_TEST(!p1.owner_before(p2));
+		BOOST_TEST(!p2.owner_before(p1));
 
-        boost::local_shared_ptr<int> p3( new int );
+		boost::local_shared_ptr<int> p3(new int);
 
-        BOOST_TEST( p1.owner_before( p3 ) || p3.owner_before( p1 ) );
+		BOOST_TEST(p1.owner_before(p3) || p3.owner_before(p1));
 
-        boost::local_shared_ptr<int> p4;
-        boost::local_shared_ptr<int> p5;
+		boost::local_shared_ptr<int> p4;
+		boost::local_shared_ptr<int> p5;
 
-        BOOST_TEST( !p4.owner_before( p5 ) );
-        BOOST_TEST( !p5.owner_before( p4 ) );
+		BOOST_TEST(!p4.owner_before(p5));
+		BOOST_TEST(!p5.owner_before(p4));
 
-        BOOST_TEST( p4.owner_before( p3 ) || p3.owner_before( p4 ) );
+		BOOST_TEST(p4.owner_before(p3) || p3.owner_before(p4));
 
-        boost::local_shared_ptr<int> p6( static_cast<int*>(0) );
+		boost::local_shared_ptr<int> p6(static_cast<int *>(0));
 
-        BOOST_TEST( p4.owner_before( p6 ) || p6.owner_before( p4 ) );
+		BOOST_TEST(p4.owner_before(p6) || p6.owner_before(p4));
 
-        boost::local_shared_ptr<void> p7( p1 );
+		boost::local_shared_ptr<void> p7(p1);
 
-        BOOST_TEST( !p1.owner_before( p7 ) );
-        BOOST_TEST( !p7.owner_before( p1 ) );
+		BOOST_TEST(!p1.owner_before(p7));
+		BOOST_TEST(!p7.owner_before(p1));
 
-        boost::local_shared_ptr<void> p8;
+		boost::local_shared_ptr<void> p8;
 
-        BOOST_TEST( p1.owner_before( p8 ) || p8.owner_before( p1 ) );
+		BOOST_TEST(p1.owner_before(p8) || p8.owner_before(p1));
 
-        BOOST_TEST( !p4.owner_before( p8 ) );
-        BOOST_TEST( !p8.owner_before( p4 ) );
-/*
+		BOOST_TEST(!p4.owner_before(p8));
+		BOOST_TEST(!p8.owner_before(p4));
+		/*
         boost::local_weak_ptr<int> q1( p1 );
 
         BOOST_TEST( !p1.owner_before( q1 ) );
@@ -97,7 +98,7 @@ int main()
 
         BOOST_TEST( q1.owner_before( q4 ) || q4.owner_before( q1 ) );
 */
-    }
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

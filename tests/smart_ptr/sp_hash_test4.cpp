@@ -7,28 +7,31 @@
 
 #include <functional>
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<int> p1, p2( new int );
+	{
+		boost::shared_ptr<int> p1, p2(new int);
 
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int> >()( p1 ), std::hash< int* >()( p1.get() ) );
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int> >()( p2 ), std::hash< int* >()( p2.get() ) );
-    }
+		BOOST_TEST_EQ(std::hash<boost::shared_ptr<int> >()(p1), std::hash<int*>()(p1.get()));
+		BOOST_TEST_EQ(std::hash<boost::shared_ptr<int> >()(p2), std::hash<int*>()(p2.get()));
+	}
 
-    {
-        boost::shared_ptr<int[]> p1, p2( new int[1] );
+	{
+		boost::shared_ptr<int[]> p1, p2(new int[1]);
 
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int[]> >()( p1 ), std::hash< int* >()( p1.get() ) );
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int[]> >()( p2 ), std::hash< int* >()( p2.get() ) );
-    }
+		BOOST_TEST_EQ(std::hash<boost::shared_ptr<int[]> >()(p1), std::hash<int*>()(p1.get()));
+		BOOST_TEST_EQ(std::hash<boost::shared_ptr<int[]> >()(p2), std::hash<int*>()(p2.get()));
+	}
 
-    {
-        boost::shared_ptr<int[1]> p1, p2( new int[1] );
+	{
+		boost::shared_ptr<int[1]> p1, p2(new int[1]);
 
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int[1]> >()( p1 ), std::hash< int* >()( p1.get() ) );
-        BOOST_TEST_EQ( std::hash< boost::shared_ptr<int[1]> >()( p2 ), std::hash< int* >()( p2.get() ) );
-    }
+		BOOST_TEST_EQ(
+		    std::hash<boost::shared_ptr<int[1]> >()(p1), std::hash<int*>()(p1.get()));
+		BOOST_TEST_EQ(
+		    std::hash<boost::shared_ptr<int[1]> >()(p2), std::hash<int*>()(p2.get()));
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -19,60 +19,63 @@ struct W
 {
 };
 
-void intrusive_ptr_add_ref( W* )
+void
+intrusive_ptr_add_ref(W*)
 {
 }
 
-void intrusive_ptr_release( W* )
+void
+intrusive_ptr_release(W*)
 {
 }
 
-int main()
+int
+main()
 {
-    {
-        boost::scoped_ptr<int> p;
+	{
+		boost::scoped_ptr<int> p;
 
-        BOOST_TEST( p == 0 );
-        BOOST_TEST( 0 == p );
-        BOOST_TEST( !( p != 0 ) );
-        BOOST_TEST( !( 0 != p ) );
-    }
+		BOOST_TEST(p == 0);
+		BOOST_TEST(0 == p);
+		BOOST_TEST(!(p != 0));
+		BOOST_TEST(!(0 != p));
+	}
 
-    {
-        boost::scoped_array<int> p;
+	{
+		boost::scoped_array<int> p;
 
-        BOOST_TEST( p == 0 );
-        BOOST_TEST( 0 == p );
-        BOOST_TEST( !( p != 0 ) );
-        BOOST_TEST( !( 0 != p ) );
-    }
+		BOOST_TEST(p == 0);
+		BOOST_TEST(0 == p);
+		BOOST_TEST(!(p != 0));
+		BOOST_TEST(!(0 != p));
+	}
 
-    {
-        boost::shared_ptr<int> p;
+	{
+		boost::shared_ptr<int> p;
 
-        BOOST_TEST( p == 0 );
-        BOOST_TEST( 0 == p );
-        BOOST_TEST( !( p != 0 ) );
-        BOOST_TEST( !( 0 != p ) );
-    }
+		BOOST_TEST(p == 0);
+		BOOST_TEST(0 == p);
+		BOOST_TEST(!(p != 0));
+		BOOST_TEST(!(0 != p));
+	}
 
-    {
-        boost::shared_array<int> p;
+	{
+		boost::shared_array<int> p;
 
-        BOOST_TEST( p == 0 );
-        BOOST_TEST( 0 == p );
-        BOOST_TEST( !( p != 0 ) );
-        BOOST_TEST( !( 0 != p ) );
-    }
+		BOOST_TEST(p == 0);
+		BOOST_TEST(0 == p);
+		BOOST_TEST(!(p != 0));
+		BOOST_TEST(!(0 != p));
+	}
 
-    {
-        boost::intrusive_ptr<W> p;
+	{
+		boost::intrusive_ptr<W> p;
 
-        BOOST_TEST( p == 0 );
-        BOOST_TEST( 0 == p );
-        BOOST_TEST( !( p != 0 ) );
-        BOOST_TEST( !( 0 != p ) );
-    }
+		BOOST_TEST(p == 0);
+		BOOST_TEST(0 == p);
+		BOOST_TEST(!(p != 0));
+		BOOST_TEST(!(0 != p));
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

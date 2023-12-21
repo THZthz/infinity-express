@@ -10,40 +10,38 @@ Distributed under the Boost Software License, Version 1.0.
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr<int[][2]> result =
-            boost::make_shared<int[][2]>(2, {0, 1});
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 1);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 1);
-    }
-    {
-        boost::shared_ptr<int[2][2]> result =
-            boost::make_shared<int[2][2]>({0, 1});
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 1);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 1);
-    }
-    {
-        boost::shared_ptr<const int[][2]> result =
-            boost::make_shared<const int[][2]>(2, {0, 1});
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 1);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 1);
-    }
-    {
-        boost::shared_ptr<const int[2][2]> result =
-            boost::make_shared<const int[2][2]>({0, 1});
-        BOOST_TEST(result[0][0] == 0);
-        BOOST_TEST(result[0][1] == 1);
-        BOOST_TEST(result[1][0] == 0);
-        BOOST_TEST(result[1][1] == 1);
-    }
-    return boost::report_errors();
+	{
+		boost::shared_ptr<int[][2]> result = boost::make_shared<int[][2]>(2, {0, 1});
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 1);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 1);
+	}
+	{
+		boost::shared_ptr<int[2][2]> result = boost::make_shared<int[2][2]>({0, 1});
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 1);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 1);
+	}
+	{
+		boost::shared_ptr<const int[][2]> result =
+		    boost::make_shared<const int[][2]>(2, {0, 1});
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 1);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 1);
+	}
+	{
+		boost::shared_ptr<const int[2][2]> result =
+		    boost::make_shared<const int[2][2]>({0, 1});
+		BOOST_TEST(result[0][0] == 0);
+		BOOST_TEST(result[0][1] == 1);
+		BOOST_TEST(result[1][0] == 0);
+		BOOST_TEST(result[1][1] == 1);
+	}
+	return boost::report_errors();
 }
-

@@ -10,67 +10,61 @@ Distributed under the Boost Software License, Version 1.0.
 #include "smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
-template<class T = void>
-struct creator {
-    typedef T value_type;
-    typedef T* pointer;
+template <class T = void> struct creator
+{
+	typedef T value_type;
+	typedef T* pointer;
 
-    template<class U>
-    struct rebind {
-        typedef creator<U> other;
-    };
+	template <class U> struct rebind
+	{
+		typedef creator<U> other;
+	};
 
-    creator() { }
+	creator() { }
 
-    template<class U>
-    creator(const creator<U>&) { }
+	template <class U> creator(const creator<U>&) { }
 
-    T* allocate(std::size_t size) {
-        return static_cast<T*>(::operator new(sizeof(T) * size));
-    }
+	T* allocate(std::size_t size) { return static_cast<T*>(::operator new(sizeof(T) * size)); }
 
-    void deallocate(T* ptr, std::size_t) const  {
-        ::operator delete(ptr);
-    }
+	void deallocate(T* ptr, std::size_t) const { ::operator delete(ptr); }
 };
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator==(const creator<T>&, const creator<U>&)
 {
-    return true;
+	return true;
 }
 
-template<class T, class U>
+template <class T, class U>
 inline bool
 operator!=(const creator<T>&, const creator<U>&)
 {
-    return false;
+	return false;
 }
 
-struct type {
-    int x;
-    int y;
+struct type
+{
+	int x;
+	int y;
 };
 
-int main()
+int
+main()
 {
-    {
-        std::unique_ptr<type,
-            boost::alloc_deleter<type, creator<type> > > result =
-            boost::allocate_unique<type>(creator<type>(), { 1, 2 });
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result->x == 1);
-        BOOST_TEST(result->y == 2);
-    }
-    {
-        std::unique_ptr<const type,
-            boost::alloc_deleter<const type, creator<> > > result =
-            boost::allocate_unique<const type>(creator<>(), { 1, 2 });
-        BOOST_TEST(result.get() != 0);
-        BOOST_TEST(result->x == 1);
-        BOOST_TEST(result->y == 2);
-    }
-    return boost::report_errors();
+	{
+		std::unique_ptr<type, boost::alloc_deleter<type, creator<type> > > result =
+		    boost::allocate_unique<type>(creator<type>(), {1, 2});
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result->x == 1);
+		BOOST_TEST(result->y == 2);
+	}
+	{
+		std::unique_ptr<const type, boost::alloc_deleter<const type, creator<> > > result =
+		    boost::allocate_unique<const type>(creator<>(), {1, 2});
+		BOOST_TEST(result.get() != 0);
+		BOOST_TEST(result->x == 1);
+		BOOST_TEST(result->y == 2);
+	}
+	return boost::report_errors();
 }
-

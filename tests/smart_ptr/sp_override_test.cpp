@@ -3,16 +3,17 @@
 // https://www.boost.org/LICENSE_1_0.txt
 
 #if defined(__GNUC__) && __GNUC__ >= 5 && __cplusplus >= 201103L
-# pragma GCC diagnostic error "-Wsuggest-override"
+#	pragma GCC diagnostic error "-Wsuggest-override"
 #endif
 
 #include "smart_ptr.hpp"
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<int> p1( new int );
-    boost::shared_ptr<int[]> p2( new int[1] );
+	boost::shared_ptr<int> p1(new int);
+	boost::shared_ptr<int[]> p2(new int[1]);
 
-    boost::make_shared<int>();
-    return 0;
+	boost::make_shared<int>();
+	return 0;
 }

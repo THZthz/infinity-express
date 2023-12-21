@@ -18,50 +18,44 @@
 
 class X;
 
-static boost::weak_ptr< X > r_;
+static boost::weak_ptr<X> r_;
 
-void register_( boost::weak_ptr< X > const & r )
+void
+register_(boost::weak_ptr<X> const &r)
 {
-    r_ = r;
+	r_ = r;
 }
 
-void check_( boost::weak_ptr< X > const & r )
+void
+check_(boost::weak_ptr<X> const &r)
 {
-    BOOST_TEST( !( r < r_ ) && !( r_ < r ) );
+	BOOST_TEST(!(r < r_) && !(r_ < r));
 }
 
-void unregister_( boost::weak_ptr< X > const & r )
+void
+unregister_(boost::weak_ptr<X> const &r)
 {
-    BOOST_TEST( !( r < r_ ) && !( r_ < r ) );
-    r_.reset();
+	BOOST_TEST(!(r < r_) && !(r_ < r));
+	r_.reset();
 }
 
-class X: public boost::enable_shared_from_raw
+class X : public boost::enable_shared_from_raw
 {
 public:
+	X() { register_(boost::shared_from_raw(this)); }
 
-    X()
-    {
-        register_( boost::shared_from_raw( this ) );
-    }
+	~X() { unregister_(boost::weak_from_raw(this)); }
 
-    ~X()
-    {
-        unregister_( boost::weak_from_raw( this ) );
-    }
-
-    void check()
-    {
-        check_( boost::weak_from_raw( this ) );
-    }
+	void check() { check_(boost::weak_from_raw(this)); }
 };
 
-int main()
+int
+main()
 {
-    {
-        boost::shared_ptr< X > px( new X );
-        px->check();
-    }
+	{
+		boost::shared_ptr<X> px(new X);
+		px->check();
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

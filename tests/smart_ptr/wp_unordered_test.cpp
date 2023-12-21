@@ -9,71 +9,72 @@
 
 #include <unordered_set>
 
-int main()
+int
+main()
 {
-    std::unordered_set< boost::weak_ptr<void> > set;
+	std::unordered_set<boost::weak_ptr<void> > set;
 
-    boost::shared_ptr<int> p1( (int*)0 );
-    boost::shared_ptr<int> p2( p1 );
-    boost::shared_ptr<void> p3( p1 );
+	boost::shared_ptr<int> p1((int *)0);
+	boost::shared_ptr<int> p2(p1);
+	boost::shared_ptr<void> p3(p1);
 
-    set.insert( p1 );
-    set.insert( p2 );
-    set.insert( p3 );
+	set.insert(p1);
+	set.insert(p2);
+	set.insert(p3);
 
-    BOOST_TEST_EQ( set.size(), 1 );
+	BOOST_TEST_EQ(set.size(), 1);
 
-    boost::weak_ptr<int> q1( p1 );
-    boost::weak_ptr<int> q2( p2 );
-    boost::weak_ptr<void> q3( p3 );
-    boost::weak_ptr<int> q4( q2 );
-    boost::weak_ptr<void> q5( q3 );
+	boost::weak_ptr<int> q1(p1);
+	boost::weak_ptr<int> q2(p2);
+	boost::weak_ptr<void> q3(p3);
+	boost::weak_ptr<int> q4(q2);
+	boost::weak_ptr<void> q5(q3);
 
-    set.insert( q1 );
-    set.insert( q2 );
-    set.insert( q3 );
-    set.insert( q4 );
-    set.insert( q5 );
+	set.insert(q1);
+	set.insert(q2);
+	set.insert(q3);
+	set.insert(q4);
+	set.insert(q5);
 
-    BOOST_TEST_EQ( set.size(), 1 );
+	BOOST_TEST_EQ(set.size(), 1);
 
-    boost::shared_ptr<int> p6( (int*)0 );
+	boost::shared_ptr<int> p6((int *)0);
 
-    set.insert( p6 );
+	set.insert(p6);
 
-    BOOST_TEST_EQ( set.size(), 2 );
+	BOOST_TEST_EQ(set.size(), 2);
 
-    boost::weak_ptr<int> q6( p6 );
+	boost::weak_ptr<int> q6(p6);
 
-    set.insert( q6 );
+	set.insert(q6);
 
-    BOOST_TEST_EQ( set.size(), 2 );
+	BOOST_TEST_EQ(set.size(), 2);
 
-    BOOST_TEST_EQ( set.count( q1 ), 1 );
-    BOOST_TEST_EQ( set.count( q2 ), 1 );
-    BOOST_TEST_EQ( set.count( q3 ), 1 );
-    BOOST_TEST_EQ( set.count( q4 ), 1 );
-    BOOST_TEST_EQ( set.count( q5 ), 1 );
-    BOOST_TEST_EQ( set.count( q6 ), 1 );
+	BOOST_TEST_EQ(set.count(q1), 1);
+	BOOST_TEST_EQ(set.count(q2), 1);
+	BOOST_TEST_EQ(set.count(q3), 1);
+	BOOST_TEST_EQ(set.count(q4), 1);
+	BOOST_TEST_EQ(set.count(q5), 1);
+	BOOST_TEST_EQ(set.count(q6), 1);
 
-    boost::shared_ptr<int> p7( (int*)0 );
-    boost::weak_ptr<int> q7( p7 );
+	boost::shared_ptr<int> p7((int *)0);
+	boost::weak_ptr<int> q7(p7);
 
-    BOOST_TEST_EQ( set.count( q7 ), 0 );
+	BOOST_TEST_EQ(set.count(q7), 0);
 
-    p1.reset();
-    p2.reset();
-    p3.reset();
-    p6.reset();
-    p7.reset();
+	p1.reset();
+	p2.reset();
+	p3.reset();
+	p6.reset();
+	p7.reset();
 
-    BOOST_TEST_EQ( set.count( q1 ), 1 );
-    BOOST_TEST_EQ( set.count( q2 ), 1 );
-    BOOST_TEST_EQ( set.count( q3 ), 1 );
-    BOOST_TEST_EQ( set.count( q4 ), 1 );
-    BOOST_TEST_EQ( set.count( q5 ), 1 );
-    BOOST_TEST_EQ( set.count( q6 ), 1 );
-    BOOST_TEST_EQ( set.count( q7 ), 0 );
+	BOOST_TEST_EQ(set.count(q1), 1);
+	BOOST_TEST_EQ(set.count(q2), 1);
+	BOOST_TEST_EQ(set.count(q3), 1);
+	BOOST_TEST_EQ(set.count(q4), 1);
+	BOOST_TEST_EQ(set.count(q5), 1);
+	BOOST_TEST_EQ(set.count(q6), 1);
+	BOOST_TEST_EQ(set.count(q7), 0);
 
-    return boost::report_errors();
+	return boost::report_errors();
 }

@@ -8,49 +8,50 @@ Distributed under the Boost Software License, Version 1.0.
 #include "lightweight_test.hpp"
 #include "smart_ptr.hpp"
 
-class type
-    : public boost::enable_shared_from_this<type> {
+class type : public boost::enable_shared_from_this<type>
+{
 public:
-    static unsigned instances;
+	static unsigned instances;
 
-    type() {
-        ++instances;
-    }
+	type() { ++instances; }
 
-    ~type() {
-        --instances;
-    }
+	~type() { --instances; }
 
 private:
-    type(const type&);
-    type& operator=(const type&);
+	type(const type&);
+	type& operator=(const type&);
 };
 
 unsigned type::instances = 0;
 
-int main()
+int
+main()
 {
-    BOOST_TEST(type::instances == 0);
-    {
-        boost::shared_ptr<type[]> result =
-            boost::make_shared<type[]>(3);
-        try {
-            result[0].shared_from_this();
-            BOOST_ERROR("shared_from_this did not throw");
-        } catch (...) {
-            BOOST_TEST(type::instances == 3);
-        }
-    }
-    BOOST_TEST(type::instances == 0);
-    {
-        boost::shared_ptr<type[3]> result =
-            boost::make_shared_noinit<type[3]>();
-        try {
-            result[0].shared_from_this();
-            BOOST_ERROR("shared_from_this did not throw");
-        } catch (...) {
-            BOOST_TEST(type::instances == 3);
-        }
-    }
-    return boost::report_errors();
+	BOOST_TEST(type::instances == 0);
+	{
+		boost::shared_ptr<type[]> result = boost::make_shared<type[]>(3);
+		try
+		{
+			result[0].shared_from_this();
+			BOOST_ERROR("shared_from_this did not throw");
+		}
+		catch (...)
+		{
+			BOOST_TEST(type::instances == 3);
+		}
+	}
+	BOOST_TEST(type::instances == 0);
+	{
+		boost::shared_ptr<type[3]> result = boost::make_shared_noinit<type[3]>();
+		try
+		{
+			result[0].shared_from_this();
+			BOOST_ERROR("shared_from_this did not throw");
+		}
+		catch (...)
+		{
+			BOOST_TEST(type::instances == 3);
+		}
+	}
+	return boost::report_errors();
 }

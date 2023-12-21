@@ -19,34 +19,36 @@
 
 //
 
-class X: public boost::enable_shared_from_raw
+class X : public boost::enable_shared_from_raw
 {
 };
 
-void null_deleter( void const* )
+void
+null_deleter(void const*)
 {
 }
 
-int main()
+int
+main()
 {
-    boost::shared_ptr<X> px( new X );
+	boost::shared_ptr<X> px(new X);
 
-    {
-        boost::shared_ptr<X> px2( px.get(), null_deleter );
-        BOOST_TEST( px == px2 );
-    }
+	{
+		boost::shared_ptr<X> px2(px.get(), null_deleter);
+		BOOST_TEST(px == px2);
+	}
 
-    try
-    {
-        boost::shared_ptr< X > qx = boost::shared_from_raw( px.get() );
+	try
+	{
+		boost::shared_ptr<X> qx = boost::shared_from_raw(px.get());
 
-        BOOST_TEST( px == qx );
-        BOOST_TEST( !( px < qx ) && !( qx < px ) );
-    }
-    catch( boost::bad_weak_ptr const& )
-    {
-        BOOST_ERROR( "shared_from_raw( px.get() ) failed" );
-    }
+		BOOST_TEST(px == qx);
+		BOOST_TEST(!(px < qx) && !(qx < px));
+	}
+	catch (boost::bad_weak_ptr const&)
+	{
+		BOOST_ERROR("shared_from_raw( px.get() ) failed");
+	}
 
-    return boost::report_errors();
+	return boost::report_errors();
 }
