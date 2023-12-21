@@ -5,8 +5,8 @@
 #include "box2d/box2d.h"
 #include "box2d/debug_draw.h"
 #include "box2d/id.h"
-#include "utils/VG.hpp"
-#include "utils/Scene.hpp"
+#include "candybox/VG.hpp"
+#include "candybox/Scene.hpp"
 
 class DebugDraw
 {

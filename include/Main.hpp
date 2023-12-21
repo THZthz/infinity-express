@@ -3,7 +3,6 @@
 
 #include <memory>
 #include "World.hpp"
-#include "imgui.h"
 
 #define SHADER_TEXT(x) "#version 330 core\n" #x
 //#define SHADER_TEXT(x) "#version 100\n" #x
@@ -162,7 +161,7 @@ private:
 
 private:
 	bool m_isRightMousePressed = false;
-	ie::vec2 m_prevPos{0, 0};
+	glm::vec2 m_prevPos{0, 0};
 
 	ShaderCRT m_shaderCRT;
 	ShaderLight m_shaderLight;

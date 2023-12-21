@@ -7,30 +7,32 @@
 #include <cstdint>
 #include <cstdlib>
 
-#include "utils/Scene.hpp"
-#include "utils/Color.hpp"
-#include "utils/TaskScheduler.hpp"
-#include "utils/Linear.hpp"
-#include "utils/vector.hpp"
+#include "candybox/Scene.hpp"
+#include "candybox/Color.hpp"
+#include "candybox/TaskScheduler.hpp"
+#include "candybox/Linear.hpp"
+#include "candybox/vector.hpp"
 #include "Main.hpp"
 #include "CellAutomata.hpp"
 #include "./vg_test/demo.hpp"
 
 // implements nanovg
-#include "utils/VG.hpp"
+#include "candybox/VG.hpp"
 //#define NANOVG_GLES2 1
 #define NANOVG_GL3 1
 #define NANOVG_GL_IMPLEMENTATION
-#include "utils/VG_gl.hpp"
+#include "candybox/VG_gl.hpp"
 #define NANOVG_GLU_IMPLEMENTATION
-#include "utils/VG_gl_utils.hpp"
+#include "candybox/VG_gl_utils.hpp"
 //#define NVGSWU_GLES2
 #define NVGSWU_GL3
 #define NANOVG_SW_IMPLEMENTATION
-#include "utils/VG_sw.hpp"
-#include "utils/VG_sw_utils.hpp"
+#include "candybox/VG_sw.hpp"
+#include "candybox/VG_sw_utils.hpp"
 
-#include "utils/ref_ptr.hpp"
+#include "candybox/ref_ptr.hpp"
+
+#include "imgui/imgui.h"
 
 int
 main()
@@ -314,9 +316,9 @@ App::render()
 
 	// Update and render
 	glViewport(0, 0, m_frameWidth, m_frameHeight);
-	//		glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
-	//		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-	glClearColor(0.f, 0.f, 0.f, 1.0f);
+//			glClearColor(0.3f, 0.3f, 0.32f, 1.0f);
+			glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+//	glClearColor(0.f, 0.f, 0.f, 1.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -330,7 +332,6 @@ App::render()
 		nvgBeginPath(m_vg);
 		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
 		nvgCircle(m_vg, pw.x, pw.y, 3 / m_camera.getZoom());
-		//		nvgCircle(m_vg, m_pointer.x, m_pointer.y, 3);
 		nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
 		nvgFill(m_vg);
 
@@ -513,7 +514,7 @@ ShaderShadow::use()
 #include "./vg_test/demo.hpp"
 #include "./vg_test/perf.hpp"
 #include "./vg_test/tests.cpp"
-#include "utils/VG_vtex.hpp"
+#include "candybox/VG_vtex.hpp"
 
 int blowup = 0;
 int screenshot = 0;

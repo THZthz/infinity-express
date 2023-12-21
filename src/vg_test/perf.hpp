@@ -2,7 +2,7 @@
 #define PERF_H
 
 #include "./platform.hpp"
-#include "utils/VG.hpp"
+#include "candybox/VG.hpp"
 
 #ifdef __cplusplus
 extern "C" {

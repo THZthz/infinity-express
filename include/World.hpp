@@ -1,9 +1,9 @@
 #ifndef IE_WORLD_HPP
 #define IE_WORLD_HPP
 
-#include "utils/VG.hpp"
-#include "utils/TaskScheduler.hpp"
-#include "utils/Scene.hpp"
+#include "candybox/VG.hpp"
+#include "candybox/TaskScheduler.hpp"
+#include "candybox/Scene.hpp"
 #include "DebugDraw.hpp"
 
 #include "box2d/box2d.h"

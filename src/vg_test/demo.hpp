@@ -2,10 +2,10 @@
 #define DEMO_H
 
 #include "platform.hpp"
-#include "utils/VG.hpp"
+#include "candybox/VG.hpp"
 #include "perf.hpp"
-#include "utils/VG_sw_utils.hpp"
-#include "utils/Scene.hpp"
+#include "candybox/VG_sw_utils.hpp"
+#include "candybox/Scene.hpp"
 
 #ifdef __cplusplus
 extern "C" {

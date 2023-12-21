@@ -43,13 +43,13 @@ macro(FETCH name src commit)
 endmacro()
 
 # third party libraries.
+add_subdirectory(modules/catch2)
 add_subdirectory(modules/predicates) # predicates (libigl).
 #fetch(sfml https://github.com/SFML/SFML.git 2.5.1)
 #fetch(box2d https://github.com/erincatto/box2d.git v2.4.1)
 # add_subdirectory(modules/boost)
 # add_subdirectory(modules/SFML)
 add_subdirectory(modules/box2c) # latest version
-add_subdirectory(modules/glm) # tag 0.9.9.8
 add_subdirectory(modules/tracy) # tag v0.10
 #add_subdirectory(modules/libtess2) # latest version
 #add_subdirectory(modules/imgui) # tag v1.90
@@ -58,6 +58,8 @@ add_subdirectory(modules/entt)
 #add_subdirectory(modules/glbinding)
 #add_subdirectory(modules/globjects)
 
+add_subdirectory(candybox)
+
 # -------------------------------------------------------------------------------
 set(IE_INCLUDES
         include/CellAutomata.hpp
@@ -65,48 +67,7 @@ set(IE_INCLUDES
         include/DebugDraw.hpp
         include/Main.hpp
 
-        # utils
-        include/utils/AABB.hpp
-        include/utils/bitwise_enum.hpp
-        include/utils/bresenham.hpp
-        include/utils/BVH.hpp
-        include/utils/color.hpp
-        include/utils/easing.hpp
-        include/utils/filesystem.hpp
-        include/utils/flex.hpp
-        include/utils/fontstash.hpp
-        include/utils/FSM.hpp
-        include/utils/GJK.hpp
-        include/utils/Heap.hpp
-        include/utils/Hilbert.hpp
-        include/utils/HSFM2.hpp
-        include/utils/IntervalTree.hpp
-        include/utils/json.hpp
-        include/utils/json_fwd.hpp
-        include/utils/Lazy.hpp
-        include/utils/Linear.hpp
-        include/utils/LockLessMultiReadPipe.hpp
-        include/utils/Macros.hpp
-        include/utils/Memory.hpp
-        include/utils/nanosvg.h
-        include/utils/NonCopyable.hpp
-        include/utils/optional.hpp
-        include/utils/profile.hpp
-        include/utils/ref_ptr.hpp
-        include/utils/Robinhood.hpp
-        include/utils/Scene.hpp
-        include/utils/simplify_path.hpp
-        include/utils/spatial.hpp
-        include/utils/TaskScheduler.hpp
-        include/utils/Tween.hpp
-        include/utils/value_ptr.hpp
-        include/utils/vector.hpp
-        include/utils/VG.hpp
-        include/utils/VG_gl.hpp
-        include/utils/VG_gl_utils.hpp
-        include/utils/VG_sw.hpp
-        include/utils/VG_sw_utils.hpp
-        include/utils/VG_vtex.hpp
+
         )
 set(IE_SOURCES
         src/main.cpp
@@ -116,33 +77,6 @@ set(IE_SOURCES
         # vg_test
         src/vg_test/demo.cpp
         src/vg_test/perf.cpp
-
-        # utils
-        src/utils/gjk/gjk.cpp
-        src/utils/gjk/manifold.cpp
-        src/utils/gjk/raycast.cpp
-        src/utils/gjk/utils.cpp
-        src/utils/BVH.cpp
-        src/utils/Color.cpp
-        src/utils/Flex.cpp
-        src/utils/Heap.cpp
-        src/utils/Scene.cpp
-        src/utils/simplify.cpp
-        src/utils/spatial.cpp
-        src/utils/VG.cpp
-        src/utils/TaskScheduler.cpp
-        src/utils/Tween.cpp
-        src/utils/VG.cpp
-        src/utils/VG_gl_utils.cpp
-
-        # imgui
-        modules/imgui/imgui.cpp
-        modules/imgui/imgui_demo.cpp
-        modules/imgui/imgui_draw.cpp
-        modules/imgui/imgui_tables.cpp
-        modules/imgui/imgui_widgets.cpp
-        modules/imgui/backends/imgui_impl_glfw.cpp
-        modules/imgui/backends/imgui_impl_opengl3.cpp
 
         # libtess2
         modules/libtess2/Source/bucketalloc.c
@@ -157,26 +91,12 @@ set(IE_SOURCES
         #        modules/clipper2_1.3.0/src/clipper.engine.cpp
         #        modules/clipper2_1.3.0/src/clipper.offset.cpp
         #        modules/clipper2_1.3.0/src/clipper.rectclip.cpp
-
-        # glad
-        modules/glad/glad.h
-        modules/glad/glad.c
-        modules/glad/khrplatform.h)
+)
 add_executable(${IE_EXE} ${IE_INCLUDES} ${IE_SOURCES})
 target_include_directories(${IE_EXE} PRIVATE include modules)
 target_include_directories(${IE_EXE} PRIVATE
-        modules/stb
-        modules/nanovgxc/src/
-        #        modules/clipper2_1.3.0/include
-        modules/imgui/
         modules/libtess2/Include)
-target_link_libraries(${IE_EXE} PUBLIC glm predicates) # math
-target_link_libraries(${IE_EXE} PUBLIC box2d) # physics
-target_link_libraries(${IE_EXE} PUBLIC # graphics
-        opengl32
-        glfw
-        )
-target_link_libraries(${IE_EXE} PUBLIC enkiTS)
+target_link_libraries(${IE_EXE} PUBLIC predicates box2d candybox)
 #target_link_libraries(${IE_EXE} PRIVATE boost)
 
 target_compile_definitions(${IE_EXE} PRIVATE -DINFINITY_EXPRESS_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
@@ -249,7 +169,3 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
 else ()
     message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/VERSION not found")
 endif ()
-
-# testing
-add_subdirectory(modules/catch2)
-add_subdirectory(tests)

@@ -1,5 +1,5 @@
 #include "CellAutomata.hpp"
-#include "utils/Memory.hpp"
+#include "candybox/Memory.hpp"
 
 void CellAutomata::generate()
 {

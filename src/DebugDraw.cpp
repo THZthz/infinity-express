@@ -1,7 +1,7 @@
-#include "glad/glad.h"
+#include "candybox/glad/glad.h"
 #include "DebugDraw.hpp"
-#include "utils/Memory.hpp"
-#include "utils/Scene.hpp"
+#include "candybox/Memory.hpp"
+#include "candybox/Scene.hpp"
 #include "box2d/math.h"
 #include <cstdio>
 

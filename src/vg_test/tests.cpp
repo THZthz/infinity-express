@@ -1,6 +1,6 @@
 // usage: #include "tests.c"
 #include "platform.hpp"
-#include "utils/VG.hpp"
+#include "candybox/VG.hpp"
 int g_hasGLError = 0;
 #ifndef NDEBUG
 int
@@ -341,7 +341,7 @@ convexFillTest(NVGcontext* vg)
 
 // nanosvg
 #define NANOSVG_IMPLEMENTATION
-#include "utils/nanosvg.h"
+#include "candybox/nanosvg.h"
 
 static struct NVGcolor
 nvgColUint(unsigned int col)

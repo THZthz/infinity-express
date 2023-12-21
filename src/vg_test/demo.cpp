@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "utils/VG.hpp"
+#include "candybox/VG.hpp"
 #define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "stb_image_write.h"
+#include "stb/stb_image_write.h"
 
 
 #define ICON_SEARCH 0x1F50D
