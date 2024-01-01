@@ -17,34 +17,34 @@ struct takes_init_and_variadic
 
 TEST_CASE("Make optional", "[make_optional]")
 {
-	auto o1 = ie::make_optional(42);
-	auto o2 = ie::optional<int>(42);
+	auto o1 = candybox::make_optional(42);
+	auto o2 = candybox::optional<int>(42);
 
-	constexpr bool is_same = std::is_same<decltype(o1), ie::optional<int>>::value;
+	constexpr bool is_same = std::is_same<decltype(o1), candybox::optional<int>>::value;
 	REQUIRE(is_same);
 	REQUIRE(o1 == o2);
 
-	auto o3 = ie::make_optional<std::tuple<int, int, int, int>>(0, 1, 2, 3);
+	auto o3 = candybox::make_optional<std::tuple<int, int, int, int>>(0, 1, 2, 3);
 	REQUIRE(std::get<0>(*o3) == 0);
 	REQUIRE(std::get<1>(*o3) == 1);
 	REQUIRE(std::get<2>(*o3) == 2);
 	REQUIRE(std::get<3>(*o3) == 3);
 
-	auto o4 = ie::make_optional<std::vector<int>>({0, 1, 2, 3});
+	auto o4 = candybox::make_optional<std::vector<int>>({0, 1, 2, 3});
 	REQUIRE(o4.value()[0] == 0);
 	REQUIRE(o4.value()[1] == 1);
 	REQUIRE(o4.value()[2] == 2);
 	REQUIRE(o4.value()[3] == 3);
 
-	auto o5 = ie::make_optional<takes_init_and_variadic>({0, 1}, 2, 3);
+	auto o5 = candybox::make_optional<takes_init_and_variadic>({0, 1}, 2, 3);
 	REQUIRE(o5->v[0] == 0);
 	REQUIRE(o5->v[1] == 1);
 	REQUIRE(std::get<0>(o5->t) == 2);
 	REQUIRE(std::get<1>(o5->t) == 3);
 
 	auto i = 42;
-	auto o6 = ie::make_optional<int &>(i);
-	REQUIRE((std::is_same<decltype(o6), ie::optional<int &>>::value));
+	auto o6 = candybox::make_optional<int &>(i);
+	REQUIRE((std::is_same<decltype(o6), candybox::optional<int &>>::value));
 	REQUIRE(o6);
 	REQUIRE(*o6 == 42);
 }

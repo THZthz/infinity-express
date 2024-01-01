@@ -1,17 +1,17 @@
-#ifndef IE_DEBUG_DRAW_HPP
-#define IE_DEBUG_DRAW_HPP
+#ifndef CANDYBOX_DEBUG_DRAW_HPP__
+#define CANDYBOX_DEBUG_DRAW_HPP__
 
 #include <cassert>
 #include "box2d/box2d.h"
 #include "box2d/debug_draw.h"
 #include "box2d/id.h"
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 #include "candybox/Scene.hpp"
 
 class DebugDraw
 {
 public:
-	explicit DebugDraw(ie::Scene* scene);
+	explicit DebugDraw(candybox::Scene* scene);
 	~DebugDraw();
 
 
@@ -37,14 +37,14 @@ public:
 	void flush();
 
 private:
-	ie::Scene* m_scene;
+	candybox::Scene* m_scene;
 
 	struct GLRenderPoints* m_points;
 	struct GLRenderLines* m_lines;
 	struct GLRenderTriangles* m_triangles;
 	struct GLRenderRoundedTriangles* m_roundedTriangles;
 
-	 ie::Scene::Camera *m_camera;
+	 candybox::Camera *m_camera;
 };
 
-#endif // IE_DEBUG_DRAW_HPP
+#endif // CANDYBOX_DEBUG_DRAW_HPP__

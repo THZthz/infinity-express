@@ -5,7 +5,7 @@
 
 TEST_CASE("Emplace", "[emplace]")
 {
-	ie::optional<std::pair<std::pair<int, int>, std::pair<double, double>>> i;
+	candybox::optional<std::pair<std::pair<int, int>, std::pair<double, double>>> i;
 	i.emplace(std::piecewise_construct, std::make_tuple(0, 2), std::make_tuple(3, 4));
 	REQUIRE(i->first.first == 0);
 	REQUIRE(i->first.second == 2);
@@ -20,6 +20,6 @@ struct A
 
 TEST_CASE("Emplace with exception thrown", "[emplace]")
 {
-	ie::optional<A> a;
+	candybox::optional<A> a;
 	REQUIRE_THROWS(a.emplace());
 }

@@ -7,11 +7,11 @@
 #else
 TEST_CASE("Triviality", "[bases.triviality]")
 {
-	REQUIRE(std::is_trivially_copy_constructible<ie::optional<int> >::value);
-	REQUIRE(std::is_trivially_copy_assignable<ie::optional<int> >::value);
-	REQUIRE(std::is_trivially_move_constructible<ie::optional<int> >::value);
-	REQUIRE(std::is_trivially_move_assignable<ie::optional<int> >::value);
-	REQUIRE(std::is_trivially_destructible<ie::optional<int> >::value);
+	REQUIRE(std::is_trivially_copy_constructible<candybox::optional<int> >::value);
+	REQUIRE(std::is_trivially_copy_assignable<candybox::optional<int> >::value);
+	REQUIRE(std::is_trivially_move_constructible<candybox::optional<int> >::value);
+	REQUIRE(std::is_trivially_move_assignable<candybox::optional<int> >::value);
+	REQUIRE(std::is_trivially_destructible<candybox::optional<int> >::value);
 
 	{
 		struct T
@@ -22,11 +22,11 @@ TEST_CASE("Triviality", "[bases.triviality]")
 			T& operator=(T&&) = default;
 			~T() = default;
 		};
-		REQUIRE(std::is_trivially_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_trivially_copy_assignable<ie::optional<T> >::value);
-		REQUIRE(std::is_trivially_move_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_trivially_move_assignable<ie::optional<T> >::value);
-		REQUIRE(std::is_trivially_destructible<ie::optional<T> >::value);
+		REQUIRE(std::is_trivially_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_trivially_copy_assignable<candybox::optional<T> >::value);
+		REQUIRE(std::is_trivially_move_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_trivially_move_assignable<candybox::optional<T> >::value);
+		REQUIRE(std::is_trivially_destructible<candybox::optional<T> >::value);
 	}
 
 	{
@@ -38,21 +38,21 @@ TEST_CASE("Triviality", "[bases.triviality]")
 			T& operator=(T&&) { return *this; };
 			~T() { }
 		};
-		REQUIRE(!std::is_trivially_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(!std::is_trivially_copy_assignable<ie::optional<T> >::value);
-		REQUIRE(!std::is_trivially_move_constructible<ie::optional<T> >::value);
-		REQUIRE(!std::is_trivially_move_assignable<ie::optional<T> >::value);
-		REQUIRE(!std::is_trivially_destructible<ie::optional<T> >::value);
+		REQUIRE(!std::is_trivially_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(!std::is_trivially_copy_assignable<candybox::optional<T> >::value);
+		REQUIRE(!std::is_trivially_move_constructible<candybox::optional<T> >::value);
+		REQUIRE(!std::is_trivially_move_assignable<candybox::optional<T> >::value);
+		REQUIRE(!std::is_trivially_destructible<candybox::optional<T> >::value);
 	}
 }
 
 TEST_CASE("Deletion", "[bases.deletion]")
 {
-	REQUIRE(std::is_copy_constructible<ie::optional<int> >::value);
-	REQUIRE(std::is_copy_assignable<ie::optional<int> >::value);
-	REQUIRE(std::is_move_constructible<ie::optional<int> >::value);
-	REQUIRE(std::is_move_assignable<ie::optional<int> >::value);
-	REQUIRE(std::is_destructible<ie::optional<int> >::value);
+	REQUIRE(std::is_copy_constructible<candybox::optional<int> >::value);
+	REQUIRE(std::is_copy_assignable<candybox::optional<int> >::value);
+	REQUIRE(std::is_move_constructible<candybox::optional<int> >::value);
+	REQUIRE(std::is_move_assignable<candybox::optional<int> >::value);
+	REQUIRE(std::is_destructible<candybox::optional<int> >::value);
 
 	{
 		struct T
@@ -63,11 +63,11 @@ TEST_CASE("Deletion", "[bases.deletion]")
 			T& operator=(T&&) = default;
 			~T() = default;
 		};
-		REQUIRE(std::is_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_copy_assignable<ie::optional<T> >::value);
-		REQUIRE(std::is_move_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_move_assignable<ie::optional<T> >::value);
-		REQUIRE(std::is_destructible<ie::optional<T> >::value);
+		REQUIRE(std::is_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_copy_assignable<candybox::optional<T> >::value);
+		REQUIRE(std::is_move_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_move_assignable<candybox::optional<T> >::value);
+		REQUIRE(std::is_destructible<candybox::optional<T> >::value);
 	}
 
 	{
@@ -78,10 +78,10 @@ TEST_CASE("Deletion", "[bases.deletion]")
 			T& operator=(const T&) = delete;
 			T& operator=(T&&) = delete;
 		};
-		REQUIRE(!std::is_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(!std::is_copy_assignable<ie::optional<T> >::value);
-		REQUIRE(!std::is_move_constructible<ie::optional<T> >::value);
-		REQUIRE(!std::is_move_assignable<ie::optional<T> >::value);
+		REQUIRE(!std::is_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(!std::is_copy_assignable<candybox::optional<T> >::value);
+		REQUIRE(!std::is_move_constructible<candybox::optional<T> >::value);
+		REQUIRE(!std::is_move_assignable<candybox::optional<T> >::value);
 	}
 
 	{
@@ -92,10 +92,10 @@ TEST_CASE("Deletion", "[bases.deletion]")
 			T& operator=(const T&) = delete;
 			T& operator=(T&&) = default;
 		};
-		REQUIRE(!std::is_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(!std::is_copy_assignable<ie::optional<T> >::value);
-		REQUIRE(std::is_move_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_move_assignable<ie::optional<T> >::value);
+		REQUIRE(!std::is_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(!std::is_copy_assignable<candybox::optional<T> >::value);
+		REQUIRE(std::is_move_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_move_assignable<candybox::optional<T> >::value);
 	}
 
 	{
@@ -106,8 +106,8 @@ TEST_CASE("Deletion", "[bases.deletion]")
 			T& operator=(const T&) = default;
 			T& operator=(T&&) = delete;
 		};
-		REQUIRE(std::is_copy_constructible<ie::optional<T> >::value);
-		REQUIRE(std::is_copy_assignable<ie::optional<T> >::value);
+		REQUIRE(std::is_copy_constructible<candybox::optional<T> >::value);
+		REQUIRE(std::is_copy_assignable<candybox::optional<T> >::value);
 	}
 }
 #endif

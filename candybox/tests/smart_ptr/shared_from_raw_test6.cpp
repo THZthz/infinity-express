@@ -14,8 +14,8 @@
 
 #define ENABLE_ASSERT_HANDLER
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 #include <stdio.h>
 

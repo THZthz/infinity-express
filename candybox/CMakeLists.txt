@@ -1,88 +1,96 @@
-set(CANDYBOX_HEADERS
+cmake_minimum_required(VERSION 3.14)
+project(candybox LANGUAGES C CXX)
 
-        # main
-        AABB.hpp
-        bitwise_enum.hpp
-        bresenham.hpp
-        BVH.hpp
-        color.hpp
-        easing.hpp
-        filesystem.hpp
-        flex.hpp
-        fontstash.hpp
-        FSM.hpp
-        GJK.hpp
-        Heap.hpp
-        Hilbert.hpp
-        HSFM2.hpp
-        IntervalTree.hpp
-        json.hpp
-        json_fwd.hpp
-        Lazy.hpp
-        Linear.hpp
-        LockLessMultiReadPipe.hpp
-        Macros.hpp
-        Memory.hpp
-        nanosvg.h
-        NonCopyable.hpp
-        optional.hpp
-        profile.hpp
-        ref_ptr.hpp
-        Robinhood.hpp
-        Scene.hpp
-        simplify_path.hpp
-        smart_ptr.hpp
-        spatial.hpp
-        TaskScheduler.hpp
-        Tween.hpp
-        vector.hpp
-        VG.hpp
-        VG_gl.hpp
-        VG_gl_utils.hpp
-        VG_sw.hpp
-        VG_sw_utils.hpp
-        VG_vtex.hpp
+set(CANDYBOX_HEADERS
+        include/candybox/AABB.hpp
+        include/candybox/assert.hpp
+        include/candybox/bitwise_enum.hpp
+        include/candybox/bresenham.hpp
+        include/candybox/BVH.hpp
+        include/candybox/color.hpp
+        include/candybox/easing.hpp
+        include/candybox/filesystem.hpp
+        include/candybox/flex.hpp
+        include/candybox/fontstash.hpp
+        include/candybox/FSM.hpp
+        include/candybox/GJK.hpp
+        include/candybox/greatest.h
+        include/candybox/Heap.hpp
+        include/candybox/Hilbert.hpp
+        include/candybox/HSFM2.hpp
+        include/candybox/IntervalTree.hpp
+        include/candybox/json.hpp
+        include/candybox/json_fwd.hpp
+        include/candybox/Lazy.hpp
+        include/candybox/linear.hpp
+        include/candybox/LockLessMultiReadPipe.hpp
+        include/candybox/Macros.hpp
+        include/candybox/Memory.hpp
+        include/candybox/nanosvg.h
+        include/candybox/NonCopyable.hpp
+        include/candybox/optional.hpp
+        include/candybox/profile.hpp
+        include/candybox/Robinhood.hpp
+        include/candybox/Scene.hpp
+        include/candybox/simplify_path.hpp
+        include/candybox/smart_ptr.hpp
+        include/candybox/spatial.hpp
+        include/candybox/TaskScheduler.hpp
+        include/candybox/Tween.hpp
+        include/candybox/vector.hpp
+
+        # vg
+        include/candybox/vg/VG.hpp
+        include/candybox/vg/VG_gl.hpp
+        include/candybox/vg/VG_gl_utils.hpp
+        include/candybox/vg/VG_sw.hpp
+        include/candybox/vg/VG_sw_utils.hpp
+        include/candybox/vg/VG_vtex.hpp
 
         # glad
-        glad/glad.h
-        glad/khrplatform.h
-        )
+        externs/candybox/glad/glad.h
+        externs/candybox/glad/khrplatform.h
+)
 set(CANDYBOX_SOURCES
 
         # main
-        _sources/gjk/gjk.cpp
-        _sources/gjk/manifold.cpp
-        _sources/gjk/raycast.cpp
-        _sources/gjk/utils.cpp
-        _sources/BVH.cpp
-        _sources/Color.cpp
-        _sources/Flex.cpp
-        _sources/Heap.cpp
-        _sources/Scene.cpp
-        _sources/simplify.cpp
-        _sources/spatial.cpp
-        _sources/VG.cpp
-        _sources/TaskScheduler.cpp
-        _sources/Tween.cpp
-        _sources/VG.cpp
-        _sources/VG_gl_utils.cpp
+        sources/gjk/gjk.cpp
+        sources/gjk/manifold.cpp
+        sources/gjk/raycast.cpp
+        sources/gjk/utils.cpp
+        sources/BVH.cpp
+        sources/Color.cpp
+        sources/flex.cpp
+        sources/Heap.cpp
+        sources/Scene.cpp
+        sources/simplify.cpp
+        sources/spatial.cpp
+        sources/VG.cpp
+        sources/TaskScheduler.cpp
+        sources/Tween.cpp
+        sources/VG.cpp
+        sources/VG_gl_utils.cpp
 
         # glad
-        glad/glad.c
+        externs/candybox/glad/glad.c
 
         # imgui
-        externs/imgui/imgui.cpp
-        externs/imgui/imgui_demo.cpp
-        externs/imgui/imgui_draw.cpp
-        externs/imgui/imgui_tables.cpp
-        externs/imgui/imgui_widgets.cpp
-        externs/imgui/backends/imgui_impl_glfw.cpp
-        externs/imgui/backends/imgui_impl_opengl3.cpp
-        )
-add_library(candybox STATIC ${CANDYBOAX_HEADERS} ${CANDYBOX_SOURCES})
-target_include_directories(candybox PUBLIC ../ externs/ PRIVATE externs/imgui)
-add_subdirectory(externs/glm) # tag 0.9.9.8
-target_link_libraries(candybox PUBLIC glm opengl32 glfw)
+        externs/candybox/imgui/imgui.cpp
+        externs/candybox/imgui/imgui_demo.cpp
+        externs/candybox/imgui/imgui_draw.cpp
+        externs/candybox/imgui/imgui_tables.cpp
+        externs/candybox/imgui/imgui_widgets.cpp
+        externs/candybox/imgui/backends/imgui_impl_glfw.cpp
+        externs/candybox/imgui/backends/imgui_impl_opengl3.cpp)
+add_library(candybox STATIC ${CANDYBOX_HEADERS} ${CANDYBOX_SOURCES})
+target_include_directories(candybox PUBLIC include/ externs/ PRIVATE externs/candybox/imgui)
+add_subdirectory(externs/candybox/glm) # tag 0.9.9.8
+target_link_libraries(candybox PUBLIC glm opengl32 glfw3)
+set_target_properties(candybox PROPERTIES
+        CXX_STANDARD 11
+        CXX_EXTENSIONS OFF
+        CXX_STANDARD_REQUIRED ON)
 
 # test
+add_subdirectory(externs/candybox/catch2)
 add_subdirectory(tests)

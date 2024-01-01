@@ -9,7 +9,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt
 
 #include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 //
 
@@ -18,12 +18,12 @@ struct W
 };
 
 void
-intrusive_ptr_add_ref(W*)
+intrusive_ptr_add_ref(W *)
 {
 }
 
 void
-intrusive_ptr_release(W*)
+intrusive_ptr_release(W *)
 {
 }
 

@@ -4,9 +4,9 @@
 #include "candybox/FSM.hpp"
 
 
-class player : public ie::fsm<player>
+class player : public candybox::fsm<player>
 {
-	friend class ie::fsm<player>; // base class needs access to transition_table
+	friend class candybox::fsm<player>; // base class needs access to transition_table
 
 	std::string cd_title;
 	bool autoplay = false;
@@ -29,14 +29,22 @@ public:
 
 	const std::string& get_cd_title() const { return cd_title; }
 
-	struct play { };
-	struct open_close { };
+	struct play
+	{
+	};
+	struct open_close
+	{
+	};
 	struct cd_detected
 	{
 		std::string title;
 	};
-	struct stop { };
-	struct pause { };
+	struct stop
+	{
+	};
+	struct pause
+	{
+	};
 
 private:
 	// guards
@@ -72,8 +80,7 @@ private:
 	    mem_fn_row<Playing, open_close, Open, &m::stop_and_open>,
 	    mem_fn_row<Paused, play, Playing, &m::resume_playback>,
 	    mem_fn_row<Paused, stop, Stopped, &m::stop_playback>,
-	    mem_fn_row<Paused, open_close, Open, &m::stop_and_open>
-	    >;
+	    mem_fn_row<Paused, open_close, Open, &m::stop_and_open> >;
 };
 
 void
@@ -215,7 +222,7 @@ TEST_CASE("Test auto play", "[auto_play]")
 
 
 int
-main(int argc, char *argv[])
+main(int argc, char* argv[])
 {
 	int result = Catch::Session().run(argc, argv);
 

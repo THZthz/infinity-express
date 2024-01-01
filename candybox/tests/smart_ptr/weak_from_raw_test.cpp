@@ -11,7 +11,7 @@
 //
 
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 

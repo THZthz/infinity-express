@@ -225,7 +225,7 @@ namespace Clipper2Lib {
     Rect64 r = ScaleRect<int64_t, double>(rect, scale);
     RectClip64 rc(r);
     Paths64 pp = ScalePaths<int64_t, double>(paths, scale, error_code);
-    if (error_code) return PathsD(); // ie: error_code result is lost 
+    if (error_code) return PathsD(); // candybox: error_code result is lost 
     return ScalePaths<double, int64_t>(
       rc.Execute(pp), 1 / scale, error_code);
   }

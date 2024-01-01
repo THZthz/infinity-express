@@ -7,7 +7,7 @@ Distributed under the Boost Software License, Version 1.0.
 */
 
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 template <class T> class point

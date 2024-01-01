@@ -3,8 +3,8 @@
 
 TEST_CASE("Swap value", "[swap.value]")
 {
-	ie::optional<int> o1 = 42;
-	ie::optional<int> o2 = 12;
+	candybox::optional<int> o1 = 42;
+	candybox::optional<int> o2 = 12;
 	o1.swap(o2);
 	CHECK(o1.value() == 12);
 	CHECK(o2.value() == 42);
@@ -12,8 +12,8 @@ TEST_CASE("Swap value", "[swap.value]")
 
 TEST_CASE("Swap value with null intialized", "[swap.value_nullopt]")
 {
-	ie::optional<int> o1 = 42;
-	ie::optional<int> o2 = ie::nullopt;
+	candybox::optional<int> o1 = 42;
+	candybox::optional<int> o2 = candybox::nullopt;
 	o1.swap(o2);
 	CHECK(!o1.has_value());
 	CHECK(o2.value() == 42);
@@ -21,8 +21,8 @@ TEST_CASE("Swap value with null intialized", "[swap.value_nullopt]")
 
 TEST_CASE("Swap null intialized with value", "[swap.nullopt_value]")
 {
-	ie::optional<int> o1 = ie::nullopt;
-	ie::optional<int> o2 = 42;
+	candybox::optional<int> o1 = candybox::nullopt;
+	candybox::optional<int> o2 = 42;
 	o1.swap(o2);
 	CHECK(o1.value() == 42);
 	CHECK(!o2.has_value());

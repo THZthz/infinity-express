@@ -10,7 +10,7 @@
 
 
 #include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include <utility>
 
 #if !defined(BOOST_NO_CXX11_RVALUE_REFERENCES)

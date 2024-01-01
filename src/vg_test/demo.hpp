@@ -2,9 +2,9 @@
 #define DEMO_H
 
 #include "platform.hpp"
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 #include "perf.hpp"
-#include "candybox/VG_sw_utils.hpp"
+#include "candybox/vg/VG_sw_utils.hpp"
 #include "candybox/Scene.hpp"
 
 #ifdef __cplusplus
@@ -37,10 +37,10 @@ void saveScreenShot(int w, int h, int premult, const char* name);
 #endif
 
 
-class VgApp : public ie::Scene
+class VgApp : public candybox::Scene
 {
 public:
-	VgApp() : ie::Scene("nanovg", 800, 600)
+	VgApp() : candybox::Scene("nanovg", 800, 600)
 	{
 		//#ifdef DEMO_MSAA // TODO
 		//	glfwWindowHint(GLFW_SAMPLES, 4);

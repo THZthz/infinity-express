@@ -6,7 +6,7 @@
 #	pragma GCC diagnostic error "-Wsuggest-override"
 #endif
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 int
 main()

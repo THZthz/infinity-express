@@ -1,0 +1,7 @@
+#ifndef CANDYBOX_MACROS_HPP__
+#define CANDYBOX_MACROS_HPP__
+
+#define API
+#define NODISCARD
+
+#endif // CANDYBOX_MACROS_HPP__

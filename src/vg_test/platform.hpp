@@ -27,11 +27,11 @@
 #else
 //#define GLEW_STATIC
 //#include <GL/glew.h>
-#include "candybox/glad/glad.h"
+#include <candybox/glad/glad.h>
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 
-#define DATA_PATH(x) ("C:\\Workspace\\CLionProjects\\Infinity_Express\\resources\\" x)
+#define DATA_PATH(x) ("E:\\CLionProjects\\Infinity_Express\\resources\\" x)
 #define PLATFORM_MOBILE 0
 #endif
 

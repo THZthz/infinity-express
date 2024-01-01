@@ -34,7 +34,7 @@ namespace Clipper2Lib {
   // Every closed path (or polygon) is made up of a series of vertices forming
   // edges that alternate between going up (relative to the Y-axis) and going
   // down. Edges consecutively going up or consecutively going down are called
-  // 'bounds' (ie sides if they're simple polygons). 'Local Minima' refer to
+  // 'bounds' (candybox sides if they're simple polygons). 'Local Minima' refer to
   // vertices where descending bounds become ascending ones.
 
   struct Scanline {
@@ -188,7 +188,7 @@ namespace Clipper2Lib {
   }
 
   //PrevPrevVertex: useful to get the (inverted Y-axis) top of the
-  //alternate edge (ie left or right bound) during edge insertion.  
+  //alternate edge (candybox left or right bound) during edge insertion.  
   inline Vertex* PrevPrevVertex(const Active& ae)
   {
     if (ae.wind_dx > 0)
@@ -637,7 +637,7 @@ namespace Clipper2Lib {
       {
         if (prev_v)
         {
-          if (prev_v->pt == pt) continue; // ie skips duplicates
+          if (prev_v->pt == pt) continue; // candybox skips duplicates
           prev_v->next = curr_v;
         }
         curr_v->prev = prev_v;
@@ -651,7 +651,7 @@ namespace Clipper2Lib {
         prev_v = prev_v->prev;
       prev_v->next = v0;
       v0->prev = prev_v;
-      v = curr_v; // ie get ready for next path
+      v = curr_v; // candybox get ready for next path
       if (cnt < 2 || (cnt == 2 && !is_open)) continue;
 
       //now find and assign local minima
@@ -1048,7 +1048,7 @@ namespace Clipper2Lib {
             //reversing direction so use the same WC
             e.wind_cnt = e2->wind_cnt;
           else
-            //otherwise keep 'reducing' the WC by 1 (ie towards 0) ...
+            //otherwise keep 'reducing' the WC by 1 (candybox towards 0) ...
             e.wind_cnt = e2->wind_cnt + e.wind_dx;
         }
         else
@@ -1062,11 +1062,11 @@ namespace Clipper2Lib {
           //reversing direction so use the same WC
           e.wind_cnt = e2->wind_cnt;
         else
-          //otherwise keep 'increasing' the WC by 1 (ie away from 0) ...
+          //otherwise keep 'increasing' the WC by 1 (candybox away from 0) ...
           e.wind_cnt = e2->wind_cnt + e.wind_dx;
       }
       e.wind_cnt2 = e2->wind_cnt2;
-      e2 = e2->next_in_ael;  // ie get ready to calc WindCnt2
+      e2 = e2->next_in_ael;  // candybox get ready to calc WindCnt2
     }
 
     //update wind_cnt2 ...
@@ -1218,7 +1218,7 @@ namespace Clipper2Lib {
         left_bound->bot = local_minima->vertex->pt;
         left_bound->curr_x = left_bound->bot.x;
         left_bound->wind_dx = -1;
-        left_bound->vertex_top = local_minima->vertex->prev;  // ie descending
+        left_bound->vertex_top = local_minima->vertex->prev;  // candybox descending
         left_bound->top = left_bound->vertex_top->pt;
         left_bound->local_min = local_minima;
         SetDx(*left_bound);
@@ -1234,7 +1234,7 @@ namespace Clipper2Lib {
         right_bound->bot = local_minima->vertex->pt;
         right_bound->curr_x = right_bound->bot.x;
         right_bound->wind_dx = 1;
-        right_bound->vertex_top = local_minima->vertex->next;  // ie ascending
+        right_bound->vertex_top = local_minima->vertex->next;  // candybox ascending
         right_bound->top = right_bound->vertex_top->pt;
         right_bound->local_min = local_minima;
         SetDx(*right_bound);
@@ -2481,7 +2481,7 @@ namespace Clipper2Lib {
 
   void ClipperBase::DoHorizontal(Active& horz)
     /*******************************************************************************
-        * Notes: Horizontal edges (HEs) at scanline intersections (ie at the top or    *
+        * Notes: Horizontal edges (HEs) at scanline intersections (candybox at the top or    *
         * bottom of a scanbeam) are processed as if layered.The order in which HEs     *
         * are processed doesn't matter. HEs intersect with the bottom vertices of      *
         * other HEs[#] and with non-horizontal edges [*]. Once these intersections     *
@@ -2615,7 +2615,7 @@ namespace Clipper2Lib {
       }
 
       //check if we've finished with (consecutive) horizontals ...
-      if (horzIsOpen && IsOpenEnd(horz)) // ie open at top
+      if (horzIsOpen && IsOpenEnd(horz)) // candybox open at top
       {
         if (IsHotEdge(horz))
         {

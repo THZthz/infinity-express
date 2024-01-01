@@ -9,7 +9,7 @@
 //  http://www.boost.org/LICENSE_1_0.txt
 
 #include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 //
 

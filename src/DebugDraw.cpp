@@ -1,4 +1,4 @@
-#include "candybox/glad/glad.h"
+#include <candybox/glad/glad.h>
 #include "DebugDraw.hpp"
 #include "candybox/Memory.hpp"
 #include "candybox/Scene.hpp"
@@ -45,13 +45,13 @@ PrintLog(GLuint object)
 		return;
 	}
 
-	char* log = (char*)ie::_malloc(log_length);
+	char* log = (char*)candybox::_malloc(log_length);
 
 	if (glIsShader(object)) glGetShaderInfoLog(object, log_length, nullptr, log);
 	else if (glIsProgram(object)) glGetProgramInfoLog(object, log_length, nullptr, log);
 
 	fprintf(stderr, "%s", log);
-	ie::_free(log);
+	candybox::_free(log);
 }
 
 static GLuint
@@ -239,7 +239,7 @@ struct GLRenderPoints
 	GLint m_colorAttribute;
 	GLint m_sizeAttribute;
 
-	ie::Scene::Camera* m_camera;
+	candybox::Camera* m_camera;
 };
 
 //
@@ -370,7 +370,7 @@ struct GLRenderLines
 	GLint m_vertexAttribute;
 	GLint m_colorAttribute;
 
-	ie::Scene::Camera* m_camera;
+	candybox::Camera* m_camera;
 };
 
 struct GLRenderTriangles
@@ -503,7 +503,7 @@ struct GLRenderTriangles
 	GLint m_vertexAttribute;
 	GLint m_colorAttribute;
 
-	ie::Scene::Camera* m_camera;
+	candybox::Camera* m_camera;
 };
 
 struct Float2
@@ -717,20 +717,20 @@ struct GLRenderRoundedTriangles
 	GLuint m_programId;
 	GLint m_projectionUniform;
 
-	ie::Scene::Camera* m_camera;
+	candybox::Camera* m_camera;
 };
 
-DebugDraw::DebugDraw(ie::Scene* scene) : m_scene(scene)
+DebugDraw::DebugDraw(candybox::Scene* scene) : m_scene(scene)
 {
 	// bind the camera to the scene's
 	assert(m_scene);
 	m_camera = &m_scene->getCamera();
 
-	m_points = static_cast<GLRenderPoints*>(ie::_malloc(sizeof(GLRenderPoints)));
-	m_lines = static_cast<GLRenderLines*>(ie::_malloc(sizeof(GLRenderLines)));
-	m_triangles = static_cast<GLRenderTriangles*>(ie::_malloc(sizeof(GLRenderTriangles)));
+	m_points = static_cast<GLRenderPoints*>(candybox::_malloc(sizeof(GLRenderPoints)));
+	m_lines = static_cast<GLRenderLines*>(candybox::_malloc(sizeof(GLRenderLines)));
+	m_triangles = static_cast<GLRenderTriangles*>(candybox::_malloc(sizeof(GLRenderTriangles)));
 	m_roundedTriangles =
-	    static_cast<GLRenderRoundedTriangles*>(ie::_malloc(sizeof(GLRenderRoundedTriangles)));
+	    static_cast<GLRenderRoundedTriangles*>(candybox::_malloc(sizeof(GLRenderRoundedTriangles)));
 	m_points->Create();
 	m_lines->Create();
 	m_triangles->Create();
@@ -745,16 +745,16 @@ DebugDraw::DebugDraw(ie::Scene* scene) : m_scene(scene)
 DebugDraw::~DebugDraw()
 {
 	m_points->Destroy();
-	ie::_free(m_points);
+	candybox::_free(m_points);
 
 	m_lines->Destroy();
-	ie::_free(m_lines);
+	candybox::_free(m_lines);
 
 	m_triangles->Destroy();
-	ie::_free(m_triangles);
+	candybox::_free(m_triangles);
 
 	m_roundedTriangles->Destroy();
-	ie::_free(m_roundedTriangles);
+	candybox::_free(m_roundedTriangles);
 }
 
 

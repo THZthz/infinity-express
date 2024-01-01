@@ -3,9 +3,9 @@
 
 TEST_CASE("Relational ops", "[relops]")
 {
-	ie::optional<int> o1{4};
-	ie::optional<int> o2{42};
-	ie::optional<int> o3{};
+	candybox::optional<int> o1{4};
+	candybox::optional<int> o2{42};
+	candybox::optional<int> o3{};
 
 	SECTION("self simple")
 	{
@@ -25,31 +25,31 @@ TEST_CASE("Relational ops", "[relops]")
 
 	SECTION("nullopt simple")
 	{
-		REQUIRE(!(o1 == ie::nullopt));
-		REQUIRE(!(ie::nullopt == o1));
-		REQUIRE(o1 != ie::nullopt);
-		REQUIRE(ie::nullopt != o1);
-		REQUIRE(!(o1 < ie::nullopt));
-		REQUIRE(ie::nullopt < o1);
-		REQUIRE(o1 > ie::nullopt);
-		REQUIRE(!(ie::nullopt > o1));
-		REQUIRE(!(o1 <= ie::nullopt));
-		REQUIRE(ie::nullopt <= o1);
-		REQUIRE(o1 >= ie::nullopt);
-		REQUIRE(!(ie::nullopt >= o1));
+		REQUIRE(!(o1 == candybox::nullopt));
+		REQUIRE(!(candybox::nullopt == o1));
+		REQUIRE(o1 != candybox::nullopt);
+		REQUIRE(candybox::nullopt != o1);
+		REQUIRE(!(o1 < candybox::nullopt));
+		REQUIRE(candybox::nullopt < o1);
+		REQUIRE(o1 > candybox::nullopt);
+		REQUIRE(!(candybox::nullopt > o1));
+		REQUIRE(!(o1 <= candybox::nullopt));
+		REQUIRE(candybox::nullopt <= o1);
+		REQUIRE(o1 >= candybox::nullopt);
+		REQUIRE(!(candybox::nullopt >= o1));
 
-		REQUIRE(o3 == ie::nullopt);
-		REQUIRE(ie::nullopt == o3);
-		REQUIRE(!(o3 != ie::nullopt));
-		REQUIRE(!(ie::nullopt != o3));
-		REQUIRE(!(o3 < ie::nullopt));
-		REQUIRE(!(ie::nullopt < o3));
-		REQUIRE(!(o3 > ie::nullopt));
-		REQUIRE(!(ie::nullopt > o3));
-		REQUIRE(o3 <= ie::nullopt);
-		REQUIRE(ie::nullopt <= o3);
-		REQUIRE(o3 >= ie::nullopt);
-		REQUIRE(ie::nullopt >= o3);
+		REQUIRE(o3 == candybox::nullopt);
+		REQUIRE(candybox::nullopt == o3);
+		REQUIRE(!(o3 != candybox::nullopt));
+		REQUIRE(!(candybox::nullopt != o3));
+		REQUIRE(!(o3 < candybox::nullopt));
+		REQUIRE(!(candybox::nullopt < o3));
+		REQUIRE(!(o3 > candybox::nullopt));
+		REQUIRE(!(candybox::nullopt > o3));
+		REQUIRE(o3 <= candybox::nullopt);
+		REQUIRE(candybox::nullopt <= o3);
+		REQUIRE(o3 >= candybox::nullopt);
+		REQUIRE(candybox::nullopt >= o3);
 	}
 
 	SECTION("with T simple")
@@ -81,8 +81,8 @@ TEST_CASE("Relational ops", "[relops]")
 		REQUIRE(4 >= o1);
 	}
 
-	ie::optional<std::string> o4{"hello"};
-	ie::optional<std::string> o5{"xyz"};
+	candybox::optional<std::string> o4{"hello"};
+	candybox::optional<std::string> o5{"xyz"};
 
 	SECTION("self complex")
 	{
@@ -102,31 +102,31 @@ TEST_CASE("Relational ops", "[relops]")
 
 	SECTION("nullopt complex")
 	{
-		REQUIRE(!(o4 == ie::nullopt));
-		REQUIRE(!(ie::nullopt == o4));
-		REQUIRE(o4 != ie::nullopt);
-		REQUIRE(ie::nullopt != o4);
-		REQUIRE(!(o4 < ie::nullopt));
-		REQUIRE(ie::nullopt < o4);
-		REQUIRE(o4 > ie::nullopt);
-		REQUIRE(!(ie::nullopt > o4));
-		REQUIRE(!(o4 <= ie::nullopt));
-		REQUIRE(ie::nullopt <= o4);
-		REQUIRE(o4 >= ie::nullopt);
-		REQUIRE(!(ie::nullopt >= o4));
+		REQUIRE(!(o4 == candybox::nullopt));
+		REQUIRE(!(candybox::nullopt == o4));
+		REQUIRE(o4 != candybox::nullopt);
+		REQUIRE(candybox::nullopt != o4);
+		REQUIRE(!(o4 < candybox::nullopt));
+		REQUIRE(candybox::nullopt < o4);
+		REQUIRE(o4 > candybox::nullopt);
+		REQUIRE(!(candybox::nullopt > o4));
+		REQUIRE(!(o4 <= candybox::nullopt));
+		REQUIRE(candybox::nullopt <= o4);
+		REQUIRE(o4 >= candybox::nullopt);
+		REQUIRE(!(candybox::nullopt >= o4));
 
-		REQUIRE(o3 == ie::nullopt);
-		REQUIRE(ie::nullopt == o3);
-		REQUIRE(!(o3 != ie::nullopt));
-		REQUIRE(!(ie::nullopt != o3));
-		REQUIRE(!(o3 < ie::nullopt));
-		REQUIRE(!(ie::nullopt < o3));
-		REQUIRE(!(o3 > ie::nullopt));
-		REQUIRE(!(ie::nullopt > o3));
-		REQUIRE(o3 <= ie::nullopt);
-		REQUIRE(ie::nullopt <= o3);
-		REQUIRE(o3 >= ie::nullopt);
-		REQUIRE(ie::nullopt >= o3);
+		REQUIRE(o3 == candybox::nullopt);
+		REQUIRE(candybox::nullopt == o3);
+		REQUIRE(!(o3 != candybox::nullopt));
+		REQUIRE(!(candybox::nullopt != o3));
+		REQUIRE(!(o3 < candybox::nullopt));
+		REQUIRE(!(candybox::nullopt < o3));
+		REQUIRE(!(o3 > candybox::nullopt));
+		REQUIRE(!(candybox::nullopt > o3));
+		REQUIRE(o3 <= candybox::nullopt);
+		REQUIRE(candybox::nullopt <= o3);
+		REQUIRE(o3 >= candybox::nullopt);
+		REQUIRE(candybox::nullopt >= o3);
 	}
 
 	SECTION("with T complex")

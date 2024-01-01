@@ -9,7 +9,7 @@
 //
 
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 //
@@ -24,7 +24,7 @@ public:
 	~X() { --instances; }
 
 private:
-	X(X const&);
+	X(X const &);
 };
 
 int X::instances = 0;
@@ -39,7 +39,7 @@ public:
 	~Y() { --instances; }
 
 private:
-	Y(Y const&);
+	Y(Y const &);
 };
 
 int Y::instances = 0;
@@ -60,7 +60,7 @@ public:
 	}
 
 private:
-	Z(Z const&);
+	Z(Z const &);
 };
 
 int Z::instances = 0;

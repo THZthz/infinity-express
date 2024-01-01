@@ -3,9 +3,9 @@
 
 TEST_CASE("Assignment value", "[assignment.value]")
 {
-	ie::optional<int> o1 = 42;
-	ie::optional<int> o2 = 12;
-	ie::optional<int> o3;
+	candybox::optional<int> o1 = 42;
+	candybox::optional<int> o2 = 12;
+	candybox::optional<int> o3;
 
 	o1 = o1;
 	REQUIRE(*o1 == 42);
@@ -19,13 +19,13 @@ TEST_CASE("Assignment value", "[assignment.value]")
 	o1 = 42;
 	REQUIRE(*o1 == 42);
 
-	o1 = ie::nullopt;
+	o1 = candybox::nullopt;
 	REQUIRE(!o1);
 
 	o1 = std::move(o2);
 	REQUIRE(*o1 == 12);
 
-	ie::optional<short> o4 = 42;
+	candybox::optional<short> o4 = 42;
 
 	o1 = o4;
 	REQUIRE(*o1 == 42);
@@ -40,9 +40,9 @@ TEST_CASE("Assignment reference", "[assignment.ref]")
 	auto i = 42;
 	auto j = 12;
 
-	ie::optional<int &> o1 = i;
-	ie::optional<int &> o2 = j;
-	ie::optional<int &> o3;
+	candybox::optional<int &> o1 = i;
+	candybox::optional<int &> o2 = j;
+	candybox::optional<int &> o3;
 
 	o1 = o1;
 	REQUIRE(*o1 == 42);
@@ -65,7 +65,7 @@ TEST_CASE("Assignment reference", "[assignment.ref]")
 	k = 12;
 	REQUIRE(*o1 == 12);
 
-	o1 = ie::nullopt;
+	o1 = candybox::nullopt;
 	REQUIRE(!o1);
 
 	o1 = std::move(o2);

@@ -13,8 +13,8 @@
 #	pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 #include "lightweight_test.hpp"
 
@@ -62,7 +62,7 @@ test()
 		BOOST_TEST(py.use_count() == 3);
 #endif
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("py->getX() failed");
 	}
@@ -112,7 +112,7 @@ createY()
 void
 test2()
 {
-	boost::shared_ptr<Y> pi(static_cast<impl2*>(0));
+	boost::shared_ptr<Y> pi(static_cast<impl2 *>(0));
 }
 
 //
@@ -132,7 +132,7 @@ test3()
 		BOOST_TEST(p == q);
 		BOOST_TEST(!(p < q) && !(q < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("shared_from_this( p.get() ) failed");
 	}
@@ -153,7 +153,7 @@ test3()
 		BOOST_TEST(p != r);
 		BOOST_TEST((p < r) || (r < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("shared_from_raw( &v2 ) failed");
 	}
@@ -165,7 +165,7 @@ test3()
 		BOOST_TEST(p == r);
 		BOOST_TEST(!(p < r) && !(r < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("shared_from_raw( p.get() ) threw bad_weak_ptr after *p = V()");
 	}

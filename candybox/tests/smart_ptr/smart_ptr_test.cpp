@@ -35,7 +35,7 @@
 #	pragma warn - 8092 // template argument passed to 'find' is not an iterator
 #endif
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 #include "lightweight_test.hpp"
 

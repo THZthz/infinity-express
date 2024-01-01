@@ -6,7 +6,7 @@ Distributed under the Boost Software License, Version 1.0.
 (http://www.boost.org/LICENSE_1_0.txt)
 */
 #include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 class type
 {

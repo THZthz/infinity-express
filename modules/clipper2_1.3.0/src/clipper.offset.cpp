@@ -366,7 +366,7 @@ void ClipperOffset::DoRound(const Path64& path, size_t j, size_t k, double angle
 	path_out.push_back(Point64(pt.x + offsetVec.x, pt.y + offsetVec.y));
 #endif
 	int steps = static_cast<int>(std::ceil(steps_per_rad_ * std::abs(angle))); // #448, #456
-	for (int i = 1; i < steps; ++i) // ie 1 less than steps
+	for (int i = 1; i < steps; ++i) // candybox 1 less than steps
 	{
 		offsetVec = PointD(offsetVec.x * step_cos_ - step_sin_ * offsetVec.y,
 			offsetVec.x * step_sin_ + offsetVec.y * step_cos_);
@@ -382,7 +382,7 @@ void ClipperOffset::DoRound(const Path64& path, size_t j, size_t k, double angle
 void ClipperOffset::OffsetPoint(Group& group, const Path64& path, size_t j, size_t k)
 {
 	// Let A = change in angle where edges join
-	// A == 0: ie no change in angle (flat join)
+	// A == 0: candybox no change in angle (flat join)
 	// A == PI: edges 'spike'
 	// sin(A) < 0: right turning
 	// cos(A) < 0: change in angle is more than 90 degree
@@ -639,7 +639,7 @@ void ClipperOffset::ExecuteInternal(double delta)
 	if (groups_.size() == 0) return;
 	solution.reserve(CalcSolutionCapacity());
 
-	if (std::abs(delta) < 0.5) // ie: offset is insignificant 
+	if (std::abs(delta) < 0.5) // candybox: offset is insignificant 
 	{
 		Paths64::size_type sol_size = 0;
 		for (const Group& group : groups_) sol_size += group.paths_in.size();

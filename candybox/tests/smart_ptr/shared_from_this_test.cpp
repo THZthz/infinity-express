@@ -22,8 +22,8 @@
 //
 
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 #include "lightweight_test.hpp"
 
@@ -71,7 +71,7 @@ test()
 		BOOST_TEST(py.use_count() == 3);
 #endif
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("py->getX() failed");
 	}
@@ -121,7 +121,7 @@ createY()
 void
 test2()
 {
-	boost::shared_ptr<Y> pi(static_cast<impl2*>(0));
+	boost::shared_ptr<Y> pi(static_cast<impl2 *>(0));
 }
 
 //
@@ -141,7 +141,7 @@ test3()
 		BOOST_TEST(p == q);
 		BOOST_TEST(!(p < q) && !(q < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("p->shared_from_this() failed");
 	}
@@ -153,7 +153,7 @@ test3()
 		boost::shared_ptr<V> r = v2.shared_from_this();
 		BOOST_ERROR("v2.shared_from_this() failed to throw");
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 	}
 
@@ -164,7 +164,7 @@ test3()
 		BOOST_TEST(p == r);
 		BOOST_TEST(!(p < r) && !(r < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("p->shared_from_this() threw bad_weak_ptr after *p = V()");
 	}

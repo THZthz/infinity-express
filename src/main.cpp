@@ -17,22 +17,20 @@
 #include "./vg_test/demo.hpp"
 
 // implements nanovg
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 //#define NANOVG_GLES2 1
 #define NANOVG_GL3 1
 #define NANOVG_GL_IMPLEMENTATION
-#include "candybox/VG_gl.hpp"
+#include "candybox/vg/VG_gl.hpp"
 #define NANOVG_GLU_IMPLEMENTATION
-#include "candybox/VG_gl_utils.hpp"
+#include "candybox/vg/VG_gl_utils.hpp"
 //#define NVGSWU_GLES2
 #define NVGSWU_GL3
 #define NANOVG_SW_IMPLEMENTATION
-#include "candybox/VG_sw.hpp"
-#include "candybox/VG_sw_utils.hpp"
+#include "candybox/vg/VG_sw.hpp"
+#include "candybox/vg/VG_sw_utils.hpp"
 
-#include "candybox/ref_ptr.hpp"
-
-#include "imgui/imgui.h"
+#include <candybox/imgui/imgui.h>
 
 int
 main()
@@ -322,21 +320,21 @@ App::render()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	//	glClear(GL_COLOR_BUFFER_BIT);
 
-		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
-		nvgSave(m_vg);
-
-		double xd, yd;
-		glfwGetCursorPos(m_window, &xd, &yd);
-		glm::vec2 pw =
-		    m_camera.convertScreenToWorld({float(xd) / m_windowScale, float(yd) / m_windowScale});
-		nvgBeginPath(m_vg);
-		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
-		nvgCircle(m_vg, pw.x, pw.y, 3 / m_camera.getZoom());
-		nvgFillColor(m_vg, nvgRGBui((uint32_t)ie::Colors::RED));
-		nvgFill(m_vg);
-
-		nvgRestore(m_vg);
-		nvgEndFrame(m_vg);
+//		nvgBeginFrame(m_vg, (float)m_winWidth, (float)m_winHeight, m_devicePixelRatio);
+//		nvgSave(m_vg);
+//
+//		double xd, yd;
+//		glfwGetCursorPos(m_window, &xd, &yd);
+//		glm::vec2 pw =
+//		    m_camera.convertScreenToWorld({float(xd) / m_windowScale, float(yd) / m_windowScale});
+//		nvgBeginPath(m_vg);
+//		nvgRoundedRect(m_vg, 100, 100, 100, 200, 20);
+//		nvgCircle(m_vg, pw.x, pw.y, 3 / m_camera.getZoom());
+//		nvgFillColor(m_vg, nvgRGBui((uint32_t)candybox::Colors::RED));
+//		nvgFill(m_vg);
+//
+//		nvgRestore(m_vg);
+//		nvgEndFrame(m_vg);
 
 				m_physicsWorld.debugRender();
 
@@ -392,9 +390,9 @@ App::renderUI()
 }
 
 ShaderCRT::ShaderCRT()
-    : ie::Shader(
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/crt.vert",
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/crt.frag",
+    : candybox::Shader(
+          "./resources/shaders/crt.vert",
+          "./resources/shaders/crt.frag",
           true)
 {
 	// set up vertex data (and buffer(s)) and configure vertex attributes
@@ -441,9 +439,9 @@ ShaderCRT::use(float frameWidth, float frameHeight) const
 }
 
 ShaderLight::ShaderLight()
-    : ie::Shader(
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/light.vert",
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/light.frag",
+    : candybox::Shader(
+          "./resources/shaders/light.vert",
+          "./resources/shaders/light.frag",
           true)
 {
 	glGenBuffers(1, &m_vertexBuffer);
@@ -475,9 +473,9 @@ ShaderLight::use()
 }
 
 ShaderShadow::ShaderShadow()
-    : ie::Shader(
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/shadow.vert",
-          INFINITY_EXPRESS_WORKING_DIR "/resources/shaders/shadow.frag",
+    : candybox::Shader(
+          "./resources/shaders/shadow.vert",
+          "./resources/shaders/shadow.frag",
           true)
 {
 	glGenBuffers(1, &m_vertexBuffer);
@@ -514,7 +512,7 @@ ShaderShadow::use()
 #include "./vg_test/demo.hpp"
 #include "./vg_test/perf.hpp"
 #include "./vg_test/tests.cpp"
-#include "candybox/VG_vtex.hpp"
+#include "candybox/vg/VG_vtex.hpp"
 
 int blowup = 0;
 int screenshot = 0;

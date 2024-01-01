@@ -1,5 +1,5 @@
-#ifndef IE_MAIN_SCENE_HPP
-#define IE_MAIN_SCENE_HPP
+#ifndef CANDYBOX_MAIN_SCENE_HPP__
+#define CANDYBOX_MAIN_SCENE_HPP__
 
 #include <memory>
 #include "World.hpp"
@@ -10,10 +10,9 @@
 class MainWorld : public PhysicsWorld
 {
 public:
-	explicit MainWorld(ie::Scene *scene) : PhysicsWorld(scene)
+	explicit MainWorld(candybox::Scene *scene) : PhysicsWorld(scene)
 	{
 		printf("Infinity Express v%s\n", INFINITY_EXPRESS_VERSION_STR);
-		printf("\tworking directory %s\n", INFINITY_EXPRESS_WORKING_DIR);
 		printf("\tc++ standard version: %ld\n", __cplusplus);
 		printf("\tOpenGL %s, GLSL %s\n", glGetString(GL_VERSION),
 		       glGetString(GL_SHADING_LANGUAGE_VERSION));
@@ -35,14 +34,14 @@ private:
 	float m_speed = 0;
 };
 
-class ShaderCRT : public ie::Shader
+class ShaderCRT : public candybox::Shader
 {
 public:
 	ShaderCRT();
 
 	~ShaderCRT()
 	{
-		ie::Shader::~Shader();
+		candybox::Shader::~Shader();
 		glDeleteVertexArrays(1, &m_vertexArray);
 		glDeleteBuffers(1, &m_vertexBuffer);
 		glDeleteBuffers(1, &m_elementBuffer);
@@ -55,7 +54,7 @@ private:
 	unsigned int m_vertexBuffer = 0, m_vertexArray = 0, m_elementBuffer = 0;
 };
 
-class ShaderLight : public ie::Shader
+class ShaderLight : public candybox::Shader
 {
 public:
 	ShaderLight();
@@ -71,7 +70,7 @@ private:
 	GLint m_matrixLoc = 0, m_colorLoc = 0;
 };
 
-class ShaderShadow : public ie::Shader
+class ShaderShadow : public candybox::Shader
 {
 public:
 	ShaderShadow();
@@ -88,10 +87,10 @@ private:
 };
 
 
-class App : public ie::Scene
+class App : public candybox::Scene
 {
 public:
-	App() : ie::Scene("Demo", 800, 800), m_physicsWorld(this)
+	App() : candybox::Scene("Demo", 800, 800), m_physicsWorld(this)
 	{
 		m_camera.setSize(m_winWidth, m_winHeight);
 	}
@@ -162,7 +161,7 @@ private:
 private:
 	bool m_isRightMousePressed = false;
 	glm::vec2 m_prevPos{0, 0};
-
+	
 	ShaderCRT m_shaderCRT;
 	ShaderLight m_shaderLight;
 	ShaderShadow m_shaderShadow;
@@ -173,4 +172,4 @@ private:
 	bool m_enableCRT = false;
 };
 
-#endif // IE_MAIN_SCENE_HPP
+#endif // CANDYBOX_MAIN_SCENE_HPP__

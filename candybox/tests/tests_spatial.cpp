@@ -136,7 +136,7 @@ template <typename T> struct Box2
 {
 	glm::vec<2, T> l, u;
 
-	explicit operator ie::TBox<int, 2>() const { return ie::TBox<int, 2>(l, u); }
+	explicit operator candybox::TBox<int, 2>() const { return candybox::TBox<int, 2>(l, u); }
 
 	bool operator==(const Box2& other) const
 	{
@@ -156,14 +156,14 @@ operator<<(std::ostream& stream, const Box2<T>& bbox)
 
 struct Object
 {
-	ie::TBox<int, 2> bbox;
+	candybox::TBox<int, 2> bbox;
 	std::string name;
 
 	// needed to avoid adding duplicates
 	bool operator==(const Object& other) const { return name == other.name; }
 };
 
-typedef ie::RTree<int, Box2<int>, 2, 4, 2> rtree_box_t;
+typedef candybox::RTree<int, Box2<int>, 2, 4, 2> rtree_box_t;
 
 const Box2<int> kBoxes[] = {
     {{5, 2}, {16, 7}},      {{1, 1}, {2, 2}},      {{26, 24}, {44, 28}},
@@ -198,13 +198,13 @@ test_rtree_create()
 		std::stringstream ss;
 		ss << "object" << i++;
 		obj.name = ss.str();
-		obj.bbox = (ie::TBox<int, 2>)bbox;
+		obj.bbox = (candybox::TBox<int, 2>)bbox;
 
 		// MESSAGE(obj.name << " " << obj.bbox << "\n");
 	}
 
 	// create a quad tree with the given box
-	ie::TBox<int, 2> bbox(0);
+	candybox::TBox<int, 2> bbox(0);
 	Point<int> point;
 	point.set(0, 0);
 	bbox.extend(point.data);
@@ -266,11 +266,11 @@ test_rtree_create2()
 	removed = rtree.remove(box);
 	assert(!removed);
 	results.clear();
-	rtree.query(ie::contains<2>(box.l, box.u), std::back_inserter(results));
+	rtree.query(candybox::contains<2>(box.l, box.u), std::back_inserter(results));
 	assert(results.empty());
 
 	box = {{0, 0}, {20, 50}};
-	rtree.query(ie::contains<2>(box.l, box.u), std::back_inserter(results));
+	rtree.query(candybox::contains<2>(box.l, box.u), std::back_inserter(results));
 	assert(!results.empty());
 	assert(results.size() == 7);
 }
@@ -280,7 +280,7 @@ test_query_for_results_within_the_search_box()
 {
 	Box2<int> searchBox = {{0, 0}, {8, 31}};
 	std::vector<Box2<int>> results;
-	rtree.query(ie::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(results));
+	rtree.query(candybox::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(results));
 
 	std::stringstream resultsStream;
 	for (const auto& res : results) resultsStream << res << ", ";
@@ -292,7 +292,7 @@ test_query_for_results_within_the_search_box()
 	    "4, ");
 
 	results.clear();
-	rtree.query(ie::contains<2>(searchBox.l, searchBox.u), std::back_inserter(results));
+	rtree.query(candybox::contains<2>(searchBox.l, searchBox.u), std::back_inserter(results));
 	resultsStream.clear();
 
 	for (const auto& res : results) resultsStream << res << ", ";
@@ -377,12 +377,12 @@ test_ray_query()
 void
 test_tree_traversal()
 {
-	ie::RTree<int, Object, 2, 4, 2, Indexable> rtree;
+	candybox::RTree<int, Object, 2, 4, 2, Indexable> rtree;
 	rtree.insert(objects.begin(), objects.end());
 
 	// SUBCASE("leaf traversal of the tree")
 	{
-		ie::	RTree<int, Object, 2, 4, 2, Indexable> rtree;
+		candybox::RTree<int, Object, 2, 4, 2, Indexable> rtree;
 		rtree.insert(objects.begin(), objects.end());
 
 		std::stringstream resultsStream;
@@ -414,7 +414,7 @@ test_tree_traversal()
 		for (auto it = rtree.dbegin(); it.valid(); it.next())
 		{
 			std::string parentName;
-			ie::TBox<int, 2> parentBBox;
+			candybox::TBox<int, 2> parentBBox;
 
 			// traverse current children of the parent node(i.e. upper level)
 			for (auto nodeIt = it.child(); nodeIt.valid(); nodeIt.next())
@@ -449,7 +449,7 @@ test_tree_traversal()
 		std::vector<Object> results;
 		Box2<int> searchBox = {{4, 14}, {8, 31}};
 		rtree.hierachical_query(
-		    ie::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(results));
+		    candybox::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(results));
 		std::stringstream resultsStream;
 		for (const auto& res : results) resultsStream << res.name << " | ";
 
@@ -460,7 +460,7 @@ test_tree_traversal()
 void
 test_nearest_neighbor_query()
 {
-	ie::	RTree<int, Object, 2, 4, 2, Indexable> rtree;
+	candybox::RTree<int, Object, 2, 4, 2, Indexable> rtree;
 	rtree.insert(objects.begin(), objects.end());
 	Point<int> p = {0, 0};
 	// SUBCASE("nearest neighbor radius query")
@@ -509,7 +509,7 @@ test_custom_indexable_for_array_and_indices_as_values()
 	ArrayIndexable indexable(boxes);
 
 	typedef uint32_t IndexType;
-	ie::	RTree<int, IndexType, 2, 4, 2, ArrayIndexable> rtree(indexable);
+	candybox::RTree<int, IndexType, 2, 4, 2, ArrayIndexable> rtree(indexable);
 
 	std::vector<uint32_t> indices(boxes.size());
 	std::iota(indices.begin(), indices.end(), 0);
@@ -517,7 +517,7 @@ test_custom_indexable_for_array_and_indices_as_values()
 
 	indices.clear();
 	Box2<int> searchBox = {{0, 0}, {8, 31}};
-	rtree.query(	ie::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(indices));
+	rtree.query(candybox::intersects<2>(searchBox.l, searchBox.u), std::back_inserter(indices));
 	std::stringstream resultsStream;
 	for (auto index : indices)
 		resultsStream
@@ -547,13 +547,13 @@ test_spatial_custom_allocator()
 	};
 
 	const int kMaxKeysPerNode = 4;
-	const int kVolumeMode =	ie::detail:: eSphericalVolume;
+	const int kVolumeMode = candybox::detail::eSphericalVolume;
 
-	typedef ie::TBox<int, 2> tree_bbox_type;
-	typedef 	ie::detail::Node<uint32_t, tree_bbox_type, kMaxKeysPerNode> tree_node_type;
+	typedef candybox::TBox<int, 2> tree_bbox_type;
+	typedef candybox::detail::Node<uint32_t, tree_bbox_type, kMaxKeysPerNode> tree_node_type;
 	typedef tree_allocator<tree_node_type> tree_allocator_type;
 
-	typedef 	ie::RTree<
+	typedef candybox::RTree<
 	    int, uint32_t, 2, kMaxKeysPerNode, kMaxKeysPerNode / 2, ArrayIndexable, kVolumeMode,
 	    double, tree_allocator_type>
 	    CustomTree;
@@ -609,8 +609,8 @@ test_spatial_count()
 {
 	glm::vec<2, int> min{0, 0};
 	glm::vec<2, int> max{1, 1};
-	ie::TBox<int, 2> bbox{min, max};
-	ie::QuadTree<int, Box2<int>> qtree{bbox.l, bbox.u};
+	candybox::TBox<int, 2> bbox{min, max};
+	candybox::QuadTree<int, Box2<int>> qtree{bbox.l, bbox.u};
 	Box2<int> box{{0, 0}, {1, 1}};
 
 	// SUBCASE("after value insert")
@@ -622,19 +622,19 @@ test_spatial_count()
 		}
 	}
 
-//	// SUBCASE("after iterator insert") // FIXME
-//	{
-//		std::array<Box2<int>, 2> boxes{box, box};
-//
-//		int expected_count{0};
-//		for (int inserts{0}; inserts < 2; ++inserts)
-//		{
-////			CAPTURE(inserts);
-//			qtree.insert(std::begin(boxes) + inserts, std::begin(boxes) + inserts + 1);
-//			expected_count += inserts;
-//			assert(qtree.count() == expected_count);
-//		}
-//	}
+	//	// SUBCASE("after iterator insert") // FIXME
+	//	{
+	//		std::array<Box2<int>, 2> boxes{box, box};
+	//
+	//		int expected_count{0};
+	//		for (int inserts{0}; inserts < 2; ++inserts)
+	//		{
+	////			CAPTURE(inserts);
+	//			qtree.insert(std::begin(boxes) + inserts, std::begin(boxes) + inserts + 1);
+	//			expected_count += inserts;
+	//			assert(qtree.count() == expected_count);
+	//		}
+	//	}
 }
 
 void
@@ -642,8 +642,8 @@ test_spatial_query()
 {
 	glm::vec<2, int> min{-2, -1};
 	glm::vec<2, int> max{9, 10};
-	ie::TBox<int, 2> bbox{min, max};
-	ie::QuadTree<int, Box2<int>> qtree{bbox.l, bbox.u};
+	candybox::TBox<int, 2> bbox{min, max};
+	candybox::QuadTree<int, Box2<int>> qtree{bbox.l, bbox.u};
 
 	// SUBCASE("with empty tree")
 	{
@@ -657,7 +657,7 @@ test_spatial_query()
 	{
 		glm::vec<2, int> corner_min{-1, 0};
 		glm::vec<2, int> corner_max{0, 1};
-		ie::TBox<int, 2> qbox{corner_min, corner_max};
+		candybox::TBox<int, 2> qbox{corner_min, corner_max};
 		assert(qtree.query(intersects(qbox)) == true);
 	}
 
@@ -665,7 +665,7 @@ test_spatial_query()
 	{
 		glm::vec<2, int> corner_min{5, 6};
 		glm::vec<2, int> corner_max{6, 7};
-		ie::TBox<int, 2> qbox{corner_min, corner_max};
+		candybox::TBox<int, 2> qbox{corner_min, corner_max};
 		assert(qtree.query(intersects(qbox)) == true);
 	}
 
@@ -677,8 +677,8 @@ test_spatial_query()
 
 		for (const auto query : queries)
 		{
-//			CAPTURE(query);
-			ie::TBox<int, 2> qbox{query};
+			//			CAPTURE(query);
+			candybox::TBox<int, 2> qbox{query};
 			assert(qtree.query(intersects(qbox)) == false);
 		}
 	}
@@ -688,14 +688,14 @@ void
 test_spatial_insert()
 {
 	// create a quad tree with the given box
-	ie::TBox<int, 2> bbox(0);
+	candybox::TBox<int, 2> bbox(0);
 	Point<int> point;
 	point.set(0, 0);
 	bbox.extend(point.data);
 	point.set(256, 128);
 	bbox.extend(point.data);
 
-	typedef ie::QuadTree<int, Box2<int>, 2> qtree_box_t;
+	typedef candybox::QuadTree<int, Box2<int>, 2> qtree_box_t;
 	qtree_box_t qtree(bbox.l, bbox.u);
 
 	assert(qtree.count() == 0u);
@@ -720,11 +720,11 @@ test_spatial_insert()
 		removed = qtree.remove(box);
 		assert(!removed);
 		std::vector<Box2<int>> results;
-		qtree.query(ie::contains<2>(box.l, box.u), std::back_inserter(results));
+		qtree.query(candybox::contains<2>(box.l, box.u), std::back_inserter(results));
 		assert(results.empty());
 
 		box = {{0, 0}, {20, 50}};
-		qtree.query(ie::contains<2>(box.l, box.u), std::back_inserter(results));
+		qtree.query(candybox::contains<2>(box.l, box.u), std::back_inserter(results));
 		assert(!results.empty());
 		assert(results.size() == 7);
 	}
@@ -764,8 +764,9 @@ test_spatial()
 	test_spatial_insert();
 }
 
-int main()
+int
+main()
 {
-	    test_spatial();
+	test_spatial();
 	return 0;
 }

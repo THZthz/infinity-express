@@ -161,7 +161,7 @@ void CellAutomata::generate()
 	}
 
 	print();
-	auto map = static_cast<char *>(ie::_malloc(sizeof(char) * m_rows * m_cols));
+	auto map = static_cast<char *>(candybox::_malloc(sizeof(char) * m_rows * m_cols));
 	for (int y = 0; y < m_rows; y++)
 		for (int x = 0; x < m_cols; x++)
 		{
@@ -176,7 +176,7 @@ void CellAutomata::generate()
 		printf("\n");
 	}
 	printf("\n");
-	ie::_free(map);
+	candybox::_free(map);
 }
 
 void CellAutomata::print() const

@@ -298,7 +298,7 @@ namespace Clipper2Lib {
 
 	//PolyTree: is intended as a READ-ONLY data structure for CLOSED paths returned
 	//by clipping operations. While this structure is more complex than the
-	//alternative Paths structure, it does preserve path 'ownership' - ie those
+	//alternative Paths structure, it does preserve path 'ownership' - candybox those
 	//paths that contain (or own) other paths. This will be useful to some users.
 
 	class PolyPath {

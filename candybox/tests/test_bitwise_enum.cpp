@@ -3,7 +3,7 @@
 
 namespace {
 
-using namespace ie::bitwise_enum;
+using namespace candybox::bitwise_enum;
 
 enum E1
 {

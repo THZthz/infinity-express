@@ -9,8 +9,8 @@
 // http://www.boost.org/LICENSE_1_0.txt
 
 #include "lightweight_test.hpp"
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 #if defined(BOOST_NO_CXX11_RVALUE_REFERENCES)
 

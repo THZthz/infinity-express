@@ -6,8 +6,8 @@
 // Distributed under the Boost Software License, Version 1.0.
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 //
@@ -32,7 +32,7 @@ public:
 };
 
 void
-null_deleter(void const*)
+null_deleter(void const *)
 {
 }
 
@@ -48,7 +48,7 @@ main()
 		BOOST_TEST_EQ(p, q);
 		BOOST_TEST(!(p < q) && !(q < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("p->shared_from_this() failed");
 	}
@@ -60,7 +60,7 @@ main()
 		boost::shared_ptr<Z> q = v2.shared_from_this();
 		BOOST_ERROR("v2.shared_from_this() failed to throw");
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 	}
 
@@ -73,7 +73,7 @@ main()
 		BOOST_TEST_EQ(p, q);
 		BOOST_TEST(!(p < q) && !(q < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("p->shared_from_this() threw bad_weak_ptr after *p = Z()");
 	}
@@ -89,7 +89,7 @@ main()
 		BOOST_TEST_EQ(p, q);
 		BOOST_TEST(!(p < q) && !(q < p));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("p->shared_from_this() failed");
 	}

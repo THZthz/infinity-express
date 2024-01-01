@@ -1,7 +1,7 @@
-#ifndef IE_WORLD_HPP
-#define IE_WORLD_HPP
+#ifndef CANDYBOX_WORLD_HPP__
+#define CANDYBOX_WORLD_HPP__
 
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 #include "candybox/TaskScheduler.hpp"
 #include "candybox/Scene.hpp"
 #include "DebugDraw.hpp"
@@ -14,7 +14,7 @@
 class PhysicsWorld
 {
 public:
-	explicit PhysicsWorld(ie::Scene* scene) : m_scene(scene), m_debugDraw(scene)
+	explicit PhysicsWorld(candybox::Scene* scene) : m_scene(scene), m_debugDraw(scene)
 	{
 		m_worldDebugDrawConfig = {
 		    handleDrawPolygon,
@@ -44,7 +44,7 @@ public:
 
 	virtual void initialize()
 	{
-		uint32_t maxThreads = std::min(8u, ie::GetNumHardwareThreads());
+		uint32_t maxThreads = std::min(8u, candybox::GetNumHardwareThreads());
 		m_scheduler.Initialize(maxThreads);
 		m_taskCount = 0;
 
@@ -101,15 +101,16 @@ public:
 		if (timeStep > 0.0f) { ++m_stepCount; }
 
 		// Track maximum profile times
+		using namespace candybox;
 		b2Profile p = b2World_GetProfile(m_worldId);
-		m_maxProfile.step = ie::Max(m_maxProfile.step, p.step);
-		m_maxProfile.pairs = ie::Max(m_maxProfile.pairs, p.pairs);
-		m_maxProfile.collide = ie::Max(m_maxProfile.collide, p.collide);
-		m_maxProfile.solve = ie::Max(m_maxProfile.solve, p.solve);
-		m_maxProfile.buildIslands = ie::Max(m_maxProfile.buildIslands, p.buildIslands);
-		m_maxProfile.solveIslands = ie::Max(m_maxProfile.solveIslands, p.solveIslands);
-		m_maxProfile.broadphase = ie::Max(m_maxProfile.broadphase, p.broadphase);
-		m_maxProfile.continuous = ie::Max(m_maxProfile.continuous, p.continuous);
+		m_maxProfile.step = m::max(m_maxProfile.step, p.step);
+		m_maxProfile.pairs = m::max(m_maxProfile.pairs, p.pairs);
+		m_maxProfile.collide = m::max(m_maxProfile.collide, p.collide);
+		m_maxProfile.solve = m::max(m_maxProfile.solve, p.solve);
+		m_maxProfile.buildIslands = m::max(m_maxProfile.buildIslands, p.buildIslands);
+		m_maxProfile.solveIslands = m::max(m_maxProfile.solveIslands, p.solveIslands);
+		m_maxProfile.broadphase = m::max(m_maxProfile.broadphase, p.broadphase);
+		m_maxProfile.continuous = m::max(m_maxProfile.continuous, p.continuous);
 
 		m_totalProfile.step += p.step;
 		m_totalProfile.pairs += p.pairs;
@@ -123,12 +124,12 @@ public:
 
 	/*--------------------------------------------------------------------------------------*/
 private:
-	class Task : public ie::ITaskSet
+	class Task : public candybox::ITaskSet
 	{
 	public:
 		Task() = default;
 
-		void ExecuteRange(ie::TaskSetPartition range, uint32_t threadIndex) override
+		void ExecuteRange(candybox::TaskSetPartition range, uint32_t threadIndex) override
 		{
 			m_task((int32_t)range.start, (int32_t)range.end, threadIndex, m_taskContext);
 		}
@@ -176,7 +177,7 @@ private:
 	}
 
 	static constexpr int32_t maxTasks = 1024;
-	ie::TaskScheduler m_scheduler;
+	candybox::TaskScheduler m_scheduler;
 	Task m_tasks[maxTasks];
 	int32_t m_taskCount = 0;
 
@@ -224,8 +225,8 @@ public:
 				// Make a small box.
 				b2AABB box;
 				b2Vec2 d = {0.001f, 0.001f};
-				box.lowerBound = ie::SubV(pw, d);
-				box.upperBound = ie::AddV(pw, d);
+				box.lowerBound = candybox::m::subv(pw, d);
+				box.upperBound = candybox::m::subv(pw, d);
 
 				// Query the world for overlapping shapes.
 				QueryContext queryContext = {pw, b2_nullBodyId};
@@ -371,7 +372,7 @@ protected:
 	DebugDraw m_debugDraw;
 	b2DebugDraw m_worldDebugDrawConfig{};
 
-	ie::Scene* m_scene;
+	candybox::Scene* m_scene;
 };
 
-#endif // IE_WORLD_HPP
+#endif // CANDYBOX_WORLD_HPP__

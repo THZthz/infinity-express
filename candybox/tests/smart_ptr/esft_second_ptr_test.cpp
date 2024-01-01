@@ -12,8 +12,8 @@
 //
 
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 //
@@ -23,7 +23,7 @@ class X : public boost::enable_shared_from_this<X>
 };
 
 void
-null_deleter(void const*)
+null_deleter(void const *)
 {
 }
 
@@ -44,7 +44,7 @@ main()
 		BOOST_TEST(px == qx);
 		BOOST_TEST(!(px < qx) && !(qx < px));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("px->shared_from_this() failed");
 	}

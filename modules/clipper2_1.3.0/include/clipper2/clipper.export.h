@@ -3,7 +3,7 @@
 * Date      :  26 November 2023                                                *
 * Website   :  http://www.angusj.com                                           *
 * Copyright :  Angus Johnson 2010-2023                                         *
-* Purpose   :  This module exports the Clipper2 Library (ie DLL/so)            *
+* Purpose   :  This module exports the Clipper2 Library (candybox DLL/so)            *
 * License   :  http://www.boost.org/LICENSE_1_0.txt                            *
 *******************************************************************************/
 
@@ -43,14 +43,14 @@ _______________________________
 
 CPolytree64 and CPolytreeD:
 These are also arrays consisting of CPolyPath structures that represent 
-individual paths in a tree structure. However, the very first (ie top)
+individual paths in a tree structure. However, the very first (candybox top)
 CPolyPath is just the tree container that won't have a path. And because
 of that, its structure will be very slightly different from the remaining
 CPolyPath. This difference will be discussed below.
 
 CPolyPath64 and CPolyPathD:
 These are simple arrays consisting of a series of path coordinates followed 
-by any number of child (ie nested) CPolyPath. Preceeding these are two values 
+by any number of child (candybox nested) CPolyPath. Preceeding these are two values 
 indicating the length of the path (N) and the number of child CPolyPath (C).
 ____________________________________________________________
 |counter|coord1|coord2|...|coordN| child1|child2|...|childC|

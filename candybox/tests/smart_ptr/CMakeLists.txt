@@ -19,7 +19,7 @@ foreach (source_file ${TEST_SOURCES})
     # common cases
     message(STATUS "adding ${name} : ${source_file}")
     add_executable(${name} ${source_file})
-    target_include_directories(${name} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../include/utils)
+    target_include_directories(${name} PRIVATE ../../../ ${CMAKE_CURRENT_SOURCE_DIR}/../../include/utils)
     add_test(${name} ${name})
     set_tests_properties(${name} PROPERTIES TIMEOUT 30)
 endforeach ()

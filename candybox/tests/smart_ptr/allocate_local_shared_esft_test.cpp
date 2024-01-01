@@ -18,7 +18,7 @@ main()
 #else
 
 #	include "lightweight_test.hpp"
-#	include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #	include <memory>
 
 class X : public boost::enable_shared_from_this<X>

@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 
 // timer query support
 #ifndef GL_ARB_timer_query

@@ -10,8 +10,8 @@
 //
 
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 //
@@ -34,7 +34,7 @@ main()
 		BOOST_TEST(px == qx);
 		BOOST_TEST(!(px < qx) && !(qx < px));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("shared_from_this( px.get() ) failed");
 	}
@@ -48,7 +48,7 @@ main()
 		BOOST_TEST(px2 == qx2);
 		BOOST_TEST(!(px2 < qx2) && !(qx2 < px2));
 	}
-	catch (boost::bad_weak_ptr const&)
+	catch (boost::bad_weak_ptr const &)
 	{
 		BOOST_ERROR("shared_from_this( px2.get() ) failed");
 	}

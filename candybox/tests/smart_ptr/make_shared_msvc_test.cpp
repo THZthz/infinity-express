@@ -12,7 +12,7 @@ template <class T> struct value
 {
 };
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 int
 main()

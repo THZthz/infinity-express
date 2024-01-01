@@ -10,9 +10,9 @@ struct move_detector
 
 TEST_CASE("Observers", "[observers]")
 {
-	ie::optional<int> o1 = 42;
-	ie::optional<int> o2;
-	const ie::optional<int> o3 = 42;
+	candybox::optional<int> o1 = 42;
+	candybox::optional<int> o2;
+	const candybox::optional<int> o3 = 42;
 
 	REQUIRE(*o1 == 42);
 	REQUIRE(*o1 == o1.value());
@@ -30,7 +30,7 @@ TEST_CASE("Observers", "[observers]")
 	REQUIRE(success);
 #endif
 
-	ie::optional<move_detector> o4{ie::in_place};
+	candybox::optional<move_detector> o4{candybox::in_place};
 	move_detector o5 = std::move(o4).value();
 	REQUIRE(o4->been_moved);
 	REQUIRE(!o5.been_moved);

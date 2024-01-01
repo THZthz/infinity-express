@@ -10,7 +10,7 @@
 
 
 
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #include "lightweight_test.hpp"
 
 struct X : public boost::enable_shared_from_this<X>

@@ -17,10 +17,12 @@ x(int& i)
 
 TEST_CASE("issue 14")
 {
-	ie::optional<foo> f = foo{};
+	candybox::optional<foo> f = foo{};
 	auto v = f.map(&foo::v).map(x);
-	static_assert(std::is_same<decltype(v), ie::optional<int&>>::value, "Must return a "
-	                                                                    "reference");
+	static_assert(
+	    std::is_same<decltype(v), candybox::optional<int&>>::value,
+	    "Must return a "
+	    "reference");
 	REQUIRE(f->i == 42);
 	REQUIRE(*v == 42);
 	REQUIRE((&f->i) == (&*v));
@@ -38,7 +40,7 @@ struct fail_on_copy_self
 
 TEST_CASE("issue 15")
 {
-	ie::optional<fail_on_copy_self> o = fail_on_copy_self(42);
+	candybox::optional<fail_on_copy_self> o = fail_on_copy_self(42);
 
 	o = o;
 	REQUIRE(o->value == 42);
@@ -48,7 +50,7 @@ TEST_CASE("issue 33")
 {
 	int i = 0;
 	int j = 0;
-	ie::optional<int&> a = i;
+	candybox::optional<int&> a = i;
 	a.emplace(j);
 	*a = 42;
 	REQUIRE(j == 42);

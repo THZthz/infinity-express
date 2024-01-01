@@ -30,20 +30,7 @@ option(IE_PROFILE "Turn ON to use Tracy to profile library and other." OFF)
 option(IE_STRICT_CODE "" OFF)
 
 # -------------------------------------------------------------------------------
-include(FetchContent)
-macro(FETCH name src commit)
-    FetchContent_Declare(
-            ${name}
-            GIT_REPOSITORY ${src}
-            GIT_TAG ${commit}
-            GIT_SHALLOW TRUE
-            GIT_PROGRESS TRUE
-    )
-    FetchContent_MakeAvailable(${name})
-endmacro()
-
 # third party libraries.
-add_subdirectory(modules/catch2)
 add_subdirectory(modules/predicates) # predicates (libigl).
 #fetch(sfml https://github.com/SFML/SFML.git 2.5.1)
 #fetch(box2d https://github.com/erincatto/box2d.git v2.4.1)
@@ -91,16 +78,13 @@ set(IE_SOURCES
         #        modules/clipper2_1.3.0/src/clipper.engine.cpp
         #        modules/clipper2_1.3.0/src/clipper.offset.cpp
         #        modules/clipper2_1.3.0/src/clipper.rectclip.cpp
-)
+        )
 add_executable(${IE_EXE} ${IE_INCLUDES} ${IE_SOURCES})
 target_include_directories(${IE_EXE} PRIVATE include modules)
 target_include_directories(${IE_EXE} PRIVATE
         modules/libtess2/Include)
 target_link_libraries(${IE_EXE} PUBLIC predicates box2d candybox)
 #target_link_libraries(${IE_EXE} PRIVATE boost)
-
-target_compile_definitions(${IE_EXE} PRIVATE -DINFINITY_EXPRESS_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\")
-message(NOTICE "Defined INFINITY_EXPRESS_WORKING_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 # set warning level
 if (IE_STRICT_CODE)
@@ -135,29 +119,32 @@ if (CMAKE_USE_PTHREADS_INIT)
 endif ()
 
 # -------------------------------------------------------------------------------
-#find_package(PythonInterp REQUIRED) # find python interpreter
-## add command to create the header and source files
-#add_custom_command(
-#        OUTPUT
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.c"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.h"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/glcorearb.h"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/khrplatform.h"
-#        COMMAND python3 ${CMAKE_CURRENT_SOURCE_DIR}/tools/gl3w_gen.py
-#        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gl3w_gen.py
-#        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/
-#)
-## add pseudo target that depends on the generated files
-#add_custom_target(
-#        gl3w_gen ALL
-#        DEPENDS
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.c"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.h"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/glcorearb.h"
-#        "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/khrplatform.h"
-#)
-## make gl3w target depend on the generator target
-#add_dependencies(${IE_EXE} gl3w_gen)
+find_package(Python COMPONENTS Interpreter Development)
+if (Python_FOUND)
+    # add command to create the header and source files
+    add_custom_command(
+            OUTPUT
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/glcorearb.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/khrplatform.h"
+            COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/tools/gl3w_gen.py
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/tools/gl3w_gen.py
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/
+    )
+    # add pseudo target that depends on the generated files
+    add_custom_target(
+            gl3w_gen ALL
+            DEPENDS
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.c"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/gl3w.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/glcorearb.h"
+            "${CMAKE_CURRENT_SOURCE_DIR}/modules/gl3w/khrplatform.h"
+    )
+    # make gl3w target depend on the generator target
+    add_dependencies(${IE_EXE} gl3w_gen)
+endif ()
+
 
 # -------------------------------------------------------------------------------
 # Read version string from "./VERSION" file and store it in "VERSION_" variable.
@@ -169,3 +156,8 @@ if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/VERSION")
 else ()
     message(FATAL_ERROR "File ${CMAKE_CURRENT_SOURCE_DIR}/VERSION not found")
 endif ()
+
+# ------------------------------------------------------------------------------
+# create soft link to resources folder in binary directory
+# TODO: this is for debugging only
+#file(CREATE_LINK ${CMAKE_SOURCE_DIR}/resources ${CMAKE_CURRENT_BINARY_DIR}/resources)

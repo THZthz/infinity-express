@@ -3,10 +3,10 @@
 
 TEST_CASE("Nullopt", "[nullopt]")
 {
-	ie::optional<int> o1 = ie::nullopt;
-	ie::optional<int> o2{ie::nullopt};
-	ie::optional<int> o3(ie::nullopt);
-	ie::optional<int> o4 = {ie::nullopt};
+	candybox::optional<int> o1 = candybox::nullopt;
+	candybox::optional<int> o2{candybox::nullopt};
+	candybox::optional<int> o3(candybox::nullopt);
+	candybox::optional<int> o4 = {candybox::nullopt};
 
 	REQUIRE(!o1);
 	REQUIRE(!o2);

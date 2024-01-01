@@ -1,6 +1,6 @@
 // usage: #include "tests.c"
 #include "platform.hpp"
-#include "candybox/VG.hpp"
+#include "candybox/vg/VG.hpp"
 int g_hasGLError = 0;
 #ifndef NDEBUG
 int

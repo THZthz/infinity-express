@@ -7,20 +7,8 @@
 // http://www.boost.org/LICENSE_1_0.txt
 
 
-
-#if defined(BOOST_NO_CXX11_RVALUE_REFERENCES) || defined(BOOST_NO_CXX11_VARIADIC_TEMPLATES)
-
-int
-main()
-{
-}
-
-#else
-
 #	include "lightweight_test.hpp"
-#	include "smart_ptr.hpp"
-#	include "smart_ptr.hpp"
-#	include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 #	include <cstddef>
 
 class X
@@ -252,5 +240,3 @@ main()
 
 	return boost::report_errors();
 }
-
-#endif

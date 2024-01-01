@@ -6,11 +6,11 @@ TEST_CASE("Constexpr", "[constexpr]")
 #if !defined(TL_OPTIONAL_MSVC2015) && defined(TL_OPTIONAL_CXX14)
 	SECTION("empty construct")
 	{
-		constexpr ie::optional<int> o2{};
-		constexpr ie::optional<int> o3 = {};
-		constexpr ie::optional<int> o4 = ie::nullopt;
-		constexpr ie::optional<int> o5 = {ie::nullopt};
-		constexpr ie::optional<int> o6(ie::nullopt);
+		constexpr candybox::optional<int> o2{};
+		constexpr candybox::optional<int> o3 = {};
+		constexpr candybox::optional<int> o4 = candybox::nullopt;
+		constexpr candybox::optional<int> o5 = {candybox::nullopt};
+		constexpr candybox::optional<int> o6(candybox::nullopt);
 
 		STATIC_REQUIRE(!o2);
 		STATIC_REQUIRE(!o3);
@@ -21,15 +21,15 @@ TEST_CASE("Constexpr", "[constexpr]")
 
 	SECTION("value construct")
 	{
-		constexpr ie::optional<int> o1 = 42;
-		constexpr ie::optional<int> o2{42};
-		constexpr ie::optional<int> o3(42);
-		constexpr ie::optional<int> o4 = {42};
+		constexpr candybox::optional<int> o1 = 42;
+		constexpr candybox::optional<int> o2{42};
+		constexpr candybox::optional<int> o3(42);
+		constexpr candybox::optional<int> o4 = {42};
 		constexpr int i = 42;
-		constexpr ie::optional<int> o5 = std::move(i);
-		constexpr ie::optional<int> o6{std::move(i)};
-		constexpr ie::optional<int> o7(std::move(i));
-		constexpr ie::optional<int> o8 = {std::move(i)};
+		constexpr candybox::optional<int> o5 = std::move(i);
+		constexpr candybox::optional<int> o6{std::move(i)};
+		constexpr candybox::optional<int> o7(std::move(i));
+		constexpr candybox::optional<int> o8 = {std::move(i)};
 
 		STATIC_REQUIRE(*o1 == 42);
 		STATIC_REQUIRE(*o2 == 42);

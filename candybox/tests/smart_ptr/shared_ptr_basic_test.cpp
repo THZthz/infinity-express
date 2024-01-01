@@ -30,8 +30,8 @@
 
 #include "lightweight_test.hpp"
 
-#include "smart_ptr.hpp"
-#include "smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
+#include "candybox/smart_ptr.hpp"
 
 int cnt = 0;
 

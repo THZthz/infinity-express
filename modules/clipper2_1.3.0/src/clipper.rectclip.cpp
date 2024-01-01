@@ -464,7 +464,7 @@ namespace Clipper2Lib {
       if (!GetIntersection(rect_as_path_, 
         path[i], prev_pt, crossing_loc, ip))
       {
-        // ie remaining outside
+        // candybox remaining outside
         if (crossing_prev == Location::Inside)
         {
           bool isClockw = IsClockwise(prev, loc, prev_pt, path[i], rect_mp_);
@@ -958,7 +958,7 @@ namespace Clipper2Lib {
       if (!GetIntersection(rect_as_path_, 
         path[i], prev_pt, crossing_loc, ip))
       {
-        // ie remaining outside
+        // candybox remaining outside
         ++i;
         continue;
       }

@@ -1,5 +1,5 @@
-#ifndef IE_CELLAUTOMATA_HPP
-#define IE_CELLAUTOMATA_HPP
+#ifndef CANDYBOX_CELLAUTOMATA_HPP__
+#define CANDYBOX_CELLAUTOMATA_HPP__
 
 #include <random>
 #include <vector>
@@ -31,4 +31,4 @@ private:
 	std::vector<std::vector<Coord>> m_borders;
 };
 
-#endif // IE_CELLAUTOMATA_HPP
+#endif // CANDYBOX_CELLAUTOMATA_HPP__

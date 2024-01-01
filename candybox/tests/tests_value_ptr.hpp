@@ -11,7 +11,7 @@ struct Widget
 	int next() const;
 
 	struct Pimpl;
-	ie::value_ptr<Pimpl> ptr;
+	candybox::value_ptr<Pimpl> ptr;
 };
 
 // in source file:
